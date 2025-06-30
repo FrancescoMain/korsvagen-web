@@ -50,22 +50,29 @@ const WorkInProgressPage: React.FC = () => {
         <ContactsContent>
           <ContactItem>
             <ContactIcon>📧</ContactIcon>
-            <ContactInfo>info@korsvagen.it</ContactInfo>
+            <ContactInfo>korsvagensrl@arubapec.it</ContactInfo>
           </ContactItem>
           <ContactItem>
             <ContactIcon>📞</ContactIcon>
-            <ContactInfo>+39 XXX XXX XXXX</ContactInfo>
+            <ContactInfo>+39 081 XXX XXXX</ContactInfo>
           </ContactItem>
           <ContactItem>
             <ContactIcon>📍</ContactIcon>
-            <ContactInfo>Sede Operativa</ContactInfo>
+            <ContactInfo>Strada Statale 145, 99 - Pompei (NA)</ContactInfo>
+          </ContactItem>
+          <ContactItem>
+            <ContactIcon>🏢</ContactIcon>
+            <ContactInfo>P.IVA: 09976601212</ContactInfo>
           </ContactItem>
         </ContactsContent>
       </ContactsSection>
 
       <Footer>
         <FooterContent>
-          <FooterText>© 2025 Korsvagen S.r.l. - Tutti i diritti riservati</FooterText>
+          <FooterText>© 2025 KORSVAGEN S.R.L. - Tutti i diritti riservati</FooterText>
+          <FooterSubtext>
+            REA: 1071429 | P.IVA/C.F.: 09976601212 | Strada Statale 145, 99 - 80045 Pompei (NA)
+          </FooterSubtext>
         </FooterContent>
       </Footer>
     </Container>
@@ -288,12 +295,17 @@ const ContactsContent = styled.div`
   max-width: 1000px;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 2rem;
   
   @media (max-width: 768px) {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 1.5rem;
+  }
+  
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+    gap: 1rem;
   }
 `;
 
@@ -333,6 +345,14 @@ const FooterText = styled.p`
   color: #ECF0F1;
   font-size: 0.9rem;
   margin: 0;
+  margin-bottom: 0.5rem;
+`;
+
+const FooterSubtext = styled.p`
+  color: #BDC3C7;
+  font-size: 0.8rem;
+  margin: 0;
+  font-weight: 300;
 `;
 
 export default WorkInProgressPage;

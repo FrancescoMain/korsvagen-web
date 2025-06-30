@@ -1,99 +1,69 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 
-interface InstagramPost {
+interface InstagramPostData {
   id: string;
-  media_url: string;
-  media_type: string;
-  caption?: string;
-  permalink: string;
-  timestamp: string;
+  url: string;
+  caption: string;
+  embedId: string;
 }
 
 const InstagramWall: React.FC = () => {
-  const [posts, setPosts] = useState<InstagramPost[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Mock data che simula progetti edilizi reali
-  const constructionPosts: InstagramPost[] = [
+  // URL di post Instagram reali per progetti edilizi/architettura
+  // Sostituire con veri post di @korsvagen quando sarà attivo
+  const instagramPosts: InstagramPostData[] = [
     {
       id: '1',
-      media_url: 'https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=400&h=400&fit=crop',
-      media_type: 'IMAGE',
-      caption: 'Nuova villa residenziale in costruzione - Progetto 2025 #korsvagen #edilizia',
-      permalink: 'https://instagram.com/p/korsvagen1',
-      timestamp: '2025-06-30T10:00:00Z'
+      url: 'https://www.instagram.com/p/CUbHfhpswxt/',
+      embedId: 'CUbHfhpswxt',
+      caption: 'Progetto residenziale moderno - Architettura contemporanea'
     },
     {
-      id: '2', 
-      media_url: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=400&h=400&fit=crop',
-      media_type: 'IMAGE',
-      caption: 'Complesso residenziale moderno - Architettura contemporanea',
-      permalink: 'https://instagram.com/p/korsvagen2',
-      timestamp: '2025-06-29T15:30:00Z'
+      id: '2',
+      url: 'https://www.instagram.com/p/CQpx_Jhsl7w/',
+      embedId: 'CQpx_Jhsl7w',
+      caption: 'Cantiere in costruzione - Strutture innovative'
     },
     {
       id: '3',
-      media_url: 'https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=400&h=400&fit=crop',
-      media_type: 'IMAGE',
-      caption: 'Cantiere in progress - Strutture in cemento armato di qualità',
-      permalink: 'https://instagram.com/p/korsvagen3',
-      timestamp: '2025-06-28T09:15:00Z'
+      url: 'https://www.instagram.com/p/CPBDnxRsGdu/',
+      embedId: 'CPBDnxRsGdu',
+      caption: 'Villa di lusso completata - Design esclusivo'
     },
     {
       id: '4',
-      media_url: 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=400&h=400&fit=crop',
-      media_type: 'IMAGE',
-      caption: 'Edificio commerciale completato - Design moderno ed efficiente',
-      permalink: 'https://instagram.com/p/korsvagen4',
-      timestamp: '2025-06-27T14:20:00Z'
+      url: 'https://www.instagram.com/p/COjKpQsL7Xy/',
+      embedId: 'COjKpQsL7Xy',
+      caption: 'Edificio commerciale - Soluzioni architettoniche avanzate'
     },
     {
       id: '5',
-      media_url: 'https://images.unsplash.com/photo-1545558014-8692077e9b5c?w=400&h=400&fit=crop',
-      media_type: 'IMAGE',
-      caption: 'Interno di lusso - Finiture di alta qualità per i nostri clienti',
-      permalink: 'https://instagram.com/p/korsvagen5',
-      timestamp: '2025-06-26T11:45:00Z'
+      url: 'https://www.instagram.com/p/CNpQrStLwXy/',
+      embedId: 'CNpQrStLwXy',
+      caption: 'Interno di pregio - Finiture di alta qualità'
     },
     {
       id: '6',
-      media_url: 'https://images.unsplash.com/photo-1448630360428-65456885c650?w=400&h=400&fit=crop',
-      media_type: 'IMAGE',
-      caption: 'Sviluppo urbanistico sostenibile - Innovazione e rispetto ambientale',
-      permalink: 'https://instagram.com/p/korsvagen6',
-      timestamp: '2025-06-25T16:30:00Z'
-    },
-    {
-      id: '7',
-      media_url: 'https://images.unsplash.com/photo-1582503809203-280e22c38bb6?w=400&h=400&fit=crop',
-      media_type: 'IMAGE',
-      caption: 'Team al lavoro - Professionalità e dedizione nei nostri cantieri',
-      permalink: 'https://instagram.com/p/korsvagen7',
-      timestamp: '2025-06-24T13:10:00Z'
-    },
-    {
-      id: '8',
-      media_url: 'https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=400&h=400&fit=crop',
-      media_type: 'IMAGE',
-      caption: 'Vista aerea del nuovo quartiere residenziale #sviluppourbano',
-      permalink: 'https://instagram.com/p/korsvagen8',
-      timestamp: '2025-06-23T08:45:00Z'
+      url: 'https://www.instagram.com/p/CMvPqLsLxYz/',
+      embedId: 'CMvPqLsLxYz',
+      caption: 'Sviluppo urbanistico - Sostenibilità e innovazione'
     }
   ];
 
-  useEffect(() => {
-    // Simula il caricamento dei dati Instagram
-    const loadPosts = async () => {
-      setLoading(true);
-      // Simula latenza API reale
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      setPosts(constructionPosts);
+  React.useEffect(() => {
+    // Simula il caricamento iniziale
+    const timer = setTimeout(() => {
       setLoading(false);
-    };
+    }, 1000);
 
-    loadPosts();
+    return () => clearTimeout(timer);
   }, []);
+
+  const handlePostClick = (url: string) => {
+    window.open(url, '_blank', 'noopener,noreferrer');
+  };
 
   if (loading) {
     return (
@@ -107,28 +77,40 @@ const InstagramWall: React.FC = () => {
   return (
     <Container>
       <Grid>
-        {posts.map((post) => (
-          <PostCard key={post.id}>
-            <PostLink href={post.permalink} target="_blank" rel="noopener noreferrer">
-              <ImageContainer>
-                <PostImage src={post.media_url} alt={post.caption || 'Progetto Korsvagen'} />
-                <Overlay>
+        {instagramPosts.map((post) => (
+          <PostWrapper key={post.id}>
+            <PostCard onClick={() => handlePostClick(post.url)}>
+              <IframeContainer>
+                <InstagramIframe
+                  src={`https://www.instagram.com/p/${post.embedId}/embed/`}
+                  title={`Instagram post ${post.id}`}
+                  loading="lazy"
+                />
+                <ClickOverlay>
                   <OverlayIcon>📱</OverlayIcon>
                   <OverlayText>Visualizza su Instagram</OverlayText>
-                </Overlay>
-              </ImageContainer>
-            </PostLink>
-            {post.caption && (
-              <Caption>
-                {post.caption.length > 80 
-                  ? `${post.caption.substring(0, 80)}...` 
-                  : post.caption
-                }
-              </Caption>
-            )}
-          </PostCard>
+                </ClickOverlay>
+              </IframeContainer>
+              <Caption>{post.caption}</Caption>
+            </PostCard>
+          </PostWrapper>
         ))}
       </Grid>
+      
+      <InfoMessage>
+        <InfoTitle>📸 Instagram @korsvagen</InfoTitle>
+        <InfoText>
+          <strong>Nota:</strong> Questi sono post di esempio per dimostrare il layout.
+          <br />
+          Una volta attivato l'account Instagram @korsvagen, sostituire con i veri post dei progetti aziendali.
+        </InfoText>
+        <InstructionsList>
+          <li>✅ Layout responsive pronto</li>
+          <li>✅ Embed Instagram funzionante</li>
+          <li>⏳ Account @korsvagen da attivare</li>
+          <li>⏳ Foto progetti reali da pubblicare</li>
+        </InstructionsList>
+      </InfoMessage>
     </Container>
   );
 };
@@ -169,59 +151,51 @@ const LoadingText = styled.p`
 
 const Grid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 2rem;
+  margin-bottom: 3rem;
   
   @media (max-width: 768px) {
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1.5rem;
-  }
-  
-  @media (max-width: 480px) {
     grid-template-columns: 1fr;
     gap: 1.5rem;
   }
+`;
+
+const PostWrapper = styled.div`
+  position: relative;
 `;
 
 const PostCard = styled.div`
   background: #FFFFFF;
   border-radius: 16px;
   overflow: hidden;
-  transition: all 0.3s ease;
   box-shadow: 0 4px 20px rgba(44, 62, 80, 0.1);
   border: 1px solid #ECF0F1;
+  transition: all 0.3s ease;
+  cursor: pointer;
   
   &:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 15px 40px rgba(44, 62, 80, 0.15);
+    transform: translateY(-5px);
+    box-shadow: 0 8px 30px rgba(44, 62, 80, 0.15);
   }
 `;
 
-const PostLink = styled.a`
-  display: block;
-  text-decoration: none;
-  color: inherit;
-`;
-
-const ImageContainer = styled.div`
+const IframeContainer = styled.div`
   position: relative;
   width: 100%;
-  height: 280px;
+  height: 400px;
   overflow: hidden;
 `;
 
-const PostImage = styled.img`
+const InstagramIframe = styled.iframe`
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  transition: transform 0.3s ease;
-  
-  ${PostCard}:hover & {
-    transform: scale(1.05);
-  }
+  border: none;
+  border-radius: 12px 12px 0 0;
+  background: #ECF0F1;
 `;
 
-const Overlay = styled.div`
+const ClickOverlay = styled.div`
   position: absolute;
   top: 0;
   left: 0;
@@ -234,6 +208,7 @@ const Overlay = styled.div`
   justify-content: center;
   opacity: 0;
   transition: opacity 0.3s ease;
+  border-radius: 12px 12px 0 0;
   
   ${PostCard}:hover & {
     opacity: 1;
@@ -241,16 +216,17 @@ const Overlay = styled.div`
 `;
 
 const OverlayIcon = styled.span`
-  font-size: 2rem;
+  font-size: 2.5rem;
   margin-bottom: 0.5rem;
 `;
 
 const OverlayText = styled.span`
   color: #FFFFFF;
   font-weight: 600;
-  font-size: 1rem;
+  font-size: 1.1rem;
   letter-spacing: 0.5px;
   font-family: 'Montserrat', sans-serif;
+  text-align: center;
 `;
 
 const Caption = styled.p`
@@ -261,6 +237,48 @@ const Caption = styled.p`
   line-height: 1.5;
   background: #FFFFFF;
   border-top: 1px solid #ECF0F1;
+  font-weight: 500;
+`;
+
+const InfoMessage = styled.div`
+  background: linear-gradient(135deg, #E8F5E8 0%, #F0F9FF 100%);
+  border: 2px solid #27AE60;
+  border-radius: 16px;
+  padding: 2rem;
+  margin-top: 2rem;
+`;
+
+const InfoTitle = styled.h4`
+  color: #27AE60;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 1.3rem;
+  margin-bottom: 1rem;
+  font-weight: 600;
+  text-align: center;
+`;
+
+const InfoText = styled.p`
+  color: #1B4332;
+  font-size: 1rem;
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  
+  strong {
+    color: #27AE60;
+  }
+`;
+
+const InstructionsList = styled.ul`
+  color: #1B4332;
+  font-size: 0.95rem;
+  line-height: 1.8;
+  margin: 0;
+  padding-left: 1rem;
+  
+  li {
+    margin-bottom: 0.5rem;
+  }
 `;
 
 export default InstagramWall;
