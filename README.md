@@ -1,46 +1,141 @@
-# Getting Started with Create React App
+# Korsvagen Web
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+**Sito vetrina editoriale elegante e moderno per Korsvagen - Editore di Libri d'Arte e Letteratura**
 
-## Available Scripts
+## 🚀 Sprint 1 - Pre-fase: Work in Progress + Instagram Wall
 
-In the project directory, you can run:
+### ✅ Completato
+- [x] Setup repository con branch `main` e `dev`
+- [x] Configurazione React TypeScript
+- [x] Pagina "Work in Progress" con design elegante e moderno
+- [x] Instagram Wall con gallery responsive
+- [x] Design mobile responsive
+- [x] Integrazione styled-components
+- [x] Loading states e animazioni
 
-### `npm start`
+## 🛠 Tecnologie
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+- **React** 18.3.1 with TypeScript
+- **Styled Components** per styling avanzato
+- **Axios** per chiamate API
+- **Create React App** per setup rapido
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+## 📁 Struttura Progetto
 
-### `npm test`
+```
+korsvagen-web/
+├── public/
+│   ├── index.html          # HTML template con meta SEO
+│   └── ...
+├── src/
+│   ├── App.tsx             # App principale
+│   ├── WorkInProgressPage.tsx  # Pagina Work in Progress
+│   ├── InstagramWall.tsx   # Componente Instagram gallery
+│   ├── index.css           # Stili globali
+│   └── ...
+└── package.json
+```
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## 🎨 Design Features
 
-### `npm run build`
+- **Dark Theme elegante** con gradient backgrounds
+- **Typography editoriale** con font serif
+- **Color palette premium** (oro #d4af37 su sfondo scuro)
+- **Animazioni fluide** e hover effects
+- **Layout responsive** ottimizzato per mobile
+- **Loading states** con spinner animato
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## 📱 Responsive Design
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+- Desktop: Layout a griglia ottimizzato
+- Tablet: Adattamento automatico
+- Mobile: Design mobile-first con typography scalabile
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## 🚀 Getting Started
 
-### `npm run eject`
+### Prerequisiti
+- Node.js 16+
+- npm o yarn
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+### Installazione
+```bash
+# Clone del repository
+git clone <repository-url>
+cd korsvagen-web
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+# Switch al branch dev
+git checkout dev
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+# Installazione dipendenze
+npm install
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+# Avvio server di sviluppo
+npm start
+```
 
-## Learn More
+Il sito sarà disponibile su [http://localhost:3000](http://localhost:3000)
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+## 📋 Scripts Disponibili
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+```bash
+npm start      # Avvia server di sviluppo
+npm test       # Esegue i test
+npm run build  # Build per produzione
+npm run eject  # Eject configurazione (non reversibile)
+```
+
+## 🌟 Instagram Integration
+
+Attualmente usa **mock data** per la demo. Per l'integrazione reale:
+
+1. **Opzione 1: Instagram Basic Display API**
+   - Registra app su Facebook Developers
+   - Ottieni access token
+   - Sostituisci mock data in `InstagramWall.tsx`
+
+2. **Opzione 2: Third-party services**
+   - SnapWidget
+   - LightWidget  
+   - Instafeed.js
+
+3. **Opzione 3: Instagram Graph API** (per account business)
+
+## 🚀 Deployment
+
+### Build di produzione
+```bash
+npm run build
+```
+
+### Deploy Options
+- **Netlify**: Drag & drop della cartella `build/`
+- **Vercel**: Connessione diretta al repository GitHub
+- **GitHub Pages**: Setup con GitHub Actions
+- **Server tradizionale**: Upload cartella `build/`
+
+## 🔄 Branching Strategy
+
+- `main`: Branch di produzione (deployment)
+- `dev`: Branch di sviluppo (feature development)
+
+## 📞 Next Steps
+
+### Fase A: Infrastruttura
+- [ ] Setup dominio e DNS
+- [ ] Configurazione SSL
+- [ ] Deploy iniziale
+
+### Fase B: Instagram Integration
+- [ ] Integrazione API Instagram reale
+- [ ] Test con account cliente
+- [ ] Ottimizzazione performance
+
+### Sprint Successivi
+- [ ] Sezioni aggiuntive (Chi siamo, Catalogo, Contatti)
+- [ ] CMS integration
+- [ ] E-commerce features
+- [ ] SEO avanzato
+
+## 📄 License
+
+© 2025 Korsvagen. Tutti i diritti riservati.
