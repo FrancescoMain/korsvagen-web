@@ -1,0 +1,25 @@
+{
+  "short_name": "Korsvagen",
+  "name": "Korsvagen - Costruzioni & Sviluppo",
+  "icons": [
+    {
+      "src": "LOGO KORSVAGEN.png",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/png"
+    },
+    {
+      "src": "LOGO KORSVAGEN.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "LOGO KORSVAGEN.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#2C3E50",
+  "background_color": "#FFFFFF"
+}

@@ -5,6 +5,7 @@
 ## 🚀 Sprint 1 - Pre-fase: Work in Progress + Instagram Wall
 
 ### ✅ Completato
+
 - [x] Setup repository con branch `main` e `dev`
 - [x] Configurazione React TypeScript
 - [x] Pagina "Work in Progress" con design elegante e moderno
@@ -54,10 +55,12 @@ korsvagen-web/
 ## 🚀 Getting Started
 
 ### Prerequisiti
+
 - Node.js 16+
 - npm o yarn
 
 ### Installazione
+
 ```bash
 # Clone del repository
 git clone <repository-url>
@@ -86,28 +89,55 @@ npm run eject  # Eject configurazione (non reversibile)
 
 ## 🌟 Instagram Integration
 
-Attualmente usa **mock data** per la demo. Per l'integrazione reale:
+**✅ PROFILO UFFICIALE ATTIVO!** [@korsvagensrl](https://www.instagram.com/korsvagensrl/)
 
-1. **Opzione 1: Instagram Basic Display API**
-   - Registra app su Facebook Developers
-   - Ottieni access token
-   - Sostituisci mock data in `InstagramWall.tsx`
+### Stato Attuale
 
-2. **Opzione 2: Third-party services**
-   - SnapWidget
-   - LightWidget  
-   - Instafeed.js
+L'Instagram Wall ora mostra il profilo ufficiale di Korsvagen S.r.l.:
 
-3. **Opzione 3: Instagram Graph API** (per account business)
+- ✅ **Account ufficiale**: @korsvagensrl attivo
+- ✅ **Feed in tempo reale**: progetti e cantieri Korsvagen
+- ✅ **Embed diretto**: visualizzazione completa del profilo
+- ✅ **Mobile responsive**: ottimizzato per tutti i dispositivi
+- Edifici commerciali moderni
+- Interni di alta qualità
+- Sviluppi urbani sostenibili
+
+### Profilo di Riferimento
+
+- **Attuale**: `@visionedilizia` (partnership per contenuti di qualità)
+- **Futuro**: `@korsvagen` (quando sarà disponibile il profilo ufficiale)
+
+### Setup Tecnico
+
+```typescript
+// Embed diretto del profilo Instagram ufficiale
+<InstagramIframe
+  src="https://www.instagram.com/korsvagensrl/embed/"
+  title="Profilo Instagram @korsvagensrl"
+  loading="lazy"
+  allowTransparency={true}
+  frameBorder={0}
+/>
+```
+
+### Tecnologie Utilizzate
+
+1. **Iframe Embed** ✅ Embed diretto del profilo
+2. **Click Overlay** ✅ Apertura profilo in nuova finestra
+3. **Loading States** ✅ UX ottimizzata
+4. **Responsive Design** ✅ Ottimizzato per tutti i dispositivi
 
 ## 🚀 Deployment
 
 ### Build di produzione
+
 ```bash
 npm run build
 ```
 
 ### Deploy Options
+
 - **Netlify**: Drag & drop della cartella `build/`
 - **Vercel**: Connessione diretta al repository GitHub
 - **GitHub Pages**: Setup con GitHub Actions
@@ -121,16 +151,20 @@ npm run build
 ## 📞 Next Steps
 
 ### Fase A: Infrastruttura
+
 - [ ] Setup dominio e DNS
 - [ ] Configurazione SSL
 - [ ] Deploy iniziale
 
-### Fase B: Instagram Integration
-- [ ] Integrazione API Instagram reale
-- [ ] Test con account cliente
-- [ ] Ottimizzazione performance
+### Fase B: Ottimizzazione Instagram ✅
+
+- [x] ✅ Integrazione post reali da @visionedilizia
+- [x] ✅ Test funzionamento embed
+- [x] ✅ UX e performance ottimizzate
+- [ ] Migrazione futura a @korsvagen (quando disponibile)
 
 ### Sprint Successivi
+
 - [ ] Sezioni aggiuntive (Chi siamo, Catalogo, Contatti)
 - [ ] CMS integration
 - [ ] E-commerce features
