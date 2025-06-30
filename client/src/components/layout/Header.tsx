@@ -23,6 +23,11 @@ const HeaderContainer = styled.header`
   position: sticky;
   top: 0;
   z-index: 100;
+  overflow: hidden;
+
+  @media (max-width: 300px) {
+    min-height: auto;
+  }
 `;
 
 const HeaderContent = styled.div`
@@ -33,6 +38,10 @@ const HeaderContent = styled.div`
   @media (max-width: 320px) {
     padding: 1rem 1rem;
   }
+
+  @media (max-width: 300px) {
+    padding: 0.8rem 0.5rem;
+  }
 `;
 
 const LogoSection = styled.div`
@@ -41,6 +50,13 @@ const LogoSection = styled.div`
   gap: 1.5rem;
 
   @media (max-width: 768px) {
+    justify-content: center;
+    text-align: center;
+  }
+
+  @media (max-width: 300px) {
+    flex-direction: column;
+    gap: 0.8rem;
     justify-content: center;
     text-align: center;
   }
@@ -54,11 +70,20 @@ const LogoImage = styled.img`
   @media (max-width: 768px) {
     height: 45px;
   }
+
+  @media (max-width: 300px) {
+    height: 35px;
+  }
 `;
 
 const BrandInfo = styled.div`
   display: flex;
   flex-direction: column;
+
+  @media (max-width: 300px) {
+    align-items: center;
+    text-align: center;
+  }
 `;
 
 const CompanyName = styled.h1`
@@ -78,6 +103,12 @@ const CompanyName = styled.h1`
     font-size: 1.5rem;
     letter-spacing: 0.5px;
   }
+
+  @media (max-width: 300px) {
+    font-size: 1.3rem;
+    letter-spacing: 0.3px;
+    line-height: 1.2;
+  }
 `;
 
 const Tagline = styled.span`
@@ -90,6 +121,12 @@ const Tagline = styled.span`
 
   @media (max-width: 768px) {
     font-size: 0.9rem;
+  }
+
+  @media (max-width: 300px) {
+    font-size: 0.8rem;
+    letter-spacing: 0.2px;
+    margin-top: 0.2rem;
   }
 `;
 

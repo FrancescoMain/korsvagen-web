@@ -33,6 +33,10 @@ const ContactsContainer = styled.section`
   @media (max-width: 320px) {
     padding: 2rem 1rem;
   }
+
+  @media (max-width: 300px) {
+    padding: 1.5rem 0.5rem;
+  }
 `;
 
 const ContactsContent = styled.div`
@@ -50,6 +54,12 @@ const ContactsContent = styled.div`
   @media (max-width: 480px) {
     grid-template-columns: 1fr;
     gap: 1rem;
+  }
+
+  @media (max-width: 300px) {
+    grid-template-columns: 1fr;
+    gap: 0.8rem;
+    padding: 0 0.2rem;
   }
 `;
 
@@ -76,6 +86,11 @@ const ContactInfo = styled.span`
 
   @media (max-width: 320px) {
     font-size: 1rem;
+  }
+
+  @media (max-width: 300px) {
+    font-size: 0.9rem;
+    line-height: 1.3;
   }
 `;
 

@@ -26,6 +26,10 @@ const ProjectsContainer = styled.section`
   @media (max-width: 320px) {
     padding: 3rem 1rem;
   }
+
+  @media (max-width: 300px) {
+    padding: 2rem 0.5rem;
+  }
 `;
 
 const SectionContent = styled.div`

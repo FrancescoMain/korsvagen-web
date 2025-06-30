@@ -25,6 +25,10 @@ const HeroContainer = styled.section`
   @media (max-width: 320px) {
     padding: 3rem 1rem;
   }
+
+  @media (max-width: 300px) {
+    padding: 2rem 0.5rem;
+  }
 `;
 
 const HeroContent = styled.div`
@@ -35,6 +39,12 @@ const HeroContent = styled.div`
     margin: 0 auto;
     text-align: center;
   }
+
+  @media (max-width: 300px) {
+    margin: 0 auto;
+    text-align: center;
+    padding: 0 0.2rem;
+  }
 `;
 
 const ConstructionIcon = styled.div`
@@ -44,6 +54,11 @@ const ConstructionIcon = styled.div`
   @media (max-width: 768px) {
     font-size: 3rem;
     margin-bottom: 1.5rem;
+  }
+
+  @media (max-width: 300px) {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
   }
 `;
 
@@ -65,6 +80,13 @@ const MainTitle = styled.h2`
     letter-spacing: 0.5px;
     word-break: break-word;
   }
+
+  @media (max-width: 300px) {
+    font-size: 1.6rem;
+    letter-spacing: 0.2px;
+    line-height: 1.3;
+    margin-bottom: 1rem;
+  }
 `;
 
 const HeroSubtitle = styled.p`
@@ -76,6 +98,13 @@ const HeroSubtitle = styled.p`
   @media (max-width: 768px) {
     font-size: 1.1rem;
     margin-bottom: 2rem;
+  }
+
+  @media (max-width: 300px) {
+    font-size: 1rem;
+    line-height: 1.4;
+    margin-bottom: 1.5rem;
+    padding: 0 0.2rem;
   }
 `;
 
