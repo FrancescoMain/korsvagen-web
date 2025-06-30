@@ -1,6 +1,6 @@
 import React from "react";
 import styled from "styled-components";
-import InstagramWall from "../common/InstagramWall-embed";
+import InstagramWall from "../common/InstagramWall";
 const ProjectsSection: React.FC = () => {
   return (
     <ProjectsContainer>
@@ -14,9 +14,6 @@ const ProjectsSection: React.FC = () => {
         >
           FOLLOW US ON INSTAGRAM
         </InstagramCTA>
-        <InstagramHandle>
-          Seguici su @korsvagensrl per i nostri lavori in tempo reale
-        </InstagramHandle>
       </SectionContent>
     </ProjectsContainer>
   );
@@ -90,18 +87,6 @@ const InstagramCTA = styled.a`
     display: block;
     text-align: center;
     width: fit-content;
-  }
-`;
-
-const InstagramHandle = styled.p`
-  text-align: center;
-  font-size: 1.2rem;
-  color: #7f8c8d;
-  margin-top: 1rem;
-  font-weight: 500;
-
-  @media (max-width: 320px) {
-    text-align: center;
   }
 `;
 

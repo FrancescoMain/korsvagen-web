@@ -193,4 +193,45 @@ const OverlaySubtext = styled.div`
   font-weight: 400;
 `;
 
+const InfoMessage = styled.div`
+  background: linear-gradient(135deg, #e8f5e8 0%, #f0f9ff 100%);
+  border: 2px solid #27ae60;
+  border-radius: 16px;
+  padding: 2rem;
+  text-align: center;
+`;
+
+const InfoTitle = styled.h4`
+  color: #27ae60;
+  font-family: "Montserrat", sans-serif;
+  font-size: 1.3rem;
+  margin-bottom: 1rem;
+  font-weight: 600;
+`;
+
+const InfoText = styled.p`
+  color: #1b4332;
+  font-size: 1rem;
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+
+  strong {
+    color: #27ae60;
+  }
+`;
+
+const FeaturesList = styled.ul`
+  color: #1b4332;
+  font-size: 0.95rem;
+  line-height: 1.8;
+  margin: 0;
+  padding-left: 1rem;
+  text-align: left;
+  display: inline-block;
+
+  li {
+    margin-bottom: 0.5rem;
+  }
+`;
+
 export default InstagramWall;

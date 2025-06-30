@@ -9,7 +9,7 @@ const Header: React.FC = () => {
           <LogoImage src="/LOGO KORSVAGEN.png" alt="Korsvagen Logo" />
           <BrandInfo>
             <CompanyName>KORSVAGEN</CompanyName>
-            <Tagline>Costruzioni & Sviluppo</Tagline>
+            <Tagline>Costruzioni & Progettazione</Tagline>
           </BrandInfo>
         </LogoSection>
       </HeaderContent>
@@ -39,6 +39,11 @@ const LogoSection = styled.div`
   display: flex;
   align-items: center;
   gap: 1.5rem;
+
+  @media (max-width: 768px) {
+    justify-content: center;
+    text-align: center;
+  }
 `;
 
 const LogoImage = styled.img`

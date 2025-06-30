@@ -8,17 +8,10 @@ const HeroSection: React.FC = () => {
         <ConstructionIcon>🏗️</ConstructionIcon>
         <MainTitle>SITO IN COSTRUZIONE</MainTitle>
         <HeroSubtitle>
-          Stiamo costruendo qualcosa di straordinario
+          Stiamo realizzando qualcosa di straordinario
           <br />
           per mostrarvi i nostri progetti
         </HeroSubtitle>
-        <CTAButton
-          href="https://www.instagram.com/korsvagensrl/"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          SEGUICI SU INSTAGRAM
-        </CTAButton>
       </HeroContent>
     </HeroContainer>
   );
@@ -83,43 +76,6 @@ const HeroSubtitle = styled.p`
   @media (max-width: 768px) {
     font-size: 1.1rem;
     margin-bottom: 2rem;
-  }
-`;
-
-const CTAButton = styled.a`
-  background: #e67e22;
-  color: #ffffff;
-  border: none;
-  padding: 1rem 2.5rem;
-  font-family: "Montserrat", sans-serif;
-  font-size: 1rem;
-  font-weight: 600;
-  letter-spacing: 1px;
-  border-radius: 50px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  text-transform: uppercase;
-  box-shadow: 0 5px 20px rgba(230, 126, 34, 0.3);
-  text-decoration: none;
-  display: inline-block;
-
-  &:hover {
-    background: #d35400;
-    transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(230, 126, 34, 0.4);
-    color: #ffffff;
-  }
-
-  @media (max-width: 768px) {
-    padding: 0.8rem 2rem;
-    font-size: 0.9rem;
-  }
-
-  @media (max-width: 320px) {
-    margin: 0 auto;
-    display: block;
-    text-align: center;
-    width: fit-content;
   }
 `;
 
