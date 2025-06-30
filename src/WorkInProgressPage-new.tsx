@@ -1,6 +1,6 @@
-import React from 'react';
-import styled from 'styled-components';
-import InstagramWall from './InstagramWall';
+import React from "react";
+import styled from "styled-components";
+import InstagramWall from "./InstagramWall";
 
 const WorkInProgressPage: React.FC = () => {
   return (
@@ -22,12 +22,11 @@ const WorkInProgressPage: React.FC = () => {
           <ConstructionIcon>🏗️</ConstructionIcon>
           <MainTitle>SITO IN COSTRUZIONE</MainTitle>
           <HeroSubtitle>
-            Stiamo costruendo qualcosa di straordinario<br />
+            Stiamo costruendo qualcosa di straordinario
+            <br />
             per mostrarvi i nostri progetti
           </HeroSubtitle>
-          <CTAButton>
-            TORNA PRESTO PER SCOPRIRE
-          </CTAButton>
+          <CTAButton>TORNA PRESTO PER SCOPRIRE</CTAButton>
         </HeroContent>
       </HeroSection>
 
@@ -35,9 +34,9 @@ const WorkInProgressPage: React.FC = () => {
         <SectionContent>
           <SectionTitle>I Nostri Lavori in Corso</SectionTitle>
           <InstagramWall />
-          <InstagramCTA 
-            href="https://instagram.com/korsvagen" 
-            target="_blank" 
+          <InstagramCTA
+            href="https://instagram.com/korsvagen"
+            target="_blank"
             rel="noopener noreferrer"
           >
             SEGUICI SU INSTAGRAM
@@ -65,7 +64,9 @@ const WorkInProgressPage: React.FC = () => {
 
       <Footer>
         <FooterContent>
-          <FooterText>© 2025 Korsvagen S.r.l. - Tutti i diritti riservati</FooterText>
+          <FooterText>
+            © 2025 Korsvagen S.r.l. - Tutti i diritti riservati
+          </FooterText>
         </FooterContent>
       </Footer>
     </Container>
@@ -75,13 +76,13 @@ const WorkInProgressPage: React.FC = () => {
 // Styled Components con palette edilizia moderna
 const Container = styled.div`
   min-height: 100vh;
-  background: #FFFFFF;
-  color: #2C3E50;
-  font-family: 'Open Sans', sans-serif;
+  background: #ffffff;
+  color: #2c3e50;
+  font-family: "Open Sans", sans-serif;
 `;
 
 const Header = styled.header`
-  background: #FFFFFF;
+  background: #ffffff;
   box-shadow: 0 2px 20px rgba(44, 62, 80, 0.1);
   position: sticky;
   top: 0;
@@ -104,7 +105,7 @@ const LogoImage = styled.img`
   height: 60px;
   width: auto;
   object-fit: contain;
-  
+
   @media (max-width: 768px) {
     height: 45px;
   }
@@ -116,13 +117,13 @@ const BrandInfo = styled.div`
 `;
 
 const CompanyName = styled.h1`
-  font-family: 'Montserrat', sans-serif;
+  font-family: "Montserrat", sans-serif;
   font-size: 2.2rem;
   font-weight: 700;
-  color: #2C3E50;
+  color: #2c3e50;
   margin: 0;
   letter-spacing: 2px;
-  
+
   @media (max-width: 768px) {
     font-size: 1.8rem;
     letter-spacing: 1px;
@@ -130,20 +131,20 @@ const CompanyName = styled.h1`
 `;
 
 const Tagline = styled.span`
-  font-family: 'Open Sans', sans-serif;
+  font-family: "Open Sans", sans-serif;
   font-size: 1rem;
-  color: #E67E22;
+  color: #e67e22;
   font-weight: 500;
   margin-top: 0.3rem;
   letter-spacing: 0.5px;
-  
+
   @media (max-width: 768px) {
     font-size: 0.9rem;
   }
 `;
 
 const HeroSection = styled.section`
-  background: linear-gradient(135deg, #ECF0F1 0%, #FFFFFF 100%);
+  background: linear-gradient(135deg, #ecf0f1 0%, #ffffff 100%);
   padding: 4rem 2rem;
   text-align: center;
 `;
@@ -156,7 +157,7 @@ const HeroContent = styled.div`
 const ConstructionIcon = styled.div`
   font-size: 4rem;
   margin-bottom: 2rem;
-  
+
   @media (max-width: 768px) {
     font-size: 3rem;
     margin-bottom: 1.5rem;
@@ -164,13 +165,13 @@ const ConstructionIcon = styled.div`
 `;
 
 const MainTitle = styled.h2`
-  font-family: 'Montserrat', sans-serif;
+  font-family: "Montserrat", sans-serif;
   font-size: 3.5rem;
   font-weight: 600;
-  color: #2C3E50;
+  color: #2c3e50;
   margin-bottom: 1.5rem;
   letter-spacing: 2px;
-  
+
   @media (max-width: 768px) {
     font-size: 2.5rem;
     letter-spacing: 1px;
@@ -179,10 +180,10 @@ const MainTitle = styled.h2`
 
 const HeroSubtitle = styled.p`
   font-size: 1.3rem;
-  color: #34495E;
+  color: #34495e;
   line-height: 1.6;
   margin-bottom: 3rem;
-  
+
   @media (max-width: 768px) {
     font-size: 1.1rem;
     margin-bottom: 2rem;
@@ -190,11 +191,11 @@ const HeroSubtitle = styled.p`
 `;
 
 const CTAButton = styled.button`
-  background: #E67E22;
-  color: #FFFFFF;
+  background: #e67e22;
+  color: #ffffff;
   border: none;
   padding: 1rem 2.5rem;
-  font-family: 'Montserrat', sans-serif;
+  font-family: "Montserrat", sans-serif;
   font-size: 1rem;
   font-weight: 600;
   letter-spacing: 1px;
@@ -203,13 +204,13 @@ const CTAButton = styled.button`
   transition: all 0.3s ease;
   text-transform: uppercase;
   box-shadow: 0 5px 20px rgba(230, 126, 34, 0.3);
-  
+
   &:hover {
-    background: #D35400;
+    background: #d35400;
     transform: translateY(-3px);
     box-shadow: 0 8px 25px rgba(230, 126, 34, 0.4);
   }
-  
+
   @media (max-width: 768px) {
     padding: 0.8rem 2rem;
     font-size: 0.9rem;
@@ -218,7 +219,7 @@ const CTAButton = styled.button`
 
 const ProjectsSection = styled.section`
   padding: 5rem 2rem;
-  background: #FFFFFF;
+  background: #ffffff;
 `;
 
 const SectionContent = styled.div`
@@ -227,13 +228,13 @@ const SectionContent = styled.div`
 `;
 
 const SectionTitle = styled.h3`
-  font-family: 'Montserrat', sans-serif;
+  font-family: "Montserrat", sans-serif;
   font-size: 2.5rem;
-  color: #2C3E50;
+  color: #2c3e50;
   text-align: center;
   margin-bottom: 3rem;
   font-weight: 500;
-  
+
   @media (max-width: 768px) {
     font-size: 2rem;
     margin-bottom: 2rem;
@@ -243,10 +244,10 @@ const SectionTitle = styled.h3`
 const InstagramCTA = styled.a`
   display: inline-block;
   background: transparent;
-  color: #E67E22;
-  border: 2px solid #E67E22;
+  color: #e67e22;
+  border: 2px solid #e67e22;
   padding: 1rem 2.5rem;
-  font-family: 'Montserrat', sans-serif;
+  font-family: "Montserrat", sans-serif;
   font-size: 1rem;
   font-weight: 600;
   letter-spacing: 1px;
@@ -257,14 +258,14 @@ const InstagramCTA = styled.a`
   margin: 2rem auto;
   display: block;
   width: fit-content;
-  
+
   &:hover {
-    background: #E67E22;
-    color: #FFFFFF;
+    background: #e67e22;
+    color: #ffffff;
     transform: translateY(-2px);
     box-shadow: 0 5px 20px rgba(230, 126, 34, 0.3);
   }
-  
+
   @media (max-width: 768px) {
     padding: 0.8rem 2rem;
     font-size: 0.9rem;
@@ -274,13 +275,13 @@ const InstagramCTA = styled.a`
 const InstagramHandle = styled.p`
   text-align: center;
   font-size: 1.2rem;
-  color: #7F8C8D;
+  color: #7f8c8d;
   margin-top: 1rem;
   font-weight: 500;
 `;
 
 const ContactsSection = styled.section`
-  background: #ECF0F1;
+  background: #ecf0f1;
   padding: 3rem 2rem;
 `;
 
@@ -290,7 +291,7 @@ const ContactsContent = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 2rem;
-  
+
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
     gap: 1.5rem;
@@ -302,7 +303,7 @@ const ContactItem = styled.div`
   align-items: center;
   gap: 1rem;
   justify-content: center;
-  
+
   @media (max-width: 768px) {
     justify-content: flex-start;
   }
@@ -314,12 +315,12 @@ const ContactIcon = styled.span`
 
 const ContactInfo = styled.span`
   font-size: 1.1rem;
-  color: #2C3E50;
+  color: #2c3e50;
   font-weight: 500;
 `;
 
 const Footer = styled.footer`
-  background: #2C3E50;
+  background: #2c3e50;
   padding: 2rem;
 `;
 
@@ -330,7 +331,7 @@ const FooterContent = styled.div`
 `;
 
 const FooterText = styled.p`
-  color: #ECF0F1;
+  color: #ecf0f1;
   font-size: 0.9rem;
   margin: 0;
 `;

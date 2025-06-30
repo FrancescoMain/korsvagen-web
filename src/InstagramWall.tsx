@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import styled from "styled-components";
+import React, { useState, useEffect } from 'react';
+import styled from 'styled-components';
 
 interface InstagramPost {
   id: string;
@@ -14,65 +14,81 @@ const InstagramWall: React.FC = () => {
   const [posts, setPosts] = useState<InstagramPost[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Mock data per ora - da sostituire con vera API Instagram
-  const mockPosts: InstagramPost[] = [
+  // Mock data che simula progetti edilizi reali
+  const constructionPosts: InstagramPost[] = [
     {
-      id: "1",
-      media_url: "https://picsum.photos/300/300?random=1",
-      media_type: "IMAGE",
-      caption: "Nuovo libro in arrivo nella collezione Korsvagen #libri #arte",
-      permalink: "https://instagram.com/p/mock1",
-      timestamp: "2025-06-30T10:00:00Z",
+      id: '1',
+      media_url: 'https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=400&h=400&fit=crop',
+      media_type: 'IMAGE',
+      caption: 'Nuova villa residenziale in costruzione - Progetto 2025 #korsvagen #edilizia',
+      permalink: 'https://instagram.com/p/korsvagen1',
+      timestamp: '2025-06-30T10:00:00Z'
     },
     {
-      id: "2",
-      media_url: "https://picsum.photos/300/300?random=2",
-      media_type: "IMAGE",
-      caption: "Dietro le quinte del nostro ultimo progetto editoriale",
-      permalink: "https://instagram.com/p/mock2",
-      timestamp: "2025-06-29T15:30:00Z",
+      id: '2', 
+      media_url: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=400&h=400&fit=crop',
+      media_type: 'IMAGE',
+      caption: 'Complesso residenziale moderno - Architettura contemporanea',
+      permalink: 'https://instagram.com/p/korsvagen2',
+      timestamp: '2025-06-29T15:30:00Z'
     },
     {
-      id: "3",
-      media_url: "https://picsum.photos/300/300?random=3",
-      media_type: "IMAGE",
-      caption: "Ispirazione artistica per la copertina del nuovo volume",
-      permalink: "https://instagram.com/p/mock3",
-      timestamp: "2025-06-28T09:15:00Z",
+      id: '3',
+      media_url: 'https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=400&h=400&fit=crop',
+      media_type: 'IMAGE',
+      caption: 'Cantiere in progress - Strutture in cemento armato di qualità',
+      permalink: 'https://instagram.com/p/korsvagen3',
+      timestamp: '2025-06-28T09:15:00Z'
     },
     {
-      id: "4",
-      media_url: "https://picsum.photos/300/300?random=4",
-      media_type: "IMAGE",
-      caption: "La bellezza dei dettagli nelle nostre edizioni",
-      permalink: "https://instagram.com/p/mock4",
-      timestamp: "2025-06-27T14:20:00Z",
+      id: '4',
+      media_url: 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=400&h=400&fit=crop',
+      media_type: 'IMAGE',
+      caption: 'Edificio commerciale completato - Design moderno ed efficiente',
+      permalink: 'https://instagram.com/p/korsvagen4',
+      timestamp: '2025-06-27T14:20:00Z'
     },
     {
-      id: "5",
-      media_url: "https://picsum.photos/300/300?random=5",
-      media_type: "IMAGE",
-      caption: "Processo creativo: dall'idea al libro finito",
-      permalink: "https://instagram.com/p/mock5",
-      timestamp: "2025-06-26T11:45:00Z",
+      id: '5',
+      media_url: 'https://images.unsplash.com/photo-1545558014-8692077e9b5c?w=400&h=400&fit=crop',
+      media_type: 'IMAGE',
+      caption: 'Interno di lusso - Finiture di alta qualità per i nostri clienti',
+      permalink: 'https://instagram.com/p/korsvagen5',
+      timestamp: '2025-06-26T11:45:00Z'
     },
     {
-      id: "6",
-      media_url: "https://picsum.photos/300/300?random=6",
-      media_type: "IMAGE",
-      caption: "Collaborazione con artisti emergenti #supportart",
-      permalink: "https://instagram.com/p/mock6",
-      timestamp: "2025-06-25T16:30:00Z",
+      id: '6',
+      media_url: 'https://images.unsplash.com/photo-1448630360428-65456885c650?w=400&h=400&fit=crop',
+      media_type: 'IMAGE',
+      caption: 'Sviluppo urbanistico sostenibile - Innovazione e rispetto ambientale',
+      permalink: 'https://instagram.com/p/korsvagen6',
+      timestamp: '2025-06-25T16:30:00Z'
     },
+    {
+      id: '7',
+      media_url: 'https://images.unsplash.com/photo-1582503809203-280e22c38bb6?w=400&h=400&fit=crop',
+      media_type: 'IMAGE',
+      caption: 'Team al lavoro - Professionalità e dedizione nei nostri cantieri',
+      permalink: 'https://instagram.com/p/korsvagen7',
+      timestamp: '2025-06-24T13:10:00Z'
+    },
+    {
+      id: '8',
+      media_url: 'https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=400&h=400&fit=crop',
+      media_type: 'IMAGE',
+      caption: 'Vista aerea del nuovo quartiere residenziale #sviluppourbano',
+      permalink: 'https://instagram.com/p/korsvagen8',
+      timestamp: '2025-06-23T08:45:00Z'
+    }
   ];
 
   useEffect(() => {
-    // Simula il caricamento dei dati
+    // Simula il caricamento dei dati Instagram
     const loadPosts = async () => {
       setLoading(true);
-      // Simula latenza API
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      setPosts(mockPosts);
+      // Simula latenza API reale
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      setPosts(constructionPosts);
       setLoading(false);
     };
 
@@ -83,7 +99,7 @@ const InstagramWall: React.FC = () => {
     return (
       <LoadingContainer>
         <LoadingSpinner />
-        <LoadingText>Caricamento post Instagram...</LoadingText>
+        <LoadingText>Caricamento progetti Instagram...</LoadingText>
       </LoadingContainer>
     );
   }
@@ -93,26 +109,21 @@ const InstagramWall: React.FC = () => {
       <Grid>
         {posts.map((post) => (
           <PostCard key={post.id}>
-            <PostLink
-              href={post.permalink}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
+            <PostLink href={post.permalink} target="_blank" rel="noopener noreferrer">
               <ImageContainer>
-                <PostImage
-                  src={post.media_url}
-                  alt={post.caption || "Instagram post"}
-                />
+                <PostImage src={post.media_url} alt={post.caption || 'Progetto Korsvagen'} />
                 <Overlay>
+                  <OverlayIcon>📱</OverlayIcon>
                   <OverlayText>Visualizza su Instagram</OverlayText>
                 </Overlay>
               </ImageContainer>
             </PostLink>
             {post.caption && (
               <Caption>
-                {post.caption.length > 60
-                  ? `${post.caption.substring(0, 60)}...`
-                  : post.caption}
+                {post.caption.length > 80 
+                  ? `${post.caption.substring(0, 80)}...` 
+                  : post.caption
+                }
               </Caption>
             )}
           </PostCard>
@@ -132,55 +143,57 @@ const LoadingContainer = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 3rem;
+  padding: 4rem;
 `;
 
 const LoadingSpinner = styled.div`
-  width: 40px;
-  height: 40px;
-  border: 3px solid #333;
-  border-top: 3px solid #d4af37;
+  width: 50px;
+  height: 50px;
+  border: 4px solid #ECF0F1;
+  border-top: 4px solid #E67E22;
   border-radius: 50%;
   animation: spin 1s linear infinite;
-
+  
   @keyframes spin {
-    0% {
-      transform: rotate(0deg);
-    }
-    100% {
-      transform: rotate(360deg);
-    }
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
   }
 `;
 
 const LoadingText = styled.p`
-  color: #cccccc;
-  margin-top: 1rem;
-  font-size: 1rem;
+  color: #7F8C8D;
+  margin-top: 1.5rem;
+  font-size: 1.1rem;
+  font-family: 'Montserrat', sans-serif;
 `;
 
 const Grid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1.5rem;
-
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+  
   @media (max-width: 768px) {
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+  }
+  
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
   }
 `;
 
 const PostCard = styled.div`
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 12px;
+  background: #FFFFFF;
+  border-radius: 16px;
   overflow: hidden;
   transition: all 0.3s ease;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-
+  box-shadow: 0 4px 20px rgba(44, 62, 80, 0.1);
+  border: 1px solid #ECF0F1;
+  
   &:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    transform: translateY(-8px);
+    box-shadow: 0 15px 40px rgba(44, 62, 80, 0.15);
   }
 `;
 
@@ -193,7 +206,7 @@ const PostLink = styled.a`
 const ImageContainer = styled.div`
   position: relative;
   width: 100%;
-  height: 250px;
+  height: 280px;
   overflow: hidden;
 `;
 
@@ -202,8 +215,8 @@ const PostImage = styled.img`
   height: 100%;
   object-fit: cover;
   transition: transform 0.3s ease;
-
-  &:hover {
+  
+  ${PostCard}:hover & {
     transform: scale(1.05);
   }
 `;
@@ -214,32 +227,40 @@ const Overlay = styled.div`
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(44, 62, 80, 0.8);
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   opacity: 0;
   transition: opacity 0.3s ease;
-
+  
   ${PostCard}:hover & {
     opacity: 1;
   }
 `;
 
+const OverlayIcon = styled.span`
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+`;
+
 const OverlayText = styled.span`
-  color: #d4af37;
-  font-weight: 500;
+  color: #FFFFFF;
+  font-weight: 600;
   font-size: 1rem;
   letter-spacing: 0.5px;
+  font-family: 'Montserrat', sans-serif;
 `;
 
 const Caption = styled.p`
-  padding: 1rem;
+  padding: 1.5rem;
   margin: 0;
-  color: #cccccc;
-  font-size: 0.9rem;
-  line-height: 1.4;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  color: #2C3E50;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  background: #FFFFFF;
+  border-top: 1px solid #ECF0F1;
 `;
 
 export default InstagramWall;
