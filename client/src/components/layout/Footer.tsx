@@ -39,8 +39,10 @@ const Footer: React.FC = () => {
               >
                 📷 Instagram
               </SocialLink>
-              <SocialLink href="mailto:info@korsvagen.it">📧 Email</SocialLink>
-              <SocialLink href="tel:+390212345678">📞 Telefono</SocialLink>
+              <SocialLink href="mailto:korsvagensrl@gmail.com">
+                📧 Email
+              </SocialLink>
+              <SocialLink href="tel:+393494298547">📞 Telefono</SocialLink>
             </SocialLinks>
           </FooterSection>
 
@@ -70,19 +72,21 @@ const Footer: React.FC = () => {
               <ContactItem>
                 <strong>Indirizzo:</strong>
                 <br />
-                Strada Statale 145, 99
+                Via Santa Maria la Carità 18
                 <br />
-                80045 Pompei (NA)
+                Scafati (SA)
               </ContactItem>
               <ContactItem>
                 <strong>Telefono:</strong>
                 <br />
-                <a href="tel:+390212345678">+39 02 1234 5678</a>
+                <a href="tel:+393494298547">+39 349 429 8547</a>
               </ContactItem>
               <ContactItem>
                 <strong>Email:</strong>
                 <br />
-                <a href="mailto:info@korsvagen.it">info@korsvagen.it</a>
+                <a href="mailto:korsvagensrl@gmail.com">
+                  korsvagensrl@gmail.com
+                </a>
               </ContactItem>
             </ContactInfo>
           </FooterSection>
