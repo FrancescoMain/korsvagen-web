@@ -11,7 +11,7 @@ const WorkInProgressPage: React.FC = () => {
             <LogoImage src="/LOGO KORSVAGEN.png" alt="Korsvagen Logo" />
             <BrandInfo>
               <CompanyName>KORSVAGEN</CompanyName>
-              <Tagline>Costruzioni & Sviluppo</Tagline>
+              <Tagline>Costruzioni & Progettazione</Tagline>
             </BrandInfo>
           </LogoSection>
         </HeaderContent>

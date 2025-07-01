@@ -55,7 +55,7 @@ const Header: React.FC = () => {
             <LogoImage src="/LOGO KORSVAGEN.png" alt="Korsvagen Logo" />
             <BrandInfo>
               <CompanyName>KORSVAGEN</CompanyName>
-              <Tagline>Costruzioni & Sviluppo</Tagline>
+              <Tagline>Costruzioni & Progettazione</Tagline>
             </BrandInfo>
           </Link>
         </LogoSection>
@@ -86,7 +86,7 @@ const Header: React.FC = () => {
                   <img src="/LOGO KORSVAGEN.png" alt="Korsvagen Logo" />
                   <div className="brand-text">
                     <h2>KORSVAGEN</h2>
-                    <span>Costruzioni & Sviluppo</span>
+                    <span>Costruzioni & Progettazione</span>
                   </div>
                 </div>
               </div>
