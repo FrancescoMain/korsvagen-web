@@ -17,16 +17,16 @@
 
 ## Sede Legale
 
-- **Indirizzo**: STRADA STATALE 145, 99
+- **Indirizzo**: VIA SANTA MARIA LA CARITÀ 18
 - **CAP**: 80045
-- **Città**: POMPEI
-- **Provincia**: NA (Napoli)
+- **Città**: SCAFATI
+- **Provincia**: SA (Napoli)
 - **Regione**: Campania
 
 ## Contatti Ufficiali
 
 - **PEC**: korsvagensrl@arubapec.it
-- **Email Aziendale**: info@korsvagen.it (da verificare)
+- **Email Aziendale**: korsvagensrl@gmail.com
 - **Telefono**: +39 081 XXX XXXX (da specificare numero reale)
 
 ## Social Media

@@ -7,7 +7,7 @@ const ContactsSection: React.FC = () => {
       <ContactsContent>
         <ContactItem>
           <ContactIcon>📧</ContactIcon>
-          <ContactInfo>korsvagensrl@arubapec.it</ContactInfo>
+          <ContactInfo>korsvagensrl@gmail.com</ContactInfo>
         </ContactItem>
         <ContactItem>
           <ContactIcon>📞</ContactIcon>
@@ -15,7 +15,7 @@ const ContactsSection: React.FC = () => {
         </ContactItem>
         <ContactItem>
           <ContactIcon>📍</ContactIcon>
-          <ContactInfo>Strada Statale 145, 99 - Pompei (NA)</ContactInfo>
+          <ContactInfo>Via Santa Maria la Carità 18 - Scafati (SA)</ContactInfo>
         </ContactItem>
         <ContactItem>
           <ContactIcon>🏢</ContactIcon>

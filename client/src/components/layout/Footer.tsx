@@ -9,8 +9,8 @@ const Footer: React.FC = () => {
           © 2025 KORSVAGEN S.R.L. - Tutti i diritti riservati
         </FooterText>
         <FooterSubtext>
-          REA: 1071429 | P.IVA/C.F.: 09976601212 | Strada Statale 145, 99 -
-          80045 Pompei (NA)
+          REA: 1071429 | P.IVA/C.F.: 09976601212 | Via Santa Maria la Carità 18 -
+          84018 Scafati (SA)
         </FooterSubtext>
       </FooterContent>
     </FooterContainer>
