@@ -48,15 +48,13 @@ const Header: React.FC = () => {
             style={{
               textDecoration: "none",
               display: "flex",
+              flexDirection: "column",
               alignItems: "center",
-              gap: "1.5rem",
+              gap: "0.5rem",
             }}
           >
             <LogoImage src="/LOGO KORSVAGEN.png" alt="Korsvagen Logo" />
-            <BrandInfo>
-              <CompanyName>KORSVAGEN</CompanyName>
-              <Tagline>Costruzioni & Progettazione</Tagline>
-            </BrandInfo>
+            <Tagline>Costruzioni & Progettazione</Tagline>
           </Link>
         </LogoSection>
 
@@ -84,10 +82,7 @@ const Header: React.FC = () => {
               <div className="menu-header">
                 <div className="logo-mobile">
                   <img src="/LOGO KORSVAGEN.png" alt="Korsvagen Logo" />
-                  <div className="brand-text">
-                    <h2>KORSVAGEN</h2>
-                    <span>Costruzioni & Progettazione</span>
-                  </div>
+                  <span>Costruzioni & Progettazione</span>
                 </div>
               </div>
               {menuItems.map((item) => (
@@ -167,44 +162,20 @@ const LogoImage = styled.img`
   }
 `;
 
-const BrandInfo = styled.div`
-  display: flex;
-  flex-direction: column;
-
-  @media (max-width: 480px) {
-    display: none;
-  }
-`;
-
-const CompanyName = styled.h1`
-  font-family: "Montserrat", sans-serif;
-  font-size: 2.2rem;
-  font-weight: 700;
-  color: #2c3e50;
-  margin: 0;
-  letter-spacing: 2px;
-
-  @media (max-width: 768px) {
-    font-size: 1.8rem;
-    letter-spacing: 1px;
-  }
-
-  @media (max-width: 320px) {
-    font-size: 1.5rem;
-    letter-spacing: 0.5px;
-  }
-`;
-
 const Tagline = styled.span`
   font-family: "Open Sans", sans-serif;
   font-size: 1rem;
   color: #e67e22;
   font-weight: 500;
-  margin-top: 0.3rem;
   letter-spacing: 0.5px;
+  text-align: center;
 
   @media (max-width: 768px) {
     font-size: 0.9rem;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 0.8rem;
   }
 `;
 
@@ -346,25 +317,19 @@ const MobileMenu = styled.div<{ $isOpen: boolean }>`
 
     .logo-mobile {
       display: flex;
+      flex-direction: column;
       align-items: center;
-      gap: 0.75rem;
+      gap: 0.5rem;
+      text-align: center;
 
       img {
         height: 35px;
       }
 
-      .brand-text {
-        h2 {
-          font-family: "Montserrat", sans-serif;
-          font-size: 1.2rem;
-          color: #2c3e50;
-          margin: 0;
-        }
-
-        span {
-          font-size: 0.8rem;
-          color: #e67e22;
-        }
+      span {
+        font-size: 0.8rem;
+        color: #e67e22;
+        font-weight: 500;
       }
     }
   }
