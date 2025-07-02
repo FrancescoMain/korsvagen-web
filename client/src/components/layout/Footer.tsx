@@ -36,13 +36,24 @@ const Footer: React.FC = () => {
                 href="https://instagram.com/korsvagensrl"
                 target="_blank"
                 rel="noopener noreferrer"
+                title="Instagram"
               >
-                📷 Instagram
+                📷
               </SocialLink>
-              <SocialLink href="mailto:korsvagensrl@gmail.com">
-                📧 Email
+              <SocialLink href="mailto:korsvagensrl@gmail.com" title="Email">
+                📧
               </SocialLink>
-              <SocialLink href="tel:+393494298547">📞 Telefono</SocialLink>
+              <SocialLink href="tel:+393494298547" title="Telefono">
+                📞
+              </SocialLink>
+              <SocialLink
+                href="https://www.linkedin.com/company/korsvagen"
+                target="_blank"
+                rel="noopener noreferrer"
+                title="LinkedIn"
+              >
+                💼
+              </SocialLink>
             </SocialLinks>
           </FooterSection>
 
@@ -93,17 +104,20 @@ const Footer: React.FC = () => {
         </FooterGrid>
 
         <FooterBottom>
+          <div>
+            <FooterText>
+              © 2025 KORSVAGEN S.R.L. - Tutti i diritti riservati
+            </FooterText>
+            <FooterSubtext>
+              REA: 1071429 | P.IVA/C.F.: 09976601212
+            </FooterSubtext>
+          </div>
+
           <LegalLinks>
             <LegalLink href="/privacy">Privacy Policy</LegalLink>
             <LegalLink href="/cookie">Cookie Policy</LegalLink>
             <LegalLink href="/termini">Termini e Condizioni</LegalLink>
           </LegalLinks>
-
-          <FooterText>
-            © 2025 KORSVAGEN S.R.L. - Tutti i diritti riservati
-          </FooterText>
-
-          <FooterSubtext>REA: 1071429 | P.IVA/C.F.: 09976601212</FooterSubtext>
         </FooterBottom>
       </FooterContent>
     </FooterContainer>
@@ -111,62 +125,74 @@ const Footer: React.FC = () => {
 };
 
 const FooterContainer = styled.footer`
-  background: #2c3e50;
-  padding: 3rem 2rem 1rem;
+  background: #1a1a1a;
+  padding: 4rem 2rem 2rem;
+  color: #ffffff;
 
   @media (max-width: 768px) {
-    padding: 2rem 1rem 1rem;
+    padding: 3rem 1rem 2rem;
   }
 `;
 
 const FooterContent = styled.div`
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
 `;
 
 const FooterGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 2rem;
-  margin-bottom: 2rem;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 3rem;
+  margin-bottom: 3rem;
 
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
-    gap: 1.5rem;
+    gap: 2rem;
   }
 `;
 
 const FooterSection = styled.div``;
 
 const SectionTitle = styled.h3`
-  color: #ecf0f1;
-  font-family: "Montserrat", sans-serif;
-  font-size: 1.1rem;
-  margin-bottom: 1rem;
-  font-weight: 600;
+  color: #ffffff;
+  font-family: "Arial", sans-serif;
+  font-size: 1.2rem;
+  margin-bottom: 1.5rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 `;
 
 const SectionDescription = styled.p`
-  color: #bdc3c7;
-  font-size: 0.9rem;
-  line-height: 1.6;
-  margin-bottom: 1rem;
+  color: #cccccc;
+  font-size: 1rem;
+  line-height: 1.7;
+  margin-bottom: 1.5rem;
+  font-weight: 300;
 `;
 
 const SocialLinks = styled.div`
   display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+  gap: 1rem;
+  margin-top: 2rem;
 `;
 
 const SocialLink = styled.a`
-  color: #3182ce;
+  width: 40px;
+  height: 40px;
+  background: #333333;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
   text-decoration: none;
-  font-size: 0.9rem;
-  transition: color 0.3s ease;
+  font-size: 1.2rem;
+  transition: all 0.3s ease;
 
   &:hover {
-    color: #63b3ed;
+    background: #555555;
+    transform: translateY(-2px);
   }
 `;
 
@@ -176,18 +202,19 @@ const LinksList = styled.ul`
   margin: 0;
 
   li {
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.8rem;
   }
 `;
 
 const FooterLink = styled(Link)`
-  color: #bdc3c7;
+  color: #cccccc;
   text-decoration: none;
-  font-size: 0.9rem;
+  font-size: 1rem;
+  font-weight: 300;
   transition: color 0.3s ease;
 
   &:hover {
-    color: #ecf0f1;
+    color: #ffffff;
   }
 `;
 
@@ -197,17 +224,15 @@ const ServicesList = styled.ul`
   margin: 0;
 
   li {
-    color: #bdc3c7;
-    font-size: 0.9rem;
-    margin-bottom: 0.5rem;
-    padding-left: 1rem;
-    position: relative;
+    color: #cccccc;
+    font-size: 1rem;
+    font-weight: 300;
+    margin-bottom: 0.8rem;
+    transition: color 0.3s ease;
+    cursor: pointer;
 
-    &:before {
-      content: "•";
-      color: #3182ce;
-      position: absolute;
-      left: 0;
+    &:hover {
+      color: #ffffff;
     }
   }
 `;
@@ -215,72 +240,85 @@ const ServicesList = styled.ul`
 const ContactInfo = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.5rem;
 `;
 
 const ContactItem = styled.div`
-  color: #bdc3c7;
-  font-size: 0.9rem;
-  line-height: 1.4;
+  color: #cccccc;
+  font-size: 1rem;
+  line-height: 1.6;
+  font-weight: 300;
 
   strong {
-    color: #ecf0f1;
+    color: #ffffff;
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
   }
 
   a {
-    color: #3182ce;
+    color: #cccccc;
     text-decoration: none;
+    transition: color 0.3s ease;
 
     &:hover {
-      color: #63b3ed;
+      color: #ffffff;
     }
   }
 `;
 
 const FooterBottom = styled.div`
-  border-top: 1px solid #34495e;
-  padding-top: 1.5rem;
-  text-align: center;
+  border-top: 1px solid #333333;
+  padding-top: 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    text-align: center;
+  }
 `;
 
 const LegalLinks = styled.div`
   display: flex;
-  justify-content: center;
   gap: 2rem;
-  margin-bottom: 1rem;
 
   @media (max-width: 480px) {
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 1rem;
   }
 `;
 
 const LegalLink = styled.a`
-  color: #bdc3c7;
+  color: #cccccc;
   text-decoration: none;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
+  font-weight: 300;
   transition: color 0.3s ease;
 
   &:hover {
-    color: #ecf0f1;
+    color: #ffffff;
   }
 `;
 
 const FooterText = styled.p`
-  color: #ecf0f1;
-  font-size: 0.9rem;
+  color: #ffffff;
+  font-size: 1rem;
   margin: 0;
-  margin-bottom: 0.5rem;
+  font-weight: 300;
 `;
 
 const FooterSubtext = styled.p`
-  color: #bdc3c7;
-  font-size: 0.8rem;
+  color: #cccccc;
+  font-size: 0.9rem;
   margin: 0;
   font-weight: 300;
 
   @media (max-width: 320px) {
-    font-size: 0.75rem;
+    font-size: 0.8rem;
     line-height: 1.4;
   }
 `;

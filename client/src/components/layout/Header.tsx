@@ -42,23 +42,7 @@ const Header: React.FC = () => {
   return (
     <HeaderContainer>
       <HeaderContent>
-        <LogoSection>
-          <Link
-            to="/"
-            style={{
-              textDecoration: "none",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              gap: "0.5rem",
-            }}
-          >
-            <LogoImage src="/LOGO KORSVAGEN.png" alt="Korsvagen Logo" />
-            <Tagline>Costruzioni & Progettazione</Tagline>
-          </Link>
-        </LogoSection>
-
-        <Navigation>
+        <Navigation $menuOpen={isMenuOpen}>
           <DesktopMenu>
             {menuItems.map((item) => (
               <MenuLink
@@ -77,14 +61,10 @@ const Header: React.FC = () => {
             <span></span>
           </MobileMenuToggle>
 
-          <MobileMenu $isOpen={isMenuOpen} onClick={() => setIsMenuOpen(false)}>
-            <div className="menu-content" onClick={(e) => e.stopPropagation()}>
-              <div className="menu-header">
-                <div className="logo-mobile">
-                  <img src="/LOGO KORSVAGEN.png" alt="Korsvagen Logo" />
-                  <span>Costruzioni & Progettazione</span>
-                </div>
-              </div>
+          {isMenuOpen && <MobileOverlay onClick={() => setIsMenuOpen(false)} />}
+
+          <MobileMenu $isOpen={isMenuOpen}>
+            <div className="menu-content">
               {menuItems.map((item) => (
                 <MobileMenuLink
                   key={item.path}
@@ -98,35 +78,56 @@ const Header: React.FC = () => {
             </div>
           </MobileMenu>
         </Navigation>
+
+        <LogoSection>
+          <Link
+            to="/"
+            style={{
+              textDecoration: "none",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: "0.5rem",
+            }}
+          >
+            <LogoImage src="/LOGO KORSVAGEN.png" alt="Korsvagen Logo" />
+            <Tagline>Costruzioni & Progettazione</Tagline>
+          </Link>
+        </LogoSection>
       </HeaderContent>
     </HeaderContainer>
   );
 };
 
 const HeaderContainer = styled.header`
-  background: #ffffff;
-  box-shadow: 0 2px 20px rgba(44, 62, 80, 0.1);
-  position: sticky;
+  background: rgba(26, 26, 26, 0.85);
+  position: fixed;
   top: 0;
-  z-index: 100;
+  left: 0;
+  right: 0;
+  z-index: 1000;
   width: 100%;
+  border-bottom: 1px solid #333333;
+  backdrop-filter: blur(12px);
 `;
 
 const HeaderContent = styled.div`
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
-  padding: 1.5rem 2rem;
+  padding: 0 2rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
   position: relative;
+  height: 110px;
 
   @media (max-width: 768px) {
-    padding: 1rem 1.5rem;
+    padding: 0 1.5rem;
+    height: 80px;
   }
 
   @media (max-width: 320px) {
-    padding: 1rem 1rem;
+    padding: 0 1rem;
   }
 `;
 
@@ -134,7 +135,6 @@ const LogoSection = styled.div`
   display: flex;
   align-items: center;
   flex-shrink: 0;
-  z-index: 110;
 
   a {
     display: flex;
@@ -154,21 +154,22 @@ const LogoImage = styled.img`
   object-fit: contain;
 
   @media (max-width: 768px) {
-    height: 45px;
+    height: 40px;
   }
 
   @media (max-width: 480px) {
-    height: 40px;
+    height: 35px;
   }
 `;
 
 const Tagline = styled.span`
-  font-family: "Open Sans", sans-serif;
+  font-family: "Arial", sans-serif;
   font-size: 1rem;
-  color: #e67e22;
-  font-weight: 500;
+  color: #cccccc;
+  font-weight: 300;
   letter-spacing: 0.5px;
   text-align: center;
+  text-transform: uppercase;
 
   @media (max-width: 768px) {
     font-size: 0.9rem;
@@ -179,17 +180,17 @@ const Tagline = styled.span`
   }
 `;
 
-const Navigation = styled.nav`
+const Navigation = styled.nav<{ $menuOpen: boolean }>`
   position: relative;
 `;
 
 const DesktopMenu = styled.div`
   display: flex;
-  gap: 1.5rem;
+  gap: 2.5rem;
   align-items: center;
 
   @media (max-width: 1200px) {
-    gap: 1rem;
+    gap: 2rem;
   }
 
   @media (max-width: 1024px) {
@@ -198,39 +199,47 @@ const DesktopMenu = styled.div`
 `;
 
 const MenuLink = styled(Link)<{ $isActive: boolean }>`
-  font-family: "Open Sans", sans-serif;
-  font-size: 0.95rem;
+  font-family: "Arial", sans-serif;
+  font-size: 1.1rem;
   font-weight: 500;
-  color: ${(props) => (props.$isActive ? "#3182ce" : "#2c3e50")};
+  color: ${(props) => (props.$isActive ? "#ffffff" : "#cccccc")};
   text-decoration: none;
-  padding: 0.5rem 0.8rem;
-  border-radius: 5px;
+  padding: 1.5rem 0;
   transition: all 0.3s ease;
   position: relative;
   white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 
   @media (max-width: 1200px) {
-    font-size: 0.9rem;
-    padding: 0.5rem 0.6rem;
+    font-size: 1rem;
   }
 
   &:hover {
-    color: #3182ce;
-    background: #f7fafc;
+    color: #ffffff;
+    transform: translateY(-1px);
+
+    &::after {
+      width: 100%;
+    }
+  }
+
+  &::after {
+    content: "";
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 4px;
+    background: #ffffff;
+    transition: width 0.3s ease;
   }
 
   ${(props) =>
     props.$isActive &&
     `
-    &:after {
-      content: '';
-      position: absolute;
-      bottom: -2px;
-      left: 0.8rem;
-      right: 0.8rem;
-      height: 2px;
-      background: #3182ce;
-    }
+    color: #ffffff;
+    font-weight: 600;
   `}
 `;
 
@@ -242,7 +251,6 @@ const MobileMenuToggle = styled.button<{ $isOpen: boolean }>`
   cursor: pointer;
   padding: 0.5rem;
   gap: 4px;
-  z-index: 110;
   position: relative;
 
   @media (max-width: 1024px) {
@@ -252,7 +260,7 @@ const MobileMenuToggle = styled.button<{ $isOpen: boolean }>`
   span {
     width: 25px;
     height: 3px;
-    background: #2c3e50;
+    background: #ffffff;
     transition: all 0.3s ease;
     border-radius: 2px;
 
@@ -275,89 +283,79 @@ const MobileMenuToggle = styled.button<{ $isOpen: boolean }>`
 const MobileMenu = styled.div<{ $isOpen: boolean }>`
   display: none;
   position: fixed;
-  top: 0;
+  top: 110px;
   left: 0;
   right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  z-index: 105;
+  background: rgba(26, 26, 26, 0.85);
+  backdrop-filter: blur(12px);
+  z-index: 1002;
   opacity: ${(props) => (props.$isOpen ? "1" : "0")};
   visibility: ${(props) => (props.$isOpen ? "visible" : "hidden")};
   transition: all 0.3s ease;
+  max-height: ${(props) => (props.$isOpen ? "calc(100vh - 110px)" : "0")};
+  overflow: hidden;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+
+  @media (max-width: 768px) {
+    top: 80px;
+    max-height: ${(props) => (props.$isOpen ? "calc(100vh - 80px)" : "0")};
+  }
 
   @media (max-width: 1024px) {
     display: block;
   }
 
   .menu-content {
-    position: absolute;
-    top: 0;
-    right: 0;
-    background: white;
-    height: 100vh;
-    width: min(280px, 85vw);
-    max-width: 320px;
-    padding: 2rem 0;
+    background: transparent;
     transform: ${(props) =>
-      props.$isOpen ? "translateX(0)" : "translateX(100%)"};
-    transition: transform 0.3s ease;
-    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.15);
+      props.$isOpen ? "translateY(0)" : "translateY(-100%)"};
+    transition: transform 0.4s ease-in-out;
     overflow-y: auto;
-
-    @media (max-width: 350px) {
-      width: 100vw;
-      max-width: none;
-    }
-  }
-
-  .menu-header {
-    padding: 0 1.5rem 2rem;
-    border-bottom: 1px solid #e2e8f0;
-    margin-bottom: 1rem;
-
-    .logo-mobile {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 0.5rem;
-      text-align: center;
-
-      img {
-        height: 35px;
-      }
-
-      span {
-        font-size: 0.8rem;
-        color: #e67e22;
-        font-weight: 500;
-      }
-    }
+    max-height: inherit;
+    height: 100%;
   }
 `;
 
 const MobileMenuLink = styled(Link)<{ $isActive: boolean }>`
   display: block;
-  font-family: "Open Sans", sans-serif;
-  font-size: 1.1rem;
+  font-family: "Arial", sans-serif;
+  font-size: 1.2rem;
   font-weight: 500;
-  color: ${(props) => (props.$isActive ? "#3182ce" : "#2c3e50")};
+  color: ${(props) => (props.$isActive ? "#ffffff" : "#cccccc")};
   text-decoration: none;
-  padding: 1rem 1.5rem;
+  padding: 1.5rem 2rem;
   transition: all 0.3s ease;
-  border-left: 3px solid transparent;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 
   &:hover {
-    background: #f7fafc;
-    color: #3182ce;
-    border-left-color: #3182ce;
+    background: rgba(255, 255, 255, 0.05);
+    color: #ffffff;
   }
 
   ${(props) =>
     props.$isActive &&
     `
-    background: #f7fafc;
-    border-left-color: #3182ce;
+    color: #ffffff;
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.05);
   `}
+`;
+
+const MobileOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1001;
+  cursor: pointer;
+
+  @media (min-width: 1025px) {
+    display: none;
+  }
 `;
 
 export default Header;

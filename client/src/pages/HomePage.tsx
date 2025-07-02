@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import styled from "styled-components";
 import Header from "../components/layout/Header";
 import Footer from "../components/layout/Footer";
@@ -9,466 +10,2342 @@ const HomeContainer = styled.div`
   flex-direction: column;
   width: 100%;
   overflow-x: hidden;
+  background: #1a1a1a;
 `;
 
 const MainContent = styled.main`
   flex: 1;
   width: 100%;
+  background: #1a1a1a;
+  padding-top: 110px;
+
+  @media (max-width: 768px) {
+    padding-top: 80px;
+  }
 `;
 
 const HeroSection = styled.section`
-  background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+  background: #1a1a1a;
   color: white;
   text-align: center;
-  padding: 100px 20px;
+  padding: 0;
   position: relative;
   overflow: hidden;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
-  &::before {
+  @media (max-width: 768px) {
+    min-height: 80vh;
+  }
+
+  @media (max-width: 480px) {
+    min-height: 70vh;
+  }
+
+  @media (max-height: 600px) {
+    min-height: 90vh;
+  }
+
+  .hero-video {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    object-fit: cover;
+    z-index: 1;
+
+    @media (max-width: 768px) {
+      height: 80vh;
+    }
+
+    @media (max-width: 480px) {
+      height: 70vh;
+    }
+
+    @media (max-height: 600px) {
+      height: 90vh;
+    }
+  }
+
+  &::after {
     content: "";
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="%23ffffff" opacity="0.05"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
-    opacity: 0.3;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 2;
   }
 
   .hero-content {
     position: relative;
-    z-index: 1;
+    z-index: 3;
     max-width: 800px;
     margin: 0 auto;
+    padding: 0 2rem;
+    text-align: center;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    padding-top: 15vh;
+
+    @media (max-width: 768px) {
+      height: 80vh;
+      padding: 10vh 1.5rem 0;
+    }
+
+    @media (max-width: 480px) {
+      height: 70vh;
+      padding: 8vh 1rem 0;
+    }
+
+    @media (max-height: 600px) {
+      height: 90vh;
+      padding: 8vh 1rem 0;
+    }
+  }
+
+  .hero-top {
+    margin-bottom: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+  }
+
+  .hero-bottom {
+    margin-top: auto;
+    padding-bottom: 15vh;
+
+    @media (max-width: 768px) {
+      padding-bottom: 12vh;
+    }
+
+    @media (max-width: 480px) {
+      padding-bottom: 10vh;
+    }
   }
 
   h1 {
-    font-size: 3.5rem;
-    font-weight: bold;
+    font-size: 4.5rem;
+    font-weight: 400;
     margin-bottom: 20px;
-    font-family: "Montserrat", sans-serif;
-    letter-spacing: 2px;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    font-family: "Trajan Pro", "Times New Roman", serif;
+    letter-spacing: 0.1em;
+    line-height: 1.1;
+    color: #ffffff;
+    text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7);
+    text-transform: uppercase;
 
     @media (max-width: 768px) {
-      font-size: 2.5rem;
-      letter-spacing: 1px;
+      font-size: 3.5rem;
     }
 
     @media (max-width: 480px) {
-      font-size: 2rem;
-      letter-spacing: 0.5px;
+      font-size: 2.8rem;
     }
   }
 
-  .slogan {
-    font-size: 1.8rem;
-    margin-bottom: 30px;
-    color: #e2e8f0;
+  .main-slogan {
+    font-size: 3rem;
     font-weight: 300;
-    letter-spacing: 3px;
+    margin-bottom: 0;
+    font-family: "Inter", "Segoe UI", sans-serif;
+    letter-spacing: 0.15em;
+    line-height: 1.2;
+    color: #ffffff;
+    text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7);
+    text-transform: uppercase;
 
     @media (max-width: 768px) {
-      font-size: 1.4rem;
-      letter-spacing: 2px;
+      font-size: 2.2rem;
     }
 
     @media (max-width: 480px) {
-      font-size: 1.2rem;
-      letter-spacing: 1px;
-    }
-  }
-
-  .subtitle {
-    font-size: 1.2rem;
-    margin-bottom: 40px;
-    color: #cbd5e0;
-    line-height: 1.6;
-
-    @media (max-width: 768px) {
-      font-size: 1.1rem;
-      margin-bottom: 30px;
-    }
-
-    @media (max-width: 480px) {
-      font-size: 1rem;
-      margin-bottom: 25px;
+      font-size: 1.8rem;
     }
   }
 
   .cta-button {
-    background: linear-gradient(135deg, #e67e22 0%, #d35400 100%);
-    color: white;
-    padding: 18px 40px;
-    border: none;
-    border-radius: 30px;
-    font-size: 1.2rem;
-    font-weight: 600;
+    background: transparent;
+    color: #ffffff;
+    padding: 16px 40px;
+    border: 2px solid #ffffff;
+    border-radius: 0;
+    font-size: 1rem;
+    font-weight: 500;
     cursor: pointer;
     transition: all 0.3s ease;
-    box-shadow: 0 8px 20px rgba(230, 126, 34, 0.3);
-    letter-spacing: 0.5px;
+    text-decoration: none;
+    display: inline-block;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-family: "Inter", "Segoe UI", sans-serif;
 
     &:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 12px 30px rgba(230, 126, 34, 0.4);
-      background: linear-gradient(135deg, #d35400 0%, #e67e22 100%);
+      background: #ffffff;
+      color: #1a1a1a;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(255, 255, 255, 0.2);
     }
 
     @media (max-width: 768px) {
-      padding: 15px 30px;
-      font-size: 1.1rem;
+      padding: 14px 32px;
+      font-size: 0.95rem;
     }
 
     @media (max-width: 480px) {
-      padding: 12px 25px;
-      font-size: 1rem;
+      padding: 12px 28px;
+      font-size: 0.9rem;
       width: 100%;
-      max-width: 280px;
+      max-width: 300px;
+    }
+`;
+
+const ServicesGallery = styled.section`
+  padding: 100px 0;
+  background: #ffffff;
+  color: #1a1a1a;
+  overflow: hidden;
+
+  .services-header {
+    text-align: center;
+    margin-bottom: 80px;
+    padding: 0 20px;
+
+    h2 {
+      font-size: 3.5rem;
+      font-weight: 300;
+      color: #1a1a1a;
+      margin-bottom: 30px;
+      font-family: "Trajan Pro", "Times New Roman", serif;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+
+      @media (max-width: 768px) {
+        font-size: 2.8rem;
+      }
+
+      @media (max-width: 480px) {
+        font-size: 2.2rem;
+      }
+    }
+
+    .subtitle {
+      font-size: 1.3rem;
+      color: #666666;
+      max-width: 700px;
+      margin: 0 auto;
+      line-height: 1.6;
+      font-family: "Inter", "Segoe UI", sans-serif;
+      font-weight: 300;
+
+      @media (max-width: 768px) {
+        font-size: 1.1rem;
+      }
     }
   }
 
-  @media (max-width: 768px) {
-    padding: 80px 20px;
+  .gallery-container {
+    position: relative;
+    width: 100%;
+    height: 600px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    @media (max-width: 768px) {
+      height: 500px;
+    }
+
+    @media (max-width: 480px) {
+      height: 400px;
+    }
   }
 
-  @media (max-width: 480px) {
-    padding: 60px 15px;
-  }
-`;
-
-const ServicesPreview = styled.section`
-  padding: 80px 20px;
-  background: #f7fafc;
-
-  h2 {
-    text-align: center;
-    font-size: 2.5rem;
-    color: #2d3748;
-    margin-bottom: 20px;
-    font-family: "Montserrat", sans-serif;
-  }
-
-  .section-subtitle {
-    text-align: center;
-    font-size: 1.2rem;
-    color: #4a5568;
-    margin-bottom: 50px;
-    max-width: 600px;
-    margin-left: auto;
-    margin-right: auto;
-    line-height: 1.6;
-  }
-
-  .services-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  .gallery-track {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
     gap: 30px;
-    max-width: 1200px;
-    margin: 0 auto 60px;
+    padding: 0 50px;
+    transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+
+    @media (max-width: 768px) {
+      gap: 20px;
+      padding: 0 30px;
+    }
+
+    @media (max-width: 480px) {
+      gap: 15px;
+      padding: 0 20px;
+    }
   }
 
   .service-card {
-    background: white;
-    border-radius: 15px;
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-    text-align: center;
-    transition: all 0.3s ease;
-    overflow: hidden;
     position: relative;
+    overflow: hidden;
+    border-radius: 0;
+    background: #000;
+    cursor: pointer;
+    transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    flex-shrink: 0;
 
-    &:hover {
-      transform: translateY(-10px);
-      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+    &.active {
+      width: 700px;
+      height: 450px;
+      z-index: 3;
+
+      @media (max-width: 1024px) {
+        width: 600px;
+        height: 400px;
+      }
+
+      @media (max-width: 768px) {
+        width: 500px;
+        height: 350px;
+      }
+
+      @media (max-width: 480px) {
+        width: 320px;
+        height: 250px;
+      }
+
+      .service-content {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      .service-overlay {
+        background: rgba(0, 0, 0, 0.4);
+      }
     }
 
-    .service-icon {
-      background: linear-gradient(135deg, #3182ce 0%, #2c5282 100%);
-      color: white;
-      padding: 40px 30px 30px;
-      position: relative;
+    &.side {
+      width: 250px;
+      height: 300px;
+      opacity: 0.7;
+      transform: scale(0.85);
+      z-index: 2;
 
-      .icon {
-        font-size: 3rem;
-        margin-bottom: 15px;
-        display: block;
+      @media (max-width: 768px) {
+        display: none;
       }
 
-      h3 {
-        color: white;
-        margin: 0;
-        font-size: 1.4rem;
-        font-family: "Montserrat", sans-serif;
-        font-weight: 600;
+      .service-content {
+        opacity: 0;
+        transform: translateY(20px);
       }
 
-      &::after {
-        content: "";
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        height: 20px;
-        background: white;
-        border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+      .service-overlay {
+        background: rgba(0, 0, 0, 0.7);
       }
+    }
+
+    &.hidden {
+      width: 200px;
+      height: 250px;
+      opacity: 0.3;
+      transform: scale(0.7);
+      z-index: 1;
+
+      @media (max-width: 768px) {
+        display: none;
+      }
+
+      .service-content {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      .service-overlay {
+        background: rgba(0, 0, 0, 0.8);
+      }
+    }
+
+    .service-video {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.4s ease;
+    }
+
+    .service-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.6);
+      transition: all 0.6s ease;
+      z-index: 2;
     }
 
     .service-content {
-      padding: 30px;
-      padding-top: 20px;
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 40px 30px;
+      z-index: 3;
+      background: linear-gradient(transparent, rgba(0, 0, 0, 0.9));
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.6s ease;
 
-      p {
-        color: #4a5568;
-        line-height: 1.6;
-        margin-bottom: 20px;
+      h3 {
+        font-size: 2rem;
+        font-weight: 400;
+        color: #ffffff;
+        margin-bottom: 15px;
+        font-family: "Trajan Pro", "Times New Roman", serif;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+
+        @media (max-width: 768px) {
+          font-size: 1.6rem;
+        }
+
+        @media (max-width: 480px) {
+          font-size: 1.2rem;
+        }
       }
 
-      .service-features {
-        list-style: none;
-        padding: 0;
-        margin: 20px 0;
+      p {
+        color: #e0e0e0;
+        font-size: 1rem;
+        line-height: 1.5;
+        margin-bottom: 20px;
+        font-family: "Inter", "Segoe UI", sans-serif;
 
-        li {
-          color: #2d3748;
-          margin-bottom: 8px;
-          padding-left: 20px;
-          position: relative;
+        @media (max-width: 480px) {
           font-size: 0.9rem;
-
-          &:before {
-            content: "✓";
-            position: absolute;
-            left: 0;
-            color: #3182ce;
-            font-weight: bold;
-          }
         }
       }
 
       .service-cta {
-        background: #3182ce;
-        color: white;
-        padding: 10px 20px;
-        border: none;
-        border-radius: 25px;
+        background: transparent;
+        color: #ffffff;
+        padding: 12px 24px;
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        border-radius: 0;
         font-size: 0.9rem;
         font-weight: 500;
         cursor: pointer;
-        transition: background 0.3s ease;
+        transition: all 0.3s ease;
         text-decoration: none;
         display: inline-block;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        font-family: "Inter", "Segoe UI", sans-serif;
 
         &:hover {
-          background: #2c5282;
+          background: #ffffff;
+          color: #1a1a1a;
+          border-color: #ffffff;
+          transform: translateY(-2px);
         }
+
+        @media (max-width: 480px) {
+          padding: 10px 20px;
+          font-size: 0.85rem;
+        }
+      }
+
+      @media (max-width: 768px) {
+        padding: 25px 20px;
+      }
+
+      @media (max-width: 480px) {
+        padding: 20px 15px;
+      }
+    }
+  }
+
+  .gallery-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(26, 26, 26, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 4;
+
+    &:hover {
+      background: rgba(26, 26, 26, 0.7);
+      transform: translateY(-50%) scale(1.1);
+    }
+
+    &.prev {
+      left: 20px;
+    }
+
+    &.next {
+      right: 20px;
+    }
+
+    @media (max-width: 480px) {
+      width: 40px;
+      height: 40px;
+      font-size: 0.8rem;
+    }
+  }
+
+  .gallery-indicators {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 40px;
+
+    .indicator {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #cccccc;
+      cursor: pointer;
+      transition: all 0.3s ease;
+
+      &.active {
+        background: #1a1a1a;
+        transform: scale(1.2);
+      }
+    }
+  }
+
+  .simple-cta {
+    text-align: center;
+    margin-top: 60px;
+
+    .simple-cta-button {
+      background: transparent;
+      color: #1a1a1a;
+      padding: 15px 35px;
+      border: 2px solid #1a1a1a;
+      border-radius: 0;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-block;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      font-family: "Inter", "Segoe UI", sans-serif;
+
+      &:hover {
+        background: #1a1a1a;
+        color: #ffffff;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(26, 26, 26, 0.2);
+      }
+
+      @media (max-width: 768px) {
+        padding: 12px 30px;
+        font-size: 0.95rem;
+      }
+
+      @media (max-width: 480px) {
+        padding: 10px 25px;
+        font-size: 0.9rem;
       }
     }
   }
 
   .cta-section {
-    background: linear-gradient(135deg, #2d3748 0%, #4a5568 100%);
-    border-radius: 15px;
-    padding: 40px;
     text-align: center;
-    color: white;
-    margin-top: 40px;
+    padding: 80px 40px;
+    margin-top: 60px;
+    background: #f8f9fa;
 
     h3 {
-      font-family: "Montserrat", sans-serif;
-      font-size: 1.8rem;
-      margin-bottom: 15px;
+      font-size: 2.2rem;
+      font-weight: 300;
+      color: #1a1a1a;
+      margin-bottom: 20px;
+      font-family: "Trajan Pro", "Times New Roman", serif;
+      letter-spacing: 0.05em;
+
+      @media (max-width: 768px) {
+        font-size: 1.8rem;
+      }
     }
 
     p {
       font-size: 1.1rem;
-      margin-bottom: 25px;
-      opacity: 0.9;
-    }
+      color: #666666;
+      margin-bottom: 40px;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+      line-height: 1.6;
+      font-family: "Inter", "Segoe UI", sans-serif;
 
-    .main-cta {
-      background: #e67e22;
-      color: white;
-      padding: 15px 30px;
-      border: none;
-      border-radius: 25px;
-      font-size: 1.1rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      margin-right: 15px;
-
-      &:hover {
-        background: #d35400;
-        transform: translateY(-2px);
+      @media (max-width: 768px) {
+        font-size: 1rem;
       }
     }
 
-    .secondary-cta {
-      background: transparent;
-      color: white;
-      padding: 15px 30px;
-      border: 2px solid white;
-      border-radius: 25px;
+    .main-cta {
+      background: #1a1a1a;
+      color: #ffffff;
+      padding: 18px 45px;
+      border: 2px solid #1a1a1a;
+      border-radius: 0;
       font-size: 1.1rem;
-      font-weight: 600;
+      font-weight: 500;
       cursor: pointer;
       transition: all 0.3s ease;
       text-decoration: none;
       display: inline-block;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      font-family: "Inter", "Segoe UI", sans-serif;
 
       &:hover {
-        background: white;
-        color: #2d3748;
+        background: transparent;
+        color: #1a1a1a;
+        transform: translateY(-3px);
+        box-shadow: 0 10px 30px rgba(26, 26, 26, 0.2);
       }
+
+      @media (max-width: 768px) {
+        padding: 16px 40px;
+        font-size: 1rem;
+      }
+
+      @media (max-width: 480px) {
+        padding: 14px 35px;
+        font-size: 0.95rem;
+        width: 100%;
+        max-width: 300px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      padding: 60px 30px;
+    }
+
+    @media (max-width: 480px) {
+      padding: 50px 20px;
     }
   }
 
   @media (max-width: 768px) {
-    padding: 60px 20px;
+    padding: 80px 0;
+  }
+
+  @media (max-width: 480px) {
+    padding: 60px 0;
+  }
+`;
+
+const ProjectsGallery = styled.section`
+  padding: 100px 0;
+  background: #1a1a1a;
+  color: #ffffff;
+  overflow: hidden;
+
+  .projects-header {
+    text-align: center;
+    margin-bottom: 80px;
+    padding: 0 20px;
 
     h2 {
-      font-size: 2rem;
-    }
+      font-size: 3.5rem;
+      font-weight: 300;
+      color: #ffffff;
+      margin-bottom: 30px;
+      font-family: "Trajan Pro", "Times New Roman", serif;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
 
-    .services-grid {
-      grid-template-columns: 1fr;
-      gap: 25px;
-    }
-
-    .service-card .service-icon {
-      padding: 30px 20px 20px;
-
-      .icon {
-        font-size: 2.5rem;
+      @media (max-width: 768px) {
+        font-size: 2.8rem;
       }
+
+      @media (max-width: 480px) {
+        font-size: 2.2rem;
+      }
+    }
+
+    .subtitle {
+      font-size: 1.3rem;
+      color: #cccccc;
+      max-width: 700px;
+      margin: 0 auto;
+      line-height: 1.6;
+      font-family: "Inter", "Segoe UI", sans-serif;
+      font-weight: 300;
+
+      @media (max-width: 768px) {
+        font-size: 1.1rem;
+      }
+    }
+  }
+
+  .gallery-container {
+    position: relative;
+    width: 100%;
+    height: 600px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    @media (max-width: 768px) {
+      height: 500px;
+    }
+
+    @media (max-width: 480px) {
+      height: 400px;
+    }
+  }
+
+  .gallery-track {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    gap: 30px;
+    padding: 0 50px;
+    transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+
+    @media (max-width: 768px) {
+      gap: 20px;
+      padding: 0 30px;
+    }
+
+    @media (max-width: 480px) {
+      gap: 15px;
+      padding: 0 20px;
+    }
+  }
+
+  .project-card {
+    position: relative;
+    overflow: hidden;
+    border-radius: 0;
+    background: #000;
+    cursor: pointer;
+    transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    flex-shrink: 0;
+
+    &.active {
+      width: 700px;
+      height: 450px;
+      z-index: 3;
+
+      @media (max-width: 1024px) {
+        width: 600px;
+        height: 400px;
+      }
+
+      @media (max-width: 768px) {
+        width: 500px;
+        height: 350px;
+      }
+
+      @media (max-width: 480px) {
+        width: 320px;
+        height: 250px;
+      }
+
+      .project-content {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      .project-overlay {
+        background: rgba(0, 0, 0, 0.4);
+      }
+    }
+
+    &.side {
+      width: 250px;
+      height: 300px;
+      opacity: 0.7;
+      transform: scale(0.85);
+      z-index: 2;
+
+      @media (max-width: 768px) {
+        display: none;
+      }
+
+      .project-content {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      .project-overlay {
+        background: rgba(0, 0, 0, 0.7);
+      }
+    }
+
+    &.hidden {
+      width: 200px;
+      height: 250px;
+      opacity: 0.3;
+      transform: scale(0.7);
+      z-index: 1;
+
+      @media (max-width: 768px) {
+        display: none;
+      }
+
+      .project-content {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      .project-overlay {
+        background: rgba(0, 0, 0, 0.8);
+      }
+    }
+
+    .project-image {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.4s ease;
+    }
+
+    .project-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.6);
+      transition: all 0.6s ease;
+      z-index: 2;
+    }
+
+    .project-content {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 40px 30px;
+      z-index: 3;
+      background: linear-gradient(transparent, rgba(0, 0, 0, 0.9));
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.6s ease;
 
       h3 {
-        font-size: 1.2rem;
+        font-size: 2rem;
+        font-weight: 400;
+        color: #ffffff;
+        margin-bottom: 10px;
+        font-family: "Trajan Pro", "Times New Roman", serif;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+
+        @media (max-width: 768px) {
+          font-size: 1.6rem;
+        }
+
+        @media (max-width: 480px) {
+          font-size: 1.2rem;
+        }
+      }
+
+      .project-location {
+        color: #cccccc;
+        font-size: 0.9rem;
+        margin-bottom: 15px;
+        font-family: "Inter", "Segoe UI", sans-serif;
+        font-style: italic;
+
+        @media (max-width: 480px) {
+          font-size: 0.8rem;
+        }
+      }
+
+      p {
+        color: #e0e0e0;
+        font-size: 1rem;
+        line-height: 1.5;
+        margin-bottom: 20px;
+        font-family: "Inter", "Segoe UI", sans-serif;
+
+        @media (max-width: 480px) {
+          font-size: 0.9rem;
+        }
+      }
+
+      .project-cta {
+        background: transparent;
+        color: #ffffff;
+        padding: 12px 24px;
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        border-radius: 0;
+        font-size: 0.9rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        font-family: "Inter", "Segoe UI", sans-serif;
+
+        &:hover {
+          background: #ffffff;
+          color: #1a1a1a;
+          border-color: #ffffff;
+          transform: translateY(-2px);
+        }
+
+        @media (max-width: 480px) {
+          padding: 10px 20px;
+          font-size: 0.85rem;
+        }
+      }
+
+      @media (max-width: 768px) {
+        padding: 25px 20px;
+      }
+
+      @media (max-width: 480px) {
+        padding: 20px 15px;
+      }
+    }
+  }
+
+  .gallery-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 4;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.15);
+      transform: translateY(-50%) scale(1.1);
+    }
+
+    &.prev {
+      left: 20px;
+    }
+
+    &.next {
+      right: 20px;
+    }
+
+    @media (max-width: 480px) {
+      width: 40px;
+      height: 40px;
+      font-size: 0.8rem;
+    }
+  }
+
+  .gallery-indicators {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 40px;
+
+    .indicator {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #666666;
+      cursor: pointer;
+      transition: all 0.3s ease;
+
+      &.active {
+        background: #ffffff;
+        transform: scale(1.2);
+      }
+    }
+  }
+
+  .simple-cta {
+    text-align: center;
+    margin-top: 60px;
+
+    .simple-cta-button {
+      background: transparent;
+      color: #ffffff;
+      padding: 15px 35px;
+      border: 2px solid #ffffff;
+      border-radius: 0;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-block;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      font-family: "Inter", "Segoe UI", sans-serif;
+
+      &:hover {
+        background: #ffffff;
+        color: #1a1a1a;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(255, 255, 255, 0.2);
+      }
+
+      @media (max-width: 768px) {
+        padding: 12px 30px;
+        font-size: 0.95rem;
+      }
+
+      @media (max-width: 480px) {
+        padding: 10px 25px;
+        font-size: 0.9rem;
+      }
+    }
+  }
+
+  .cta-section {
+    text-align: center;
+    padding: 80px 40px;
+    margin-top: 60px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+
+    h3 {
+      font-size: 2.2rem;
+      font-weight: 300;
+      color: #ffffff;
+      margin-bottom: 20px;
+      font-family: "Trajan Pro", "Times New Roman", serif;
+      letter-spacing: 0.05em;
+
+      @media (max-width: 768px) {
+        font-size: 1.8rem;
       }
     }
 
-    .cta-section {
-      padding: 30px 20px;
+    p {
+      font-size: 1.1rem;
+      color: #cccccc;
+      margin-bottom: 40px;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+      line-height: 1.6;
+      font-family: "Inter", "Segoe UI", sans-serif;
 
-      h3 {
-        font-size: 1.5rem;
+      @media (max-width: 768px) {
+        font-size: 1rem;
+      }
+    }
+
+    .main-cta {
+      background: transparent;
+      color: #ffffff;
+      padding: 18px 45px;
+      border: 2px solid #ffffff;
+      border-radius: 0;
+      font-size: 1.1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-block;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      font-family: "Inter", "Segoe UI", sans-serif;
+
+      &:hover {
+        background: #ffffff;
+        color: #1a1a1a;
+        transform: translateY(-3px);
+        box-shadow: 0 10px 30px rgba(255, 255, 255, 0.2);
       }
 
-      .main-cta,
-      .secondary-cta {
-        display: block;
-        margin: 10px auto;
+      @media (max-width: 768px) {
+        padding: 16px 40px;
+        font-size: 1rem;
+      }
+
+      @media (max-width: 480px) {
+        padding: 14px 35px;
+        font-size: 0.95rem;
         width: 100%;
-        max-width: 250px;
+        max-width: 300px;
       }
+    }
+
+    @media (max-width: 768px) {
+      padding: 60px 30px;
+    }
+
+    @media (max-width: 480px) {
+      padding: 50px 20px;
+    }
+  }
+
+  @media (max-width: 768px) {
+    padding: 80px 0;
+  }
+
+  @media (max-width: 480px) {
+    padding: 60px 0;
+  }
+`;
+
+const NewsSection = styled.section`
+  background: #ffffff;
+  color: #000000;
+  padding: 80px 0;
+
+  @media (max-width: 768px) {
+    padding: 60px 0;
+  }
+`;
+
+const NewsContainer = styled.div`
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+
+  @media (max-width: 768px) {
+    padding: 0 1rem;
+  }
+`;
+
+const NewsSectionTitle = styled.h2`
+  font-size: 3.5rem;
+  font-weight: 300;
+  text-align: center;
+  margin-bottom: 20px;
+  color: #000000;
+  font-family: "Trajan Pro", "Times New Roman", serif;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+
+  @media (max-width: 768px) {
+    font-size: 2.5rem;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 2rem;
+  }
+`;
+
+const NewsSectionSubtitle = styled.p`
+  font-size: 1.2rem;
+  text-align: center;
+  margin-bottom: 60px;
+  color: #666666;
+  font-weight: 300;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.6;
+
+  @media (max-width: 768px) {
+    font-size: 1.1rem;
+    margin-bottom: 40px;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 1rem;
+    margin-bottom: 30px;
+  }
+`;
+
+const NewsGallery = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+  margin-bottom: 60px;
+
+  @media (max-width: 768px) {
+    gap: 30px;
+    margin-bottom: 40px;
+  }
+`;
+
+const NewsCard = styled.article`
+  display: flex;
+  background: #f8f8f8;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.12);
+  }
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+  }
+`;
+
+const NewsImageContainer = styled.div`
+  flex: 1;
+  min-height: 300px;
+  position: relative;
+  overflow: hidden;
+
+  @media (max-width: 768px) {
+    min-height: 200px;
+  }
+`;
+
+const NewsImage = styled.img`
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  ${NewsCard}:hover & {
+    transform: scale(1.05);
+  }
+`;
+
+const NewsContent = styled.div`
+  flex: 1;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  @media (max-width: 768px) {
+    padding: 30px;
+  }
+
+  @media (max-width: 480px) {
+    padding: 20px;
+  }
+`;
+
+const NewsDate = styled.time`
+  font-size: 0.9rem;
+  color: #999999;
+  margin-bottom: 12px;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+`;
+
+const NewsTitle = styled.h3`
+  font-size: 1.8rem;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: #000000;
+  line-height: 1.3;
+
+  @media (max-width: 768px) {
+    font-size: 1.5rem;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 1.3rem;
+  }
+`;
+
+const NewsExcerpt = styled.p`
+  font-size: 1rem;
+  color: #666666;
+  line-height: 1.6;
+  margin-bottom: 24px;
+
+  @media (max-width: 480px) {
+    font-size: 0.95rem;
+  }
+`;
+
+const NewsActions = styled.div`
+  display: flex;
+  gap: 16px;
+  margin-top: auto;
+
+  @media (max-width: 480px) {
+    flex-direction: column;
+    gap: 12px;
+  }
+`;
+
+const NewsCtaButton = styled(Link)`
+  display: inline-block;
+  padding: 12px 24px;
+  background: #000000;
+  color: #ffffff;
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 0.95rem;
+  text-align: center;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  letter-spacing: 0.02em;
+
+  &:hover {
+    background: #333333;
+    transform: translateY(-1px);
+  }
+
+  @media (max-width: 480px) {
+    padding: 14px 20px;
+  }
+`;
+
+const NewsSecondaryButton = styled(Link)`
+  display: inline-block;
+  padding: 12px 24px;
+  background: transparent;
+  color: #000000;
+  text-decoration: none;
+  border: 2px solid #000000;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 0.95rem;
+  text-align: center;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  letter-spacing: 0.02em;
+
+  &:hover {
+    background: #000000;
+    color: #ffffff;
+    transform: translateY(-1px);
+  }
+
+  @media (max-width: 480px) {
+    padding: 14px 20px;
+  }
+`;
+
+const NewsSimpleCta = styled.div`
+  text-align: center;
+  margin-top: 40px;
+
+  .simple-cta-button {
+    display: inline-block;
+    padding: 16px 32px;
+    background: transparent;
+    color: #000000;
+    text-decoration: none;
+    border: 2px solid #000000;
+    border-radius: 50px;
+    font-weight: 500;
+    font-size: 1rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+
+    &:hover {
+      background: #000000;
+      color: #ffffff;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    @media (max-width: 768px) {
+      padding: 14px 28px;
+      font-size: 0.95rem;
+    }
+
+    @media (max-width: 480px) {
+      padding: 12px 24px;
+      font-size: 0.9rem;
     }
   }
 `;
 
+const ReviewsSection = styled.section`
+  background: #1a1a1a;
+  color: #ffffff;
+  padding: 0;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+`;
+
+const ReviewsContainer = styled.div`
+  width: 100%;
+  height: 100vh;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+const ReviewsTrack = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+`;
+
+const ReviewCard = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 80px 40px;
+  width: 100%;
+  min-height: 100vh;
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0;
+  transform: translateY(50px);
+  transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &.active {
+    opacity: 1;
+    transform: translateY(0);
+    position: relative;
+  }
+
+  @media (max-width: 768px) {
+    padding: 60px 30px;
+  }
+
+  @media (max-width: 480px) {
+    padding: 40px 20px;
+  }
+`;
+
+const ReviewStars = styled.div`
+  display: flex;
+  gap: 8px;
+  margin-bottom: 30px;
+  justify-content: center;
+
+  .star {
+    color: #ffd700;
+    font-size: 2rem;
+
+    @media (max-width: 768px) {
+      font-size: 1.5rem;
+    }
+  }
+`;
+
+const ReviewText = styled.blockquote`
+  font-size: 2rem;
+  font-weight: 300;
+  line-height: 1.4;
+  max-width: 800px;
+  margin: 0 auto 40px;
+  color: #ffffff;
+  font-style: italic;
+  font-family: "Georgia", serif;
+
+  @media (max-width: 768px) {
+    font-size: 1.5rem;
+    margin-bottom: 30px;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 1.2rem;
+    margin-bottom: 25px;
+  }
+
+  &::before {
+    content: """;
+    font-size: 4rem;
+    color: #666666;
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: "Georgia", serif;
+
+    @media (max-width: 768px) {
+      font-size: 3rem;
+      top: 10px;
+    }
+  }
+`;
+
+const ReviewAuthor = styled.div`
+  .author-name {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #ffffff;
+    margin-bottom: 8px;
+    font-family: "Inter", "Segoe UI", sans-serif;
+
+    @media (max-width: 768px) {
+      font-size: 1.1rem;
+    }
+
+    @media (max-width: 480px) {
+      font-size: 1rem;
+    }
+  }
+
+  .author-company {
+    font-size: 1rem;
+    color: #cccccc;
+    font-weight: 300;
+
+    @media (max-width: 768px) {
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 480px) {
+      font-size: 0.85rem;
+    }
+  }
+`;
+
+const ReviewsIndicators = styled.div`
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 12px;
+  z-index: 3;
+
+  @media (max-width: 768px) {
+    bottom: 30px;
+  }
+
+  .indicator {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    cursor: pointer;
+    transition: all 0.3s ease;
+
+    &.active {
+      background: #ffffff;
+      transform: scale(1.3);
+    }
+  }
+`;
+
+const InstagramSection = styled.section`
+  background: #ffffff;
+  padding: 80px 0;
+
+  @media (max-width: 768px) {
+    padding: 60px 0;
+  }
+`;
+
+const InstagramContainer = styled.div`
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  text-align: center;
+
+  @media (max-width: 768px) {
+    padding: 0 1rem;
+  }
+`;
+
+const InstagramTitle = styled.h2`
+  font-size: 3.5rem;
+  font-weight: 300;
+  text-align: center;
+  margin-bottom: 20px;
+  color: #000000;
+  font-family: "Trajan Pro", "Times New Roman", serif;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+
+  @media (max-width: 768px) {
+    font-size: 2.5rem;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 2rem;
+  }
+`;
+
+const InstagramSubtitle = styled.p`
+  font-size: 1.2rem;
+  text-align: center;
+  margin-bottom: 60px;
+  color: #666666;
+  font-weight: 300;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.6;
+
+  @media (max-width: 768px) {
+    font-size: 1.1rem;
+    margin-bottom: 40px;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 1rem;
+    margin-bottom: 30px;
+  }
+`;
+
+const InstagramEmbed = styled.div`
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+
+  iframe {
+    width: 100%;
+    height: 600px;
+    border: none;
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+
+    @media (max-width: 768px) {
+      height: 500px;
+    }
+
+    @media (max-width: 480px) {
+      height: 400px;
+      border-radius: 12px;
+    }
+  }
+`;
+
+const ContactSection = styled.section`
+  background: #1a1a1a;
+  color: #ffffff;
+  padding: 100px 0;
+
+  @media (max-width: 768px) {
+    padding: 80px 0;
+  }
+
+  @media (max-width: 480px) {
+    padding: 60px 0;
+  }
+`;
+
+const ContactContainer = styled.div`
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  text-align: center;
+
+  @media (max-width: 768px) {
+    padding: 0 1rem;
+  }
+`;
+
+const ContactTitle = styled.h2`
+  font-size: 3.5rem;
+  font-weight: 300;
+  text-align: center;
+  margin-bottom: 20px;
+  color: #ffffff;
+  font-family: "Trajan Pro", "Times New Roman", serif;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+
+  @media (max-width: 768px) {
+    font-size: 2.5rem;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 2rem;
+  }
+`;
+
+const ContactSubtitle = styled.p`
+  font-size: 1.2rem;
+  text-align: center;
+  margin-bottom: 60px;
+  color: #cccccc;
+  font-weight: 300;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.6;
+
+  @media (max-width: 768px) {
+    font-size: 1.1rem;
+    margin-bottom: 50px;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 1rem;
+    margin-bottom: 40px;
+  }
+`;
+
+const ContactForm = styled.form`
+  max-width: 600px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+
+  @media (max-width: 768px) {
+    gap: 20px;
+  }
+`;
+
+const ContactRow = styled.div`
+  display: flex;
+  gap: 20px;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 15px;
+  }
+`;
+
+const ContactInput = styled.input`
+  flex: 1;
+  padding: 18px 20px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  color: #ffffff;
+  font-size: 1rem;
+  font-family: "Inter", "Segoe UI", sans-serif;
+  transition: all 0.3s ease;
+
+  &::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+  }
+
+  &:focus {
+    outline: none;
+    border-color: rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.15);
+  }
+
+  @media (max-width: 480px) {
+    padding: 16px 18px;
+    font-size: 0.95rem;
+  }
+`;
+
+const ContactTextarea = styled.textarea`
+  width: 100%;
+  padding: 18px 20px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  color: #ffffff;
+  font-size: 1rem;
+  font-family: "Inter", "Segoe UI", sans-serif;
+  resize: vertical;
+  min-height: 120px;
+  transition: all 0.3s ease;
+
+  &::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+  }
+
+  &:focus {
+    outline: none;
+    border-color: rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.15);
+  }
+
+  @media (max-width: 480px) {
+    padding: 16px 18px;
+    font-size: 0.95rem;
+    min-height: 100px;
+  }
+`;
+
+const ContactSubmit = styled.button`
+  background: #ffffff;
+  color: #1a1a1a;
+  padding: 18px 40px;
+  border: 2px solid #ffffff;
+  border-radius: 50px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-family: "Inter", "Segoe UI", sans-serif;
+  margin-top: 20px;
+
+  &:hover {
+    background: transparent;
+    color: #ffffff;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(255, 255, 255, 0.2);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  @media (max-width: 768px) {
+    padding: 16px 35px;
+    font-size: 1rem;
+  }
+
+  @media (max-width: 480px) {
+    padding: 14px 30px;
+    font-size: 0.95rem;
+    width: 100%;
+  }
+`;
+
 const HomePage: React.FC = () => {
+  const [currentSlide, setCurrentSlide] = React.useState(0);
+  const [currentProjectSlide, setCurrentProjectSlide] = React.useState(2); // Terzo elemento selezionato di default (design a specchi)
+  const [currentReviewSlide, setCurrentReviewSlide] = React.useState(0);
+
+  // Touch handling for mobile navigation
+  const [touchStart, setTouchStart] = React.useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = React.useState<number | null>(null);
+
+  // Minimum swipe distance (in px)
+  const minSwipeDistance = 50;
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEnd = (
+    galleryType: "services" | "projects" | "reviews" | "news"
+  ) => {
+    if (!touchStart || !touchEnd) return;
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+
+    if (galleryType === "services") {
+      if (isLeftSwipe) {
+        nextSlide();
+      }
+      if (isRightSwipe) {
+        prevSlide();
+      }
+    } else if (galleryType === "projects") {
+      if (isLeftSwipe) {
+        nextProjectSlide();
+      }
+      if (isRightSwipe) {
+        prevProjectSlide();
+      }
+    } else if (galleryType === "reviews") {
+      if (isLeftSwipe) {
+        nextReviewSlide();
+      }
+      if (isRightSwipe) {
+        prevReviewSlide();
+      }
+    }
+  };
+
+  const services = [
+    {
+      title: "Costruzioni",
+      description:
+        "Realizziamo costruzioni di ogni tipologia con materiali di qualità e tecniche all'avanguardia, dal residenziale all'industriale.",
+      video:
+        "https://www.techbau.it/wp-content/uploads/2024/06/Construction_v3.webm",
+    },
+    {
+      title: "Progettazione",
+      description:
+        "Progettazione completa e consulenza specializzata per trasformare le tue idee in progetti concreti e realizzabili.",
+      video:
+        "https://www.techbau.it/wp-content/uploads/2024/06/Site-Selection_v3.webm",
+    },
+    {
+      title: "Facility Management",
+      description:
+        "Gestione completa delle strutture con servizi di manutenzione, ottimizzazione e controllo per massimizzare l'efficienza.",
+      video:
+        "https://www.techbau.it/wp-content/uploads/2024/07/Facility-20Management-20V2.webm",
+    },
+  ];
+
+  const projects = [
+    {
+      title: "Villa Moderna",
+      location: "Milano, Lombardia",
+      description:
+        "Residenza di lusso con design contemporaneo e tecnologie smart home integrate. Struttura ecosostenibile con certificazione energetica A+.",
+      image:
+        "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=2075&q=80",
+    },
+    {
+      title: "Centro Commerciale",
+      location: "Roma, Lazio",
+      description:
+        "Complesso commerciale multifunzionale con spazi retail, uffici e aree ricreative. Design architettonico innovativo e sostenibile.",
+      image:
+        "https://images.unsplash.com/photo-1441986300917-64674bd600d8?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
+    },
+    {
+      title: "Stabilimento Industriale",
+      location: "Torino, Piemonte",
+      description:
+        "Impianto produttivo all'avanguardia con tecnologie Industry 4.0. Ottimizzazione dei flussi logistici e massima efficienza energetica.",
+      image:
+        "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
+    },
+  ];
+
+  const news = [
+    {
+      date: "15 Gen 2024",
+      title: "Nuove Tecnologie BIM per l'Edilizia Sostenibile",
+      excerpt:
+        "Korsvagen adotta le più moderne tecnologie BIM per garantire progetti sempre più sostenibili e efficienti dal punto di vista energetico.",
+      image:
+        "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
+      link: "/news/tecnologie-bim-edilizia-sostenibile",
+    },
+    {
+      date: "8 Gen 2024",
+      title: "Inaugurazione Nuovo Stabilimento a Milano",
+      excerpt:
+        "Aperta la nuova sede operativa a Milano: 5.000 mq di spazi moderni dedicati alla progettazione e alla gestione cantieri.",
+      image:
+        "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
+      link: "/news/inaugurazione-stabilimento-milano",
+    },
+    {
+      date: "22 Dic 2023",
+      title: "Certificazione ISO 14001: Impegno per l'Ambiente",
+      excerpt:
+        "Korsvagen ottiene la certificazione ISO 14001 per la gestione ambientale, confermando il nostro impegno verso la sostenibilità.",
+      image:
+        "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
+      link: "/news/certificazione-iso-14001-ambiente",
+    },
+  ];
+
+  const reviews = [
+    {
+      text: "Eccezionale! Korsvagen ha realizzato la casa dei nostri sogni con professionalità e attenzione ai dettagli incredibili.",
+      author: "Mario Rossi",
+      company: "Imprenditore edile",
+      stars: 5,
+    },
+    {
+      text: "Ottima esperienza, team competente e disponibile. Consigliatissimi per chi cerca qualità e affidabilità.",
+      author: "Giulia Verdi",
+      company: "Architetto",
+      stars: 5,
+    },
+    {
+      text: "Hanno trasformato la mia visione in realtà. Ogni fase del progetto è stata gestita con cura e precisione.",
+      author: "Laura Bianchi",
+      company: "Cliente privato",
+      stars: 5,
+    },
+  ];
+
+  // Auto-rotate reviews every 3 seconds
+  React.useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentReviewSlide((prev) => (prev + 1) % reviews.length);
+    }, 3000);
+
+    return () => clearInterval(timer);
+  }, [reviews.length]);
+
+  const nextSlide = () => {
+    setCurrentSlide((prev) => (prev + 1) % services.length);
+  };
+
+  const prevSlide = () => {
+    setCurrentSlide((prev) => (prev - 1 + services.length) % services.length);
+  };
+
+  const goToSlide = (index: number) => {
+    setCurrentSlide(index);
+  };
+
+  const nextProjectSlide = () => {
+    setCurrentProjectSlide((prev) => (prev + 1) % projects.length);
+  };
+
+  const prevProjectSlide = () => {
+    setCurrentProjectSlide(
+      (prev) => (prev - 1 + projects.length) % projects.length
+    );
+  };
+
+  const goToProjectSlide = (index: number) => {
+    setCurrentProjectSlide(index);
+  };
+
+  const nextReviewSlide = () => {
+    setCurrentReviewSlide((prev) => (prev + 1) % reviews.length);
+  };
+
+  const prevReviewSlide = () => {
+    setCurrentReviewSlide(
+      (prev) => (prev - 1 + reviews.length) % reviews.length
+    );
+  };
+
+  const goToReviewSlide = (index: number) => {
+    setCurrentReviewSlide(index);
+  };
+
+  const getCardClass = (index: number) => {
+    if (index === currentSlide) return "active";
+    if (
+      index === (currentSlide - 1 + services.length) % services.length ||
+      index === (currentSlide + 1) % services.length
+    )
+      return "side";
+    return "hidden";
+  };
+
+  const getProjectCardClass = (index: number) => {
+    if (index === currentProjectSlide) return "active";
+    if (
+      index === (currentProjectSlide - 1 + projects.length) % projects.length ||
+      index === (currentProjectSlide + 1) % projects.length
+    )
+      return "side";
+    return "hidden";
+  };
+
+  const getReviewCardClass = (index: number) => {
+    if (index === currentReviewSlide) return "active";
+    return ""; // Mostra tutte le recensioni, ma solo quella attiva è visibile
+  };
+
   return (
     <HomeContainer>
       <Header />
       <MainContent>
         <HeroSection>
+          <video className="hero-video" autoPlay muted loop playsInline>
+            <source
+              src="https://www.techbau.it/wp-content/uploads/2025/01/2024_RIMONTATO.mp4"
+              type="video/mp4"
+            />
+          </video>
           <div className="hero-content">
-            <h1>KORSVAGEN S.R.L.</h1>
-            <p className="slogan">YOU DREAM, WE BUILD</p>
-            <p className="subtitle">
-              Trasformiamo le tue idee in realtà con professionalità, qualità e
-              innovazione. Dal progetto alla realizzazione, siamo il tuo partner
-              di fiducia.
-            </p>
-            <button className="cta-button">Richiedi una Consulenza</button>
+            <div className="hero-top">
+              <h1>KORSVAGEN</h1>
+              <p className="main-slogan">YOU DREAM, WE BUILD</p>
+            </div>
+            <div className="hero-bottom">
+              <Link to="/chi-siamo" className="cta-button">
+                Scopri di più
+              </Link>
+            </div>
           </div>
         </HeroSection>
 
-        <ServicesPreview>
-          <h2>I Nostri Servizi</h2>
-          <p className="section-subtitle">
-            Offriamo soluzioni complete per ogni esigenza edilizia, dalla
-            progettazione alla realizzazione finale. Scopri come possiamo
-            trasformare le tue idee in realtà.
-          </p>
-          <div className="services-grid">
-            <div className="service-card">
-              <div className="service-icon">
-                <span className="icon">🏗️</span>
-                <h3>Progettazione</h3>
-              </div>
-              <div className="service-content">
-                <p>
-                  Progettazione completa per ogni tipo di costruzione, dalla
-                  fase preliminare al progetto esecutivo.
-                </p>
-                <ul className="service-features">
-                  <li>Progettazione Architettonica</li>
-                  <li>Progettazione Strutturale</li>
-                  <li>Progettazione Impiantistica</li>
-                  <li>Rendering 3D e Visualizzazioni</li>
-                </ul>
-                <a href="/servizi" className="service-cta">
-                  Scopri di più
-                </a>
-              </div>
-            </div>
-            <div className="service-card">
-              <div className="service-icon">
-                <span className="icon">🏢</span>
-                <h3>Costruzioni</h3>
-              </div>
-              <div className="service-content">
-                <p>
-                  Realizziamo costruzioni di ogni tipologia con materiali di
-                  qualità e tecniche all'avanguardia.
-                </p>
-                <ul className="service-features">
-                  <li>Costruzioni Residenziali</li>
-                  <li>Costruzioni Commerciali</li>
-                  <li>Costruzioni Industriali</li>
-                  <li>Gestione Cantiere Completa</li>
-                </ul>
-                <a href="/servizi" className="service-cta">
-                  Scopri di più
-                </a>
-              </div>
-            </div>
-            <div className="service-card">
-              <div className="service-icon">
-                <span className="icon">🔧</span>
-                <h3>Ristrutturazioni</h3>
-              </div>
-              <div className="service-content">
-                <p>
-                  Ristrutturazioni complete e riqualificazioni energetiche per
-                  rinnovare e valorizzare i tuoi spazi.
-                </p>
-                <ul className="service-features">
-                  <li>Ristrutturazioni Complete</li>
-                  <li>Riqualificazione Energetica</li>
-                  <li>Bonus Edilizi</li>
-                  <li>Restauro Conservativo</li>
-                </ul>
-                <a href="/servizi" className="service-cta">
-                  Scopri di più
-                </a>
-              </div>
-            </div>
+        <ServicesGallery>
+          <div className="services-header">
+            <h2>I Nostri Servizi</h2>
+            <p className="subtitle">
+              Soluzioni innovative per ogni fase del tuo progetto. Dalla
+              progettazione alla realizzazione, con competenza e tecnologie
+              all'avanguardia.
+            </p>
           </div>
 
-          <div className="cta-section">
-            <h3>Pronto a Realizzare il Tuo Progetto?</h3>
-            <p>
-              Contattaci per una consulenza gratuita e senza impegno. I nostri
-              esperti sono pronti ad ascoltarti.
-            </p>
-            <button className="main-cta">Richiedi Consulenza</button>
-            <a href="/contatti" className="secondary-cta">
-              Contattaci
-            </a>
+          <div className="gallery-container">
+            <button className="gallery-nav prev" onClick={prevSlide}>
+              ‹
+            </button>
+
+            <div className="gallery-track">
+              {services.map((service, index) => (
+                <div
+                  key={index}
+                  className={`service-card ${getCardClass(index)}`}
+                  onClick={() => goToSlide(index)}
+                  onTouchStart={onTouchStart}
+                  onTouchMove={onTouchMove}
+                  onTouchEnd={() => onTouchEnd("services")}
+                >
+                  <video
+                    className="service-video"
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                  >
+                    <source src={service.video} type="video/webm" />
+                  </video>
+                  <div className="service-overlay"></div>
+                  <div className="service-content">
+                    <h3>{service.title}</h3>
+                    <p>{service.description}</p>
+                    <Link to="/servizi" className="service-cta">
+                      Scopri di più
+                    </Link>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <button className="gallery-nav next" onClick={nextSlide}>
+              ›
+            </button>
           </div>
-        </ServicesPreview>
+
+          <div className="gallery-indicators">
+            {services.map((_, index) => (
+              <div
+                key={index}
+                className={`indicator ${
+                  index === currentSlide ? "active" : ""
+                }`}
+                onClick={() => goToSlide(index)}
+              />
+            ))}
+          </div>
+
+          <div className="simple-cta">
+            <Link to="/servizi" className="simple-cta-button">
+              Scopri Altri Servizi
+            </Link>
+          </div>
+        </ServicesGallery>
+
+        <ProjectsGallery>
+          <div className="projects-header">
+            <h2>I Nostri Progetti</h2>
+            <p className="subtitle">
+              Scopri alcuni dei nostri progetti realizzati, esempi concreti di
+              eccellenza architettonica e innovazione tecnologica.
+            </p>
+          </div>
+
+          <div className="gallery-container">
+            <button className="gallery-nav prev" onClick={prevProjectSlide}>
+              ‹
+            </button>
+
+            <div className="gallery-track">
+              {projects.map((project, index) => (
+                <div
+                  key={index}
+                  className={`project-card ${getProjectCardClass(index)}`}
+                  onClick={() => goToProjectSlide(index)}
+                  onTouchStart={onTouchStart}
+                  onTouchMove={onTouchMove}
+                  onTouchEnd={() => onTouchEnd("projects")}
+                >
+                  <img
+                    src={project.image}
+                    alt={project.title}
+                    className="project-image"
+                  />
+                  <div className="project-overlay"></div>
+                  <div className="project-content">
+                    <h3>{project.title}</h3>
+                    <div className="project-location">{project.location}</div>
+                    <p>{project.description}</p>
+                    <Link to="/progetti" className="project-cta">
+                      Scopri di più
+                    </Link>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <button className="gallery-nav next" onClick={nextProjectSlide}>
+              ›
+            </button>
+          </div>
+
+          <div className="gallery-indicators">
+            {projects.map((_, index) => (
+              <div
+                key={index}
+                className={`indicator ${
+                  index === currentProjectSlide ? "active" : ""
+                }`}
+                onClick={() => goToProjectSlide(index)}
+              />
+            ))}
+          </div>
+
+          <div className="simple-cta">
+            <Link to="/progetti" className="simple-cta-button">
+              Scopri Altri Progetti
+            </Link>
+          </div>
+        </ProjectsGallery>
+
+        <NewsSection>
+          <NewsContainer>
+            <NewsSectionTitle>Ultime News</NewsSectionTitle>
+            <NewsSectionSubtitle>
+              Resta aggiornato sulle ultime novità e tendenze dal mondo
+              dell'architettura e costruzioni.
+            </NewsSectionSubtitle>
+
+            <NewsGallery>
+              {news.map((newsItem, index) => (
+                <NewsCard key={index}>
+                  <NewsImageContainer>
+                    <NewsImage src={newsItem.image} alt={`News ${index + 1}`} />
+                  </NewsImageContainer>
+                  <NewsContent>
+                    <NewsDate>{newsItem.date}</NewsDate>
+                    <NewsTitle>{newsItem.title}</NewsTitle>
+                    <NewsExcerpt>{newsItem.excerpt}</NewsExcerpt>
+                    <NewsActions>
+                      <NewsCtaButton to={newsItem.link}>
+                        Leggi di più
+                      </NewsCtaButton>
+                      <NewsSecondaryButton to="/progetti">
+                        Vedi Progetti
+                      </NewsSecondaryButton>
+                    </NewsActions>
+                  </NewsContent>
+                </NewsCard>
+              ))}
+            </NewsGallery>
+
+            <NewsSimpleCta>
+              <Link to="/news" className="simple-cta-button">
+                Leggi Tutte le News
+              </Link>
+            </NewsSimpleCta>
+          </NewsContainer>
+        </NewsSection>
+
+        <ReviewsSection>
+          <ReviewsContainer
+            onTouchStart={onTouchStart}
+            onTouchMove={onTouchMove}
+            onTouchEnd={() => onTouchEnd("reviews")}
+          >
+            <button className="gallery-nav prev" onClick={prevReviewSlide}>
+              ‹
+            </button>
+
+            <ReviewsTrack>
+              {reviews.map((review, index) => (
+                <ReviewCard key={index} className={getReviewCardClass(index)}>
+                  <ReviewStars>
+                    {[...Array(review.stars)].map((_, i) => (
+                      <span key={i} className="star">
+                        ★
+                      </span>
+                    ))}
+                  </ReviewStars>
+                  <ReviewText>{review.text}</ReviewText>
+                  <ReviewAuthor>
+                    <div className="author-name">{review.author}</div>
+                    <div className="author-company">{review.company}</div>
+                  </ReviewAuthor>
+                </ReviewCard>
+              ))}
+            </ReviewsTrack>
+
+            <button className="gallery-nav next" onClick={nextReviewSlide}>
+              ›
+            </button>
+
+            <ReviewsIndicators>
+              {reviews.map((_, index) => (
+                <div
+                  key={index}
+                  className={`indicator ${
+                    index === currentReviewSlide ? "active" : ""
+                  }`}
+                  onClick={() => goToReviewSlide(index)}
+                />
+              ))}
+            </ReviewsIndicators>
+          </ReviewsContainer>
+        </ReviewsSection>
+
+        <InstagramSection>
+          <InstagramContainer>
+            <InstagramTitle>Seguici su Instagram</InstagramTitle>
+            <InstagramSubtitle>
+              Resta aggiornato con i nostri progetti più recenti e scopri dietro
+              le quinte della nostra attività.
+            </InstagramSubtitle>
+
+            <InstagramEmbed>
+              <iframe
+                src="https://www.instagram.com/korsvagensrl/embed/"
+                width="400"
+                height="500"
+                frameBorder="0"
+                scrolling="no"
+                allowTransparency={true}
+                allow="encrypted-media"
+              ></iframe>
+            </InstagramEmbed>
+          </InstagramContainer>
+        </InstagramSection>
+
+        <ContactSection>
+          <ContactContainer>
+            <ContactTitle>Contattaci</ContactTitle>
+            <ContactSubtitle>
+              Hai un progetto in mente? Compila il form sottostante per ricevere
+              un preventivo gratuito e senza impegno.
+            </ContactSubtitle>
+
+            <ContactForm>
+              <ContactRow>
+                <ContactInput
+                  type="text"
+                  placeholder="Nome e Cognome"
+                  required
+                />
+                <ContactInput type="email" placeholder="Email" required />
+              </ContactRow>
+              <ContactRow>
+                <ContactInput type="tel" placeholder="Telefono" required />
+                <ContactInput type="text" placeholder="Azienda (opzionale)" />
+              </ContactRow>
+              <ContactTextarea placeholder="Messaggio" rows={4} required />
+              <ContactSubmit type="submit">Richiedi Preventivo</ContactSubmit>
+            </ContactForm>
+          </ContactContainer>
+        </ContactSection>
       </MainContent>
       <Footer />
     </HomeContainer>
