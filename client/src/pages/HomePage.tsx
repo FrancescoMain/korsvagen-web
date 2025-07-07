@@ -136,7 +136,7 @@ const HeroSection = styled.section`
     font-size: 4.5rem;
     font-weight: 400;
     margin-bottom: 20px;
-    font-family: "Trajan Pro", "Times New Roman", serif;
+    font-family: "Korsvagen Brand", "Times New Roman", serif;
     letter-spacing: 0.1em;
     line-height: 1.1;
     color: #ffffff;
@@ -224,7 +224,7 @@ const ServicesGallery = styled.section`
       font-weight: 300;
       color: #1a1a1a;
       margin-bottom: 30px;
-      font-family: "Trajan Pro", "Times New Roman", serif;
+      font-family: "Korsvagen Brand", "Times New Roman", serif;
       letter-spacing: 0.1em;
       text-transform: uppercase;
 
@@ -408,7 +408,7 @@ const ServicesGallery = styled.section`
         font-weight: 400;
         color: #ffffff;
         margin-bottom: 15px;
-        font-family: "Trajan Pro", "Times New Roman", serif;
+        font-family: "Korsvagen Brand", "Times New Roman", serif;
         letter-spacing: 0.05em;
         text-transform: uppercase;
 
@@ -580,7 +580,7 @@ const ServicesGallery = styled.section`
       font-weight: 300;
       color: #1a1a1a;
       margin-bottom: 20px;
-      font-family: "Trajan Pro", "Times New Roman", serif;
+      font-family: "Korsvagen Brand", "Times New Roman", serif;
       letter-spacing: 0.05em;
 
       @media (max-width: 768px) {
@@ -673,7 +673,7 @@ const ProjectsGallery = styled.section`
       font-weight: 300;
       color: #ffffff;
       margin-bottom: 30px;
-      font-family: "Trajan Pro", "Times New Roman", serif;
+      font-family: "Korsvagen Brand", "Times New Roman", serif;
       letter-spacing: 0.1em;
       text-transform: uppercase;
 
@@ -857,7 +857,7 @@ const ProjectsGallery = styled.section`
         font-weight: 400;
         color: #ffffff;
         margin-bottom: 10px;
-        font-family: "Trajan Pro", "Times New Roman", serif;
+        font-family: "Korsvagen Brand", "Times New Roman", serif;
         letter-spacing: 0.05em;
         text-transform: uppercase;
 
@@ -1043,7 +1043,7 @@ const ProjectsGallery = styled.section`
       font-weight: 300;
       color: #ffffff;
       margin-bottom: 20px;
-      font-family: "Trajan Pro", "Times New Roman", serif;
+      font-family: "Korsvagen Brand", "Times New Roman", serif;
       letter-spacing: 0.05em;
 
       @media (max-width: 768px) {
@@ -1146,7 +1146,7 @@ const NewsSectionTitle = styled.h2`
   text-align: center;
   margin-bottom: 20px;
   color: #000000;
-  font-family: "Trajan Pro", "Times New Roman", serif;
+  font-family: "Korsvagen Brand", "Times New Roman", serif;
   letter-spacing: 0.05em;
   text-transform: uppercase;
 
@@ -1582,7 +1582,7 @@ const InstagramTitle = styled.h2`
   text-align: center;
   margin-bottom: 20px;
   color: #000000;
-  font-family: "Trajan Pro", "Times New Roman", serif;
+  font-family: "Korsvagen Brand", "Times New Roman", serif;
   letter-spacing: 0.05em;
   text-transform: uppercase;
 
@@ -1671,7 +1671,7 @@ const ContactTitle = styled.h2`
   text-align: center;
   margin-bottom: 20px;
   color: #ffffff;
-  font-family: "Trajan Pro", "Times New Roman", serif;
+  font-family: "Korsvagen Brand", "Times New Roman", serif;
   letter-spacing: 0.05em;
   text-transform: uppercase;
 
