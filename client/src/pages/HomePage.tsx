@@ -2315,6 +2315,7 @@ const HomePage: React.FC = () => {
                 scrolling="no"
                 allowTransparency={true}
                 allow="encrypted-media"
+                title="Instagram Feed"
               ></iframe>
             </InstagramEmbed>
           </InstagramContainer>

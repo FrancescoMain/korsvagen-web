@@ -10,3 +10,5 @@ export { default as ContactsSection } from "./sections/ContactsSection";
 // Common Components
 export { default as InstagramWall } from "./common/InstagramWall";
 export { default as StandardHero } from "./common/HeroSection";
+export { default as ContactCTA } from "./common/ContactCTA";
+export { default as ProjectsCTA } from "./common/ProjectsCTA";

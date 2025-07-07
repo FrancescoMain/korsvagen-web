@@ -24,37 +24,44 @@ const MainContent = styled.main`
 `;
 
 const HeroSection = styled.section`
-  background: #1a1a1a;
+  background: linear-gradient(
+      135deg,
+      rgba(26, 26, 26, 0.95) 0%,
+      rgba(44, 44, 44, 0.95) 100%
+    ),
+    url("https://images.unsplash.com/photo-1541976590-713941681591?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80");
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
   color: white;
   text-align: center;
-  padding: 0;
+  padding: 120px 20px 80px;
   position: relative;
   overflow: hidden;
-  min-height: 60vh;
+  min-height: 70vh;
   display: flex;
   align-items: center;
   justify-content: center;
 
   @media (max-width: 768px) {
-    min-height: 50vh;
+    min-height: 60vh;
+    padding: 100px 20px 60px;
+    background-attachment: scroll;
   }
 
   @media (max-width: 480px) {
-    min-height: 40vh;
+    min-height: 50vh;
+    padding: 80px 20px 50px;
   }
 
-  &::after {
+  &::before {
     content: "";
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(
-      135deg,
-      rgba(26, 26, 26, 0.8) 0%,
-      rgba(45, 55, 72, 0.3) 100%
-    );
+    background: rgba(26, 26, 26, 0.7);
     z-index: 1;
   }
 

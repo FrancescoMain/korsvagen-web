@@ -5,6 +5,7 @@ import {
   AboutPage,
   ServicesPage,
   ProjectsPage,
+  ProjectDetailPage,
   NewsPage,
   ContactPage,
   CareersPage,
@@ -19,6 +20,7 @@ function App() {
         <Route path="/chi-siamo" element={<AboutPage />} />
         <Route path="/servizi" element={<ServicesPage />} />
         <Route path="/progetti" element={<ProjectsPage />} />
+        <Route path="/progetti/:projectId" element={<ProjectDetailPage />} />
         <Route path="/news" element={<NewsPage />} />
         <Route path="/contatti" element={<ContactPage />} />
         <Route path="/lavora-con-noi" element={<CareersPage />} />

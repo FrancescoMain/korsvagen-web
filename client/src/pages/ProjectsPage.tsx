@@ -1,7 +1,10 @@
 import React from "react";
 import styled from "styled-components";
+import { useNavigate } from "react-router-dom";
 import Header from "../components/layout/Header";
 import Footer from "../components/layout/Footer";
+import ContactCTA from "../components/common/ContactCTA";
+import ProjectsCTA from "../components/common/ProjectsCTA";
 
 const ProjectsContainer = styled.div`
   min-height: 100vh;
@@ -9,227 +12,374 @@ const ProjectsContainer = styled.div`
   flex-direction: column;
   width: 100%;
   overflow-x: hidden;
+  background: #1a1a1a;
+  color: #ffffff;
 `;
 
 const MainContent = styled.main`
   flex: 1;
   width: 100%;
+  padding-top: 110px;
+
+  @media (max-width: 768px) {
+    padding-top: 80px;
+  }
 `;
 
 const HeroSection = styled.section`
-  background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+  background: linear-gradient(
+      135deg,
+      rgba(26, 26, 26, 0.95) 0%,
+      rgba(44, 44, 44, 0.95) 100%
+    ),
+    url("https://images.unsplash.com/photo-1541976590-713941681591?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80");
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
   color: white;
   text-align: center;
-  padding: 100px 20px;
-  min-height: 300px;
+  padding: 120px 20px 80px;
+  min-height: 70vh;
   display: flex;
   align-items: center;
   justify-content: center;
   width: 100%;
   overflow: hidden;
+  position: relative;
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(26, 26, 26, 0.7);
+    z-index: 1;
+  }
 
   .hero-content {
     max-width: 800px;
     width: 100%;
     padding: 0 10px;
+    position: relative;
+    z-index: 2;
 
     h1 {
-      font-size: 2.8rem;
-      font-weight: bold;
-      margin-bottom: 20px;
-      font-family: "Montserrat", sans-serif;
-      line-height: 1.2;
-      word-wrap: break-word;
+      font-size: 4.5rem;
+      font-weight: 400;
+      margin-bottom: 30px;
+      font-family: "Korsvagen Brand", "Times New Roman", serif;
+      letter-spacing: 0.1em;
+      line-height: 1.1;
+      color: #ffffff;
+      text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7);
+      text-transform: uppercase;
 
       @media (max-width: 1024px) {
-        font-size: 2.4rem;
+        font-size: 3.5rem;
       }
 
       @media (max-width: 768px) {
-        font-size: 2rem;
-        margin-bottom: 15px;
+        font-size: 3rem;
+        margin-bottom: 20px;
       }
 
       @media (max-width: 480px) {
-        font-size: 1.8rem;
-        margin-bottom: 10px;
-      }
-
-      @media (max-width: 350px) {
-        font-size: 1.6rem;
+        font-size: 2.5rem;
+        margin-bottom: 15px;
       }
     }
 
     p {
-      font-size: 1.2rem;
-      color: #e2e8f0;
+      font-size: 1.4rem;
+      color: #cccccc;
       margin: 0;
-      line-height: 1.4;
-      word-wrap: break-word;
+      line-height: 1.6;
+      font-family: "Inter", "Segoe UI", sans-serif;
+      font-weight: 300;
 
       @media (max-width: 768px) {
-        font-size: 1.1rem;
+        font-size: 1.2rem;
       }
 
       @media (max-width: 480px) {
-        font-size: 1rem;
-      }
-
-      @media (max-width: 350px) {
-        font-size: 0.9rem;
+        font-size: 1.1rem;
       }
     }
   }
 
   @media (max-width: 1024px) {
-    padding: 80px 15px;
-    min-height: 250px;
+    padding: 100px 15px 60px;
+    min-height: 60vh;
   }
 
   @media (max-width: 768px) {
-    padding: 60px 15px;
-    min-height: 200px;
+    padding: 80px 15px 50px;
+    min-height: 50vh;
+    background-attachment: scroll;
   }
 
   @media (max-width: 480px) {
-    padding: 40px 10px;
-    min-height: 180px;
-  }
-
-  @media (max-width: 350px) {
-    padding: 30px 10px;
-    min-height: 160px;
+    padding: 60px 10px 40px;
+    min-height: 45vh;
   }
 `;
 
 const ProjectsGrid = styled.section`
-  padding: 80px 20px;
-  max-width: 1200px;
+  background: #1a1a1a;
+  padding: 100px 20px;
+  max-width: 1400px;
   margin: 0 auto;
+
+  @media (max-width: 768px) {
+    padding: 80px 15px;
+  }
+
+  @media (max-width: 480px) {
+    padding: 60px 10px;
+  }
 
   .filter-tabs {
     display: flex;
     justify-content: center;
-    margin-bottom: 50px;
+    margin-bottom: 60px;
     flex-wrap: wrap;
-    gap: 10px;
+    gap: 15px;
+
+    @media (max-width: 768px) {
+      gap: 10px;
+      margin-bottom: 50px;
+    }
 
     button {
-      padding: 12px 25px;
-      background: #f7fafc;
-      border: 2px solid #e2e8f0;
-      border-radius: 25px;
+      padding: 15px 30px;
+      background: transparent;
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      border-radius: 50px;
       cursor: pointer;
       transition: all 0.3s ease;
       font-weight: 500;
-      color: #4a5568;
+      color: #cccccc;
+      font-family: "Inter", "Segoe UI", sans-serif;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
 
       &.active {
-        background: #3182ce;
-        color: white;
-        border-color: #3182ce;
+        background: #e67e22;
+        color: #1a1a1a;
+        border-color: #e67e22;
       }
 
       &:hover:not(.active) {
-        background: #e2e8f0;
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.4);
+        color: #ffffff;
+      }
+
+      @media (max-width: 768px) {
+        padding: 12px 20px;
+        font-size: 0.9rem;
+      }
+
+      @media (max-width: 480px) {
+        padding: 10px 16px;
+        font-size: 0.85rem;
       }
     }
   }
 
   .projects-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 30px;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 40px;
 
     @media (max-width: 768px) {
       grid-template-columns: 1fr;
+      gap: 30px;
+    }
+
+    @media (max-width: 480px) {
+      gap: 25px;
     }
   }
 
   .project-card {
-    background: white;
-    border-radius: 15px;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    backdrop-filter: blur(10px);
     overflow: hidden;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    transition: all 0.3s ease;
+    cursor: pointer;
 
     &:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+      transform: translateY(-10px);
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+      border-color: rgba(255, 255, 255, 0.2);
     }
 
     .project-image {
       width: 100%;
-      height: 200px;
-      background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e0 100%);
+      height: 250px;
+      background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.1) 0%,
+        rgba(255, 255, 255, 0.05) 100%
+      );
+      position: relative;
+      overflow: hidden;
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #4a5568;
-      font-size: 0.9rem;
+      color: #cccccc;
+      font-family: "Inter", "Segoe UI", sans-serif;
+
+      .project-category {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        background: #e67e22;
+        color: #1a1a1a;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        z-index: 2;
+      }
+
+      @media (max-width: 768px) {
+        height: 220px;
+      }
+
+      @media (max-width: 480px) {
+        height: 200px;
+      }
     }
 
     .project-content {
-      padding: 25px;
+      padding: 30px;
 
-      .project-category {
-        color: #3182ce;
-        font-size: 0.9rem;
-        font-weight: 500;
-        margin-bottom: 10px;
+      @media (max-width: 768px) {
+        padding: 25px;
+      }
+
+      @media (max-width: 480px) {
+        padding: 20px;
       }
 
       h3 {
-        color: #2d3748;
+        color: #ffffff;
         margin-bottom: 15px;
-        font-family: "Montserrat", sans-serif;
-        font-size: 1.3rem;
+        font-family: "Korsvagen Brand", "Times New Roman", serif;
+        font-size: 1.5rem;
+        font-weight: 400;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+
+        @media (max-width: 768px) {
+          font-size: 1.3rem;
+        }
+
+        @media (max-width: 480px) {
+          font-size: 1.2rem;
+        }
       }
 
       p {
-        color: #4a5568;
-        line-height: 1.6;
-        margin-bottom: 20px;
+        color: #cccccc;
+        line-height: 1.7;
+        margin-bottom: 25px;
+        font-family: "Inter", "Segoe UI", sans-serif;
+        font-size: 1rem;
+
+        @media (max-width: 480px) {
+          font-size: 0.95rem;
+          margin-bottom: 20px;
+        }
       }
 
       .project-details {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-top: 20px;
-        padding-top: 20px;
-        border-top: 1px solid #e2e8f0;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+        margin-bottom: 25px;
+        padding: 20px 0;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+
+        @media (max-width: 480px) {
+          grid-template-columns: 1fr;
+          gap: 15px;
+          margin-bottom: 20px;
+        }
 
         .detail-item {
           text-align: center;
 
+          @media (max-width: 480px) {
+            display: flex;
+            justify-content: space-between;
+            text-align: left;
+          }
+
           .label {
-            font-size: 0.8rem;
-            color: #718096;
-            margin-bottom: 5px;
+            font-size: 0.85rem;
+            color: #999999;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-family: "Inter", "Segoe UI", sans-serif;
+
+            @media (max-width: 480px) {
+              margin-bottom: 0;
+            }
           }
 
           .value {
             font-weight: 600;
-            color: #2d3748;
+            color: #ffffff;
+            font-size: 1rem;
+            font-family: "Inter", "Segoe UI", sans-serif;
+
+            @media (max-width: 480px) {
+              font-size: 0.95rem;
+            }
           }
         }
       }
 
       .view-project-btn {
-        background: #3182ce;
-        color: white;
-        padding: 10px 20px;
-        border: none;
-        border-radius: 5px;
+        background: transparent;
+        color: #ffffff;
+        padding: 15px 30px;
+        border: 2px solid #e67e22;
+        border-radius: 50px;
         cursor: pointer;
-        font-size: 0.9rem;
-        transition: background 0.3s ease;
+        font-weight: 600;
+        transition: all 0.3s ease;
         width: 100%;
-        margin-top: 15px;
+        font-family: "Inter", "Segoe UI", sans-serif;
+        font-size: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
 
         &:hover {
-          background: #2c5282;
+          background: #e67e22;
+          color: #1a1a1a;
+          transform: translateY(-2px);
+          box-shadow: 0 8px 25px rgba(230, 126, 34, 0.3);
+        }
+
+        @media (max-width: 768px) {
+          padding: 14px 25px;
+          font-size: 0.95rem;
+        }
+
+        @media (max-width: 480px) {
+          padding: 12px 20px;
+          font-size: 0.9rem;
         }
       }
     }
@@ -238,21 +388,37 @@ const ProjectsGrid = styled.section`
   .coming-soon {
     text-align: center;
     padding: 60px 20px;
+    color: #cccccc;
 
     h2 {
-      color: #4a5568;
+      color: #ffffff;
       margin-bottom: 20px;
-      font-family: "Montserrat", sans-serif;
+      font-family: "Korsvagen Brand", "Times New Roman", serif;
+      font-size: 2.5rem;
+      font-weight: 400;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+
+      @media (max-width: 768px) {
+        font-size: 2rem;
+      }
+
+      @media (max-width: 480px) {
+        font-size: 1.8rem;
+      }
     }
 
     p {
-      color: #718096;
+      color: #cccccc;
       font-size: 1.1rem;
+      font-family: "Inter", "Segoe UI", sans-serif;
+      line-height: 1.6;
     }
   }
 `;
 
 const ProjectsPage: React.FC = () => {
+  const navigate = useNavigate();
   const [activeFilter, setActiveFilter] = React.useState("tutti");
 
   const projects = [
@@ -331,6 +497,10 @@ const ProjectsPage: React.FC = () => {
       ? projects
       : projects.filter((project) => project.category === activeFilter);
 
+  const handleProjectClick = (projectId: number) => {
+    navigate(`/progetti/${projectId}`);
+  };
+
   return (
     <ProjectsContainer>
       <Header />
@@ -357,14 +527,18 @@ const ProjectsPage: React.FC = () => {
 
           <div className="projects-grid">
             {filteredProjects.map((project) => (
-              <div key={project.id} className="project-card">
+              <div
+                key={project.id}
+                className="project-card"
+                onClick={() => handleProjectClick(project.id)}
+              >
                 <div className="project-image">
-                  Immagine del progetto in arrivo
-                </div>
-                <div className="project-content">
                   <div className="project-category">
                     {project.category.toUpperCase()}
                   </div>
+                  Immagine del progetto in arrivo
+                </div>
+                <div className="project-content">
                   <h3>{project.title}</h3>
                   <p>{project.description}</p>
                   <div className="project-details">
@@ -398,6 +572,9 @@ const ProjectsPage: React.FC = () => {
             </div>
           )}
         </ProjectsGrid>
+
+        <ProjectsCTA />
+        <ContactCTA />
       </MainContent>
       <Footer />
     </ProjectsContainer>
