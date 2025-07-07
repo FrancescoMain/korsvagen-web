@@ -193,7 +193,7 @@ const DesktopMenu = styled.div`
     gap: 2rem;
   }
 
-  @media (max-width: 1024px) {
+  @media (max-width: 1280px) {
     display: none;
   }
 `;
@@ -253,7 +253,7 @@ const MobileMenuToggle = styled.button<{ $isOpen: boolean }>`
   gap: 4px;
   position: relative;
 
-  @media (max-width: 1024px) {
+  @media (max-width: 1280px) {
     display: flex;
   }
 
@@ -301,7 +301,7 @@ const MobileMenu = styled.div<{ $isOpen: boolean }>`
     max-height: ${(props) => (props.$isOpen ? "calc(100vh - 80px)" : "0")};
   }
 
-  @media (max-width: 1024px) {
+  @media (max-width: 1280px) {
     display: block;
   }
 
@@ -353,7 +353,7 @@ const MobileOverlay = styled.div`
   z-index: 1001;
   cursor: pointer;
 
-  @media (min-width: 1025px) {
+  @media (min-width: 1281px) {
     display: none;
   }
 `;
