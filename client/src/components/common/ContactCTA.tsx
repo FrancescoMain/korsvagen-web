@@ -77,6 +77,10 @@ const ContactContainer = styled.section`
   position: relative;
   overflow: hidden;
 
+  /* Forza il tema scuro e previene sovrascrizioni del browser */
+  -webkit-color-scheme: dark;
+  color-scheme: dark;
+
   &::before {
     content: "";
     position: absolute;
@@ -145,6 +149,13 @@ const ContactTitle = styled.h2`
   -webkit-text-fill-color: transparent;
   background-clip: text;
 
+  /* Fallback per temi scuri del browser */
+  @media (prefers-color-scheme: dark) {
+    -webkit-text-fill-color: #ffffff !important;
+    background: none !important;
+    color: #ffffff !important;
+  }
+
   @media (max-width: 1024px) {
     font-size: 3rem;
   }
@@ -152,11 +163,21 @@ const ContactTitle = styled.h2`
   @media (max-width: 768px) {
     font-size: 2.5rem;
     margin-bottom: 1.5rem;
+    
+    /* Assicuriamoci che sia visibile su mobile con tema scuro */
+    -webkit-text-fill-color: #ffffff !important;
+    background: none !important;
+    color: #ffffff !important;
   }
 
   @media (max-width: 480px) {
     font-size: 2rem;
     margin-bottom: 1rem;
+    
+    /* Assicuriamoci che sia visibile su mobile con tema scuro */
+    -webkit-text-fill-color: #ffffff !important;
+    background: none !important;
+    color: #ffffff !important;
   }
 `;
 
@@ -171,6 +192,11 @@ const ContactDescription = styled.p`
   font-family: "Inter", "Segoe UI", sans-serif;
   font-weight: 300;
 
+  /* Assicuriamoci che sia visibile con tema scuro del browser */
+  @media (prefers-color-scheme: dark) {
+    color: #cccccc !important;
+  }
+
   @media (max-width: 1024px) {
     font-size: 1.2rem;
   }
@@ -178,11 +204,13 @@ const ContactDescription = styled.p`
   @media (max-width: 768px) {
     font-size: 1.1rem;
     max-width: 600px;
+    color: #cccccc !important; /* Forza il colore su mobile */
   }
 
   @media (max-width: 480px) {
     font-size: 1rem;
     max-width: 100%;
+    color: #cccccc !important; /* Forza il colore su mobile */
   }
 `;
 
@@ -310,9 +338,15 @@ const CardTitle = styled.h3`
   font-weight: 400;
   letter-spacing: 0.02em;
 
+  /* Assicuriamoci che sia visibile con tema scuro del browser */
+  @media (prefers-color-scheme: dark) {
+    color: #ffffff !important;
+  }
+
   @media (max-width: 480px) {
     font-size: 1.2rem;
     margin-bottom: 0.8rem;
+    color: #ffffff !important; /* Forza il colore su mobile */
   }
 `;
 
@@ -322,8 +356,14 @@ const CardText = styled.div`
   font-size: 1rem;
   line-height: 1.6;
 
+  /* Assicuriamoci che sia visibile con tema scuro del browser */
+  @media (prefers-color-scheme: dark) {
+    color: #cccccc !important;
+  }
+
   @media (max-width: 480px) {
     font-size: 0.95rem;
+    color: #cccccc !important; /* Forza il colore su mobile */
   }
 `;
 
