@@ -1,5 +1,6 @@
 import React from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
+import { useNavigateWithScroll } from "../hooks/useNavigateWithScroll";
 import styled from "styled-components";
 import Header from "../components/layout/Header";
 import Footer from "../components/layout/Footer";
@@ -531,7 +532,7 @@ const RelatedNews = styled.section`
 
 const NewsDetailPage: React.FC = () => {
   const { newsId } = useParams<{ newsId: string }>();
-  const navigate = useNavigate();
+  const navigate = useNavigateWithScroll();
 
   // Mock data delle news - in un'app reale, questo dovrebbe venire da un API
   const allNews = [

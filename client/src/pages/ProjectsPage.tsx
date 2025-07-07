@@ -1,6 +1,6 @@
 import React from "react";
 import styled from "styled-components";
-import { useNavigate } from "react-router-dom";
+import { useNavigateWithScroll } from "../hooks/useNavigateWithScroll";
 import Header from "../components/layout/Header";
 import Footer from "../components/layout/Footer";
 import ContactCTA from "../components/common/ContactCTA";
@@ -418,7 +418,7 @@ const ProjectsGrid = styled.section`
 `;
 
 const ProjectsPage: React.FC = () => {
-  const navigate = useNavigate();
+  const navigate = useNavigateWithScroll();
   const [activeFilter, setActiveFilter] = React.useState("tutti");
 
   const projects = [

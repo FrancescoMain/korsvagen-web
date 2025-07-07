@@ -1,9 +1,9 @@
 import React from "react";
-import { Link } from "react-router-dom";
 import styled from "styled-components";
 import Header from "../components/layout/Header";
 import Footer from "../components/layout/Footer";
 import ContactCTA from "../components/common/ContactCTA";
+import Link from "../components/common/Link";
 
 const HomeContainer = styled.div`
   min-height: 100vh;

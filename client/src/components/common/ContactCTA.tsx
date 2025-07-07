@@ -1,7 +1,7 @@
 import React from "react";
-import { Link } from "react-router-dom";
 import styled from "styled-components";
 import { contactData } from "../../data/contactData";
+import Link from "./Link";
 
 const ContactCTA: React.FC = () => {
   return (

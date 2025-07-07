@@ -1,5 +1,6 @@
 import React from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
+import { useNavigateWithScroll } from "../hooks/useNavigateWithScroll";
 import styled from "styled-components";
 import Header from "../components/layout/Header";
 import Footer from "../components/layout/Footer";
@@ -697,7 +698,7 @@ const ModalImage = styled.div`
 
 const ProjectDetailPage: React.FC = () => {
   const { projectId } = useParams<{ projectId: string }>();
-  const navigate = useNavigate();
+  const navigate = useNavigateWithScroll();
   const [selectedImage, setSelectedImage] = React.useState<number | null>(null);
 
   // Mock data del progetto - in un'app reale, questo dovrebbe venire da un API

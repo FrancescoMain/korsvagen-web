@@ -1,5 +1,5 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigateWithScroll } from "../hooks/useNavigateWithScroll";
 import styled from "styled-components";
 import Header from "../components/layout/Header";
 import Footer from "../components/layout/Footer";
@@ -500,7 +500,7 @@ const FilterSection = styled.div`
 `;
 
 const NewsPage: React.FC = () => {
-  const navigate = useNavigate();
+  const navigate = useNavigateWithScroll();
   const [selectedCategory, setSelectedCategory] = React.useState<string>("all");
 
   const allNews = [
