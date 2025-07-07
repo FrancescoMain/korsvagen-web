@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import Header from "../components/layout/Header";
 import Footer from "../components/layout/Footer";
+import ContactCTA from "../components/common/ContactCTA";
 
 const CareersContainer = styled.div`
   min-height: 100vh;
@@ -9,24 +10,48 @@ const CareersContainer = styled.div`
   flex-direction: column;
   width: 100%;
   overflow-x: hidden;
+  background: #1a1a1a;
+  color: #ffffff;
 `;
 
 const MainContent = styled.main`
   flex: 1;
   width: 100%;
+  padding-top: 110px;
+
+  @media (max-width: 1024px) {
+    padding-top: 100px;
+  }
+
+  @media (max-width: 768px) {
+    padding-top: 80px;
+  }
+
+  @media (max-width: 480px) {
+    padding-top: 70px;
+  }
 `;
 
 const HeroSection = styled.section`
-  background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+  background: linear-gradient(
+      135deg,
+      rgba(26, 26, 26, 0.95) 0%,
+      rgba(44, 44, 44, 0.95) 100%
+    ),
+    url("https://images.unsplash.com/photo-1521737604893-d14cc237f11d?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80");
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
   color: white;
   text-align: center;
-  padding: 100px 20px;
-  min-height: 300px;
+  padding: 120px 20px 80px;
+  min-height: 60vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  position: relative;
+  width: 100%;
   overflow: hidden;
+  position: relative;
 
   &::before {
     content: "";
@@ -35,431 +60,698 @@ const HeroSection = styled.section`
     left: 0;
     right: 0;
     bottom: 0;
-    background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="%23ffffff" opacity="0.05"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
-    opacity: 0.3;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 1;
   }
 
   .hero-content {
     position: relative;
-    z-index: 1;
-    max-width: 800px;
+    z-index: 2;
+    max-width: 900px;
     margin: 0 auto;
     width: 100%;
-  }
 
-  h1 {
-    font-size: 2.8rem;
-    font-weight: bold;
-    margin-bottom: 20px;
-    font-family: "Montserrat", sans-serif;
-    line-height: 1.2;
+    h1 {
+      font-size: 3.5rem;
+      margin-bottom: 30px;
+      font-family: "Korsvagen Brand", "Times New Roman", serif;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: #ffffff;
+      line-height: 1.2;
+      font-weight: 400;
 
-    @media (max-width: 1024px) {
-      font-size: 2.4rem;
+      @media (max-width: 1024px) {
+        font-size: 3rem;
+      }
+
+      @media (max-width: 768px) {
+        font-size: 2.5rem;
+        margin-bottom: 25px;
+      }
+
+      @media (max-width: 480px) {
+        font-size: 2rem;
+        margin-bottom: 20px;
+        letter-spacing: 0.02em;
+      }
     }
 
-    @media (max-width: 768px) {
-      font-size: 2rem;
-      margin-bottom: 15px;
-    }
+    p {
+      font-size: 1.3rem;
+      color: #cccccc;
+      font-weight: 300;
+      max-width: 700px;
+      margin: 0 auto;
+      line-height: 1.6;
+      font-family: "Inter", "Segoe UI", sans-serif;
 
-    @media (max-width: 480px) {
-      font-size: 1.8rem;
-      margin-bottom: 10px;
-    }
-  }
+      @media (max-width: 1024px) {
+        font-size: 1.2rem;
+      }
 
-  p {
-    font-size: 1.2rem;
-    color: #e2e8f0;
-    margin: 0;
-    line-height: 1.4;
+      @media (max-width: 768px) {
+        font-size: 1.1rem;
+      }
 
-    @media (max-width: 768px) {
-      font-size: 1.1rem;
-    }
-
-    @media (max-width: 480px) {
-      font-size: 1rem;
+      @media (max-width: 480px) {
+        font-size: 1rem;
+      }
     }
   }
 
   @media (max-width: 1024px) {
-    padding: 80px 20px;
-    min-height: 250px;
+    padding: 110px 20px 70px;
+    min-height: 55vh;
+    background-attachment: scroll;
   }
 
   @media (max-width: 768px) {
-    padding: 60px 20px;
-    min-height: 200px;
+    padding: 100px 20px 60px;
+    min-height: 50vh;
   }
 
   @media (max-width: 480px) {
-    padding: 40px 20px;
-    min-height: 180px;
-  }
-
-  p {
-    font-size: 1.2rem;
-    color: #e2e8f0;
-    line-height: 1.6;
-  }
-
-  @media (max-width: 768px) {
-    padding: 60px 20px;
-
-    h1 {
-      font-size: 2rem;
-    }
+    padding: 90px 15px 50px;
+    min-height: 45vh;
   }
 `;
 
 const ContentSection = styled.section`
-  padding: 80px 20px;
+  padding: 80px 0;
+  background: #1a1a1a;
+
+  @media (max-width: 768px) {
+    padding: 60px 0;
+  }
+
+  @media (max-width: 480px) {
+    padding: 40px 0;
+  }
+`;
+
+const Container = styled.div`
   max-width: 1200px;
   margin: 0 auto;
+  padding: 0 20px;
+
+  @media (max-width: 768px) {
+    padding: 0 15px;
+  }
 
   .intro-section {
     text-align: center;
-    margin-bottom: 60px;
+    margin-bottom: 80px;
+
+    @media (max-width: 768px) {
+      margin-bottom: 60px;
+    }
+
+    @media (max-width: 480px) {
+      margin-bottom: 50px;
+    }
 
     h2 {
       font-size: 2.5rem;
-      color: #2d3748;
-      margin-bottom: 20px;
-      font-family: "Montserrat", sans-serif;
+      color: #ffffff;
+      margin-bottom: 30px;
+      font-family: "Korsvagen Brand", "Times New Roman", serif;
+      font-weight: 400;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+
+      @media (max-width: 768px) {
+        font-size: 2rem;
+        margin-bottom: 25px;
+      }
+
+      @media (max-width: 480px) {
+        font-size: 1.8rem;
+        margin-bottom: 20px;
+      }
     }
 
     p {
-      font-size: 1.1rem;
-      color: #4a5568;
-      line-height: 1.6;
+      font-size: 1.2rem;
+      color: #cccccc;
+      line-height: 1.7;
       max-width: 700px;
       margin: 0 auto;
+      font-family: "Inter", "Segoe UI", sans-serif;
+
+      @media (max-width: 768px) {
+        font-size: 1.1rem;
+      }
+
+      @media (max-width: 480px) {
+        font-size: 1rem;
+      }
     }
   }
 
   .benefits-section {
-    margin-bottom: 60px;
+    margin-bottom: 80px;
+
+    @media (max-width: 768px) {
+      margin-bottom: 60px;
+    }
+
+    @media (max-width: 480px) {
+      margin-bottom: 50px;
+    }
 
     h3 {
       font-size: 2rem;
-      color: #2d3748;
-      margin-bottom: 30px;
+      color: #ffffff;
+      margin-bottom: 40px;
       text-align: center;
-      font-family: "Montserrat", sans-serif;
+      font-family: "Korsvagen Brand", "Times New Roman", serif;
+      font-weight: 400;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+
+      @media (max-width: 768px) {
+        font-size: 1.8rem;
+        margin-bottom: 35px;
+      }
+
+      @media (max-width: 480px) {
+        font-size: 1.6rem;
+        margin-bottom: 30px;
+      }
     }
 
     .benefits-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
       gap: 30px;
       margin-top: 40px;
 
+      @media (max-width: 768px) {
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 25px;
+      }
+
+      @media (max-width: 480px) {
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+
       .benefit-card {
-        background: white;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 20px;
         padding: 30px;
-        border-radius: 15px;
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
         text-align: center;
-        transition: transform 0.3s ease;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        transition: all 0.3s ease;
 
         &:hover {
+          background: rgba(255, 255, 255, 0.1);
           transform: translateY(-5px);
+          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
         }
 
-        .icon {
+        @media (max-width: 768px) {
+          padding: 25px;
+        }
+
+        @media (max-width: 480px) {
+          padding: 20px;
+        }
+
+        .benefit-icon {
           font-size: 3rem;
           margin-bottom: 20px;
-          display: block;
+          color: #4caf50;
+
+          @media (max-width: 768px) {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+          }
+
+          @media (max-width: 480px) {
+            font-size: 2rem;
+            margin-bottom: 12px;
+          }
         }
 
         h4 {
-          color: #2d3748;
+          font-size: 1.3rem;
+          color: #ffffff;
           margin-bottom: 15px;
-          font-family: "Montserrat", sans-serif;
+          font-family: "Korsvagen Brand", "Times New Roman", serif;
+          font-weight: 400;
+          letter-spacing: 0.02em;
+
+          @media (max-width: 768px) {
+            font-size: 1.2rem;
+            margin-bottom: 12px;
+          }
+
+          @media (max-width: 480px) {
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+          }
         }
 
         p {
-          color: #4a5568;
+          font-size: 1rem;
+          color: #cccccc;
           line-height: 1.6;
+          margin: 0;
+          font-family: "Inter", "Segoe UI", sans-serif;
+
+          @media (max-width: 480px) {
+            font-size: 0.95rem;
+          }
         }
       }
     }
   }
 
   .positions-section {
-    margin-bottom: 60px;
+    margin-bottom: 80px;
+
+    @media (max-width: 768px) {
+      margin-bottom: 60px;
+    }
+
+    @media (max-width: 480px) {
+      margin-bottom: 50px;
+    }
 
     h3 {
       font-size: 2rem;
-      color: #2d3748;
-      margin-bottom: 30px;
+      color: #ffffff;
+      margin-bottom: 40px;
       text-align: center;
-      font-family: "Montserrat", sans-serif;
+      font-family: "Korsvagen Brand", "Times New Roman", serif;
+      font-weight: 400;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+
+      @media (max-width: 768px) {
+        font-size: 1.8rem;
+        margin-bottom: 35px;
+      }
+
+      @media (max-width: 480px) {
+        font-size: 1.6rem;
+        margin-bottom: 30px;
+      }
     }
 
     .positions-grid {
       display: grid;
-      gap: 20px;
+      gap: 25px;
       margin-top: 40px;
 
+      @media (max-width: 768px) {
+        gap: 20px;
+      }
+
       .position-card {
-        background: white;
-        border: 1px solid #e2e8f0;
-        border-radius: 10px;
-        padding: 25px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        padding: 30px;
+        backdrop-filter: blur(10px);
         transition: all 0.3s ease;
 
         &:hover {
-          border-color: #3182ce;
-          box-shadow: 0 4px 15px rgba(49, 130, 206, 0.1);
+          background: rgba(255, 255, 255, 0.1);
+          transform: translateY(-5px);
+          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        @media (max-width: 768px) {
+          padding: 25px;
+        }
+
+        @media (max-width: 480px) {
+          padding: 20px;
         }
 
         .position-header {
           display: flex;
           justify-content: space-between;
           align-items: flex-start;
-          margin-bottom: 15px;
+          margin-bottom: 20px;
+
+          @media (max-width: 600px) {
+            flex-direction: column;
+            gap: 10px;
+          }
 
           h4 {
-            color: #2d3748;
+            color: #ffffff;
             margin: 0;
-            font-family: "Montserrat", sans-serif;
-            font-size: 1.3rem;
+            font-family: "Korsvagen Brand", "Times New Roman", serif;
+            font-size: 1.4rem;
+            font-weight: 400;
+            letter-spacing: 0.02em;
+
+            @media (max-width: 768px) {
+              font-size: 1.3rem;
+            }
+
+            @media (max-width: 480px) {
+              font-size: 1.2rem;
+            }
           }
 
           .position-type {
-            background: #e6fffa;
-            color: #3182ce;
-            padding: 5px 12px;
-            border-radius: 15px;
+            background: rgba(76, 175, 80, 0.1);
+            color: #4caf50;
+            padding: 8px 16px;
+            border-radius: 20px;
             font-size: 0.8rem;
             font-weight: 500;
+            border: 1px solid rgba(76, 175, 80, 0.2);
+            font-family: "Inter", "Segoe UI", sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
           }
         }
 
         .position-details {
-          margin-bottom: 15px;
+          margin-bottom: 20px;
 
           .detail-item {
             display: flex;
             align-items: center;
-            margin-bottom: 8px;
-            color: #4a5568;
-            font-size: 0.9rem;
+            margin-bottom: 12px;
+            color: #cccccc;
+            font-size: 0.95rem;
+            font-family: "Inter", "Segoe UI", sans-serif;
+
+            @media (max-width: 480px) {
+              font-size: 0.9rem;
+              margin-bottom: 10px;
+            }
 
             .icon {
-              margin-right: 8px;
-              width: 16px;
-            }
-          }
-        }
+              margin-right: 12px;
+              width: 18px;
+              color: #4caf50;
 
-        p {
-          color: #4a5568;
-          line-height: 1.6;
-          margin-bottom: 20px;
-        }
-
-        .requirements {
-          margin-bottom: 20px;
-
-          h5 {
-            color: #2d3748;
-            margin-bottom: 10px;
-            font-size: 0.9rem;
-            font-weight: 600;
-          }
-
-          ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-
-            li {
-              color: #4a5568;
-              padding: 3px 0;
-              padding-left: 15px;
-              position: relative;
-              font-size: 0.9rem;
-
-              &:before {
-                content: "•";
-                position: absolute;
-                left: 0;
-                color: #3182ce;
+              @media (max-width: 480px) {
+                width: 16px;
+                margin-right: 10px;
               }
             }
           }
         }
 
-        .apply-btn {
-          background: #3182ce;
+        p {
+          color: #cccccc;
+          line-height: 1.6;
+          margin-bottom: 20px;
+          font-family: "Inter", "Segoe UI", sans-serif;
+
+          @media (max-width: 480px) {
+            font-size: 0.95rem;
+          }
+        }
+
+        .requirements {
+          margin-bottom: 25px;
+
+          h5 {
+            color: #ffffff;
+            margin-bottom: 15px;
+            font-size: 1rem;
+            font-weight: 600;
+            font-family: "Inter", "Segoe UI", sans-serif;
+
+            @media (max-width: 480px) {
+              font-size: 0.95rem;
+              margin-bottom: 12px;
+            }
+          }
+
+          ul {
+            list-style: none;
+            padding: 0;
+
+            li {
+              color: #cccccc;
+              margin-bottom: 8px;
+              font-family: "Inter", "Segoe UI", sans-serif;
+              font-size: 0.9rem;
+              display: flex;
+              align-items: center;
+
+              @media (max-width: 480px) {
+                font-size: 0.85rem;
+                margin-bottom: 6px;
+              }
+
+              &::before {
+                content: "•";
+                color: #4caf50;
+                font-weight: bold;
+                margin-right: 12px;
+                font-size: 1.2rem;
+
+                @media (max-width: 480px) {
+                  margin-right: 10px;
+                  font-size: 1.1rem;
+                }
+              }
+            }
+          }
+        }
+
+        .apply-button {
+          background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
           color: white;
-          padding: 10px 20px;
           border: none;
-          border-radius: 5px;
+          padding: 12px 30px;
+          border-radius: 25px;
+          font-size: 1rem;
+          font-weight: 600;
           cursor: pointer;
-          font-size: 0.9rem;
-          transition: background 0.3s ease;
+          transition: all 0.3s ease;
+          font-family: "Inter", "Segoe UI", sans-serif;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
 
           &:hover {
-            background: #2c5282;
+            background: linear-gradient(135deg, #45a049 0%, #4caf50 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(76, 175, 80, 0.3);
+          }
+
+          @media (max-width: 480px) {
+            padding: 10px 25px;
+            font-size: 0.9rem;
           }
         }
       }
     }
   }
-
-  @media (max-width: 768px) {
-    padding: 60px 20px;
-
-    .intro-section h2 {
-      font-size: 2rem;
-    }
-
-    .benefits-section .benefits-grid {
-      grid-template-columns: 1fr;
-    }
-
-    .positions-section .position-card .position-header {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 10px;
-    }
-  }
 `;
 
 const ApplicationForm = styled.section`
-  background: #f7fafc;
-  padding: 60px 20px;
+  background: #1a1a1a;
+  padding: 80px 0;
 
-  .form-container {
-    max-width: 800px;
-    margin: 0 auto;
-    background: white;
+  @media (max-width: 768px) {
+    padding: 60px 0;
+  }
+
+  @media (max-width: 480px) {
+    padding: 40px 0;
+  }
+`;
+
+const FormContainer = styled.div`
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 20px;
+
+  @media (max-width: 768px) {
+    padding: 0 15px;
+  }
+
+  .form-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
     padding: 40px;
-    border-radius: 15px;
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
 
-    h3 {
-      color: #2d3748;
-      margin-bottom: 30px;
-      text-align: center;
-      font-family: "Montserrat", sans-serif;
-      font-size: 1.8rem;
+    @media (max-width: 768px) {
+      padding: 30px;
     }
 
-    .form-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
-      margin-bottom: 20px;
+    @media (max-width: 480px) {
+      padding: 25px;
+    }
+
+    h3 {
+      font-size: 2rem;
+      color: #ffffff;
+      margin-bottom: 30px;
+      text-align: center;
+      font-family: "Korsvagen Brand", "Times New Roman", serif;
+      font-weight: 400;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
 
       @media (max-width: 768px) {
-        grid-template-columns: 1fr;
+        font-size: 1.8rem;
+        margin-bottom: 25px;
+      }
+
+      @media (max-width: 480px) {
+        font-size: 1.6rem;
+        margin-bottom: 20px;
       }
     }
 
     .form-group {
-      margin-bottom: 20px;
+      margin-bottom: 25px;
+
+      @media (max-width: 480px) {
+        margin-bottom: 20px;
+      }
 
       label {
         display: block;
-        color: #4a5568;
         margin-bottom: 8px;
+        color: #cccccc;
         font-weight: 500;
+        font-family: "Inter", "Segoe UI", sans-serif;
+        font-size: 1rem;
+
+        @media (max-width: 480px) {
+          font-size: 0.95rem;
+        }
       }
 
       input,
       select,
       textarea {
         width: 100%;
-        padding: 12px;
-        border: 1px solid #e2e8f0;
-        border-radius: 5px;
+        padding: 15px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.05);
+        color: #ffffff;
+        font-family: "Inter", "Segoe UI", sans-serif;
         font-size: 1rem;
-        transition: border-color 0.3s ease;
+        transition: all 0.3s ease;
 
         &:focus {
           outline: none;
-          border-color: #3182ce;
+          border-color: #4caf50;
+          background: rgba(255, 255, 255, 0.1);
+        }
+
+        &::placeholder {
+          color: #999999;
+        }
+
+        @media (max-width: 480px) {
+          padding: 12px;
+          font-size: 0.95rem;
         }
       }
 
       textarea {
-        min-height: 120px;
         resize: vertical;
+        min-height: 120px;
       }
 
-      .file-input {
-        position: relative;
-        display: inline-block;
+      select {
         cursor: pointer;
-        width: 100%;
 
-        input[type="file"] {
-          position: absolute;
-          left: -9999px;
-        }
+        option {
+          background: #ffffff;
+          color: #1a1a1a;
+          padding: 10px;
+          border: none;
+          font-family: "Inter", "Segoe UI", sans-serif;
 
-        .file-label {
-          display: block;
-          padding: 12px;
-          background: #f7fafc;
-          border: 2px dashed #cbd5e0;
-          border-radius: 5px;
-          text-align: center;
-          color: #4a5568;
-          transition: all 0.3s ease;
-
-          &:hover {
-            border-color: #3182ce;
-            background: #ebf8ff;
+          &:hover,
+          &:focus,
+          &:checked {
+            background: #f0f0f0;
+            color: #1a1a1a;
           }
         }
       }
-    }
 
-    .submit-btn {
-      background: #3182ce;
-      color: white;
-      padding: 15px 30px;
-      border: none;
-      border-radius: 5px;
-      font-size: 1.1rem;
-      cursor: pointer;
-      transition: background 0.3s ease;
-      width: 100%;
+      input[type="file"] {
+        padding: 10px;
+        border: 2px dashed rgba(255, 255, 255, 0.2);
+        background: rgba(255, 255, 255, 0.02);
+        cursor: pointer;
 
-      &:hover {
-        background: #2c5282;
-      }
-    }
+        &::-webkit-file-upload-button {
+          background: rgba(76, 175, 80, 0.1);
+          color: #4caf50;
+          border: 1px solid rgba(76, 175, 80, 0.3);
+          border-radius: 6px;
+          padding: 8px 16px;
+          margin-right: 15px;
+          cursor: pointer;
+          font-family: "Inter", "Segoe UI", sans-serif;
+          font-size: 0.9rem;
+          transition: all 0.3s ease;
+        }
 
-    .privacy-notice {
-      font-size: 0.9rem;
-      color: #718096;
-      margin-top: 15px;
-      line-height: 1.4;
-
-      a {
-        color: #3182ce;
-        text-decoration: none;
+        &::-webkit-file-upload-button:hover {
+          background: rgba(76, 175, 80, 0.2);
+          border-color: rgba(76, 175, 80, 0.5);
+        }
 
         &:hover {
-          text-decoration: underline;
+          border-color: rgba(255, 255, 255, 0.3);
+          background: rgba(255, 255, 255, 0.05);
         }
       }
     }
-  }
 
-  @media (max-width: 768px) {
-    padding: 40px 20px;
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
 
-    .form-container {
-      padding: 30px 20px;
+      @media (max-width: 600px) {
+        grid-template-columns: 1fr;
+        gap: 15px;
+      }
+    }
+
+    .submit-button {
+      background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+      color: white;
+      border: none;
+      padding: 15px 40px;
+      border-radius: 25px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-family: "Inter", "Segoe UI", sans-serif;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      width: 100%;
+
+      &:hover {
+        background: linear-gradient(135deg, #45a049 0%, #4caf50 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(76, 175, 80, 0.3);
+      }
+
+      @media (max-width: 480px) {
+        padding: 12px 30px;
+        font-size: 1rem;
+      }
     }
   }
 `;
@@ -471,9 +763,11 @@ const CareersPage: React.FC = () => {
     email: "",
     telefono: "",
     posizione: "",
-    esperienza: "",
+    cv: null as File | null,
     messaggio: "",
   });
+
+  const formRef = React.useRef<HTMLDivElement>(null);
 
   const handleInputChange = (
     e: React.ChangeEvent<
@@ -485,6 +779,46 @@ const CareersPage: React.FC = () => {
       ...prev,
       [name]: value,
     }));
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    if (file) {
+      // Verifica che il file sia PDF o DOC/DOCX
+      const allowedTypes = [
+        "application/pdf",
+        "application/msword",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      ];
+      if (!allowedTypes.includes(file.type)) {
+        alert(
+          "Formato file non supportato. Si prega di caricare un file PDF o Word."
+        );
+        return;
+      }
+      // Verifica dimensione file (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        alert("Il file è troppo grande. Dimensione massima: 5MB.");
+        return;
+      }
+    }
+    setFormData((prev) => ({
+      ...prev,
+      cv: file,
+    }));
+  };
+
+  const handleApplyClick = (positionTitle: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      posizione: positionTitle,
+    }));
+
+    // Scroll al form
+    formRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -610,187 +944,201 @@ const CareersPage: React.FC = () => {
         </HeroSection>
 
         <ContentSection>
-          <div className="intro-section">
-            <h2>Perché Scegliere KORSVAGEN</h2>
-            <p>
-              In KORSVAGEN crediamo che le persone siano il nostro asset più
-              prezioso. Offriamo un ambiente di lavoro stimolante, opportunità
-              di crescita professionale e la possibilità di lavorare su progetti
-              innovativi che fanno la differenza.
-            </p>
-          </div>
-
-          <div className="benefits-section">
-            <h3>I Nostri Vantaggi</h3>
-            <div className="benefits-grid">
-              {benefits.map((benefit, index) => (
-                <div key={index} className="benefit-card">
-                  <span className="icon">{benefit.icon}</span>
-                  <h4>{benefit.title}</h4>
-                  <p>{benefit.description}</p>
-                </div>
-              ))}
+          <Container>
+            <div className="intro-section">
+              <h2>Perché Scegliere KORSVAGEN</h2>
+              <p>
+                In KORSVAGEN crediamo che le persone siano il nostro asset più
+                prezioso. Offriamo un ambiente di lavoro stimolante, opportunità
+                di crescita professionale e la possibilità di lavorare su
+                progetti innovativi che fanno la differenza.
+              </p>
             </div>
-          </div>
 
-          <div className="positions-section">
-            <h3>Posizioni Aperte</h3>
-            <div className="positions-grid">
-              {positions.map((position) => (
-                <div key={position.id} className="position-card">
-                  <div className="position-header">
-                    <h4>{position.title}</h4>
-                    <span className="position-type">{position.type}</span>
+            <div className="benefits-section">
+              <h3>I Nostri Vantaggi</h3>
+              <div className="benefits-grid">
+                {benefits.map((benefit, index) => (
+                  <div key={index} className="benefit-card">
+                    <div className="benefit-icon">{benefit.icon}</div>
+                    <h4>{benefit.title}</h4>
+                    <p>{benefit.description}</p>
                   </div>
-                  <div className="position-details">
-                    <div className="detail-item">
-                      <span className="icon">📍</span>
-                      {position.location}
-                    </div>
-                    <div className="detail-item">
-                      <span className="icon">💼</span>
-                      {position.experience}
-                    </div>
-                  </div>
-                  <p>{position.description}</p>
-                  <div className="requirements">
-                    <h5>Requisiti:</h5>
-                    <ul>
-                      {position.requirements.map((req, index) => (
-                        <li key={index}>{req}</li>
-                      ))}
-                    </ul>
-                  </div>
-                  <button className="apply-btn">Candidati</button>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
+
+            <div className="positions-section">
+              <h3>Posizioni Aperte</h3>
+              <div className="positions-grid">
+                {positions.map((position) => (
+                  <div key={position.id} className="position-card">
+                    <div className="position-header">
+                      <h4>{position.title}</h4>
+                      <span className="position-type">{position.type}</span>
+                    </div>
+                    <div className="position-details">
+                      <div className="detail-item">
+                        <span className="icon">📍</span>
+                        {position.location}
+                      </div>
+                      <div className="detail-item">
+                        <span className="icon">💼</span>
+                        {position.experience}
+                      </div>
+                    </div>
+                    <p>{position.description}</p>
+                    <div className="requirements">
+                      <h5>Requisiti:</h5>
+                      <ul>
+                        {position.requirements.map((req, index) => (
+                          <li key={index}>{req}</li>
+                        ))}
+                      </ul>
+                    </div>
+                    <button
+                      className="apply-button"
+                      onClick={() => handleApplyClick(position.title)}
+                    >
+                      Candidati
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </Container>
         </ContentSection>
 
-        <ApplicationForm>
-          <div className="form-container">
-            <h3>Candidatura Spontanea</h3>
-            <form onSubmit={handleSubmit}>
-              <div className="form-grid">
+        <ApplicationForm ref={formRef}>
+          <FormContainer>
+            <div className="form-card">
+              <h3>
+                {formData.posizione
+                  ? `Candidatura per: ${formData.posizione}`
+                  : "Candidatura Spontanea"}
+              </h3>
+              <form onSubmit={handleSubmit}>
+                <div className="form-row">
+                  <div className="form-group">
+                    <label htmlFor="nome">Nome *</label>
+                    <input
+                      type="text"
+                      id="nome"
+                      name="nome"
+                      value={formData.nome}
+                      onChange={handleInputChange}
+                      required
+                      placeholder="Il tuo nome"
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="cognome">Cognome *</label>
+                    <input
+                      type="text"
+                      id="cognome"
+                      name="cognome"
+                      value={formData.cognome}
+                      onChange={handleInputChange}
+                      required
+                      placeholder="Il tuo cognome"
+                    />
+                  </div>
+                </div>
+
+                <div className="form-row">
+                  <div className="form-group">
+                    <label htmlFor="email">Email *</label>
+                    <input
+                      type="email"
+                      id="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      required
+                      placeholder="la.tua@email.com"
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="telefono">Telefono</label>
+                    <input
+                      type="tel"
+                      id="telefono"
+                      name="telefono"
+                      value={formData.telefono}
+                      onChange={handleInputChange}
+                      placeholder="+39 123 456 7890"
+                    />
+                  </div>
+                </div>
+
+                <div className="form-row">
+                  <div className="form-group">
+                    <label htmlFor="posizione">Posizione di Interesse</label>
+                    <select
+                      id="posizione"
+                      name="posizione"
+                      value={formData.posizione}
+                      onChange={handleInputChange}
+                    >
+                      <option value="">Seleziona una posizione</option>
+                      <option value="Ingegnere Strutturale">
+                        Ingegnere Strutturale
+                      </option>
+                      <option value="Architetto Progettista">
+                        Architetto Progettista
+                      </option>
+                      <option value="Geometra/Capo Cantiere">
+                        Geometra/Capo Cantiere
+                      </option>
+                      <option value="Operaio Specializzato">
+                        Operaio Specializzato
+                      </option>
+                      <option value="altro">Altro</option>
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="cv">Curriculum Vitae *</label>
+                    <input
+                      type="file"
+                      id="cv"
+                      name="cv"
+                      accept=".pdf,.doc,.docx"
+                      onChange={handleFileChange}
+                      required
+                    />
+                    <small
+                      style={{
+                        color: "#999",
+                        fontSize: "0.8rem",
+                        marginTop: "5px",
+                        display: "block",
+                      }}
+                    >
+                      Formati accettati: PDF, DOC, DOCX (max 5MB)
+                    </small>
+                  </div>
+                </div>
+
                 <div className="form-group">
-                  <label htmlFor="nome">Nome *</label>
-                  <input
-                    type="text"
-                    id="nome"
-                    name="nome"
-                    value={formData.nome}
+                  <label htmlFor="messaggio">Lettera di Presentazione</label>
+                  <textarea
+                    id="messaggio"
+                    name="messaggio"
+                    value={formData.messaggio}
                     onChange={handleInputChange}
-                    required
+                    placeholder="Raccontaci di te, delle tue competenze e perché vorresti lavorare con noi..."
                   />
                 </div>
-                <div className="form-group">
-                  <label htmlFor="cognome">Cognome *</label>
-                  <input
-                    type="text"
-                    id="cognome"
-                    name="cognome"
-                    value={formData.cognome}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-              </div>
 
-              <div className="form-grid">
-                <div className="form-group">
-                  <label htmlFor="email">Email *</label>
-                  <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-                <div className="form-group">
-                  <label htmlFor="telefono">Telefono</label>
-                  <input
-                    type="tel"
-                    id="telefono"
-                    name="telefono"
-                    value={formData.telefono}
-                    onChange={handleInputChange}
-                  />
-                </div>
-              </div>
-
-              <div className="form-grid">
-                <div className="form-group">
-                  <label htmlFor="posizione">Posizione di Interesse</label>
-                  <select
-                    id="posizione"
-                    name="posizione"
-                    value={formData.posizione}
-                    onChange={handleInputChange}
-                  >
-                    <option value="">Seleziona una posizione</option>
-                    <option value="ingegnere-strutturale">
-                      Ingegnere Strutturale
-                    </option>
-                    <option value="architetto">Architetto Progettista</option>
-                    <option value="geometra">Geometra/Capo Cantiere</option>
-                    <option value="operaio">Operaio Specializzato</option>
-                    <option value="altro">Altro</option>
-                  </select>
-                </div>
-                <div className="form-group">
-                  <label htmlFor="esperienza">Anni di Esperienza</label>
-                  <select
-                    id="esperienza"
-                    name="esperienza"
-                    value={formData.esperienza}
-                    onChange={handleInputChange}
-                  >
-                    <option value="">Seleziona esperienza</option>
-                    <option value="0-1">0-1 anni</option>
-                    <option value="1-3">1-3 anni</option>
-                    <option value="3-5">3-5 anni</option>
-                    <option value="5+">5+ anni</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="cv">Curriculum Vitae</label>
-                <div className="file-input">
-                  <input type="file" id="cv" accept=".pdf,.doc,.docx" />
-                  <label htmlFor="cv" className="file-label">
-                    📄 Carica il tuo CV (PDF, DOC, DOCX)
-                  </label>
-                </div>
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="messaggio">Lettera di Presentazione</label>
-                <textarea
-                  id="messaggio"
-                  name="messaggio"
-                  value={formData.messaggio}
-                  onChange={handleInputChange}
-                  placeholder="Raccontaci di te, delle tue competenze e perché vorresti lavorare con noi..."
-                />
-              </div>
-
-              <button type="submit" className="submit-btn">
-                Invia Candidatura
-              </button>
-
-              <p className="privacy-notice">
-                Inviando questa candidatura accetti il trattamento dei tuoi dati
-                personali secondo la nostra
-                <a href="/privacy"> Privacy Policy</a>. I tuoi dati saranno
-                utilizzati esclusivamente per valutare la tua candidatura.
-              </p>
-            </form>
-          </div>
+                <button type="submit" className="submit-button">
+                  Invia Candidatura
+                </button>
+              </form>
+            </div>
+          </FormContainer>
         </ApplicationForm>
+
+        <ContactCTA />
       </MainContent>
       <Footer />
     </CareersContainer>

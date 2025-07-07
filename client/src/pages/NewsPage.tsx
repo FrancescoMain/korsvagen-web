@@ -1,8 +1,9 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import Header from "../components/layout/Header";
 import Footer from "../components/layout/Footer";
-import { StandardHero } from "../components";
+import ContactCTA from "../components/common/ContactCTA";
 
 const NewsContainer = styled.div`
   min-height: 100vh;
@@ -10,63 +11,104 @@ const NewsContainer = styled.div`
   flex-direction: column;
   width: 100%;
   overflow-x: hidden;
+  background: #1a1a1a;
+  color: #ffffff;
 `;
 
 const MainContent = styled.main`
   flex: 1;
   width: 100%;
+  padding-top: 110px;
+
+  @media (max-width: 1024px) {
+    padding-top: 100px;
+  }
+
+  @media (max-width: 768px) {
+    padding-top: 80px;
+  }
+
+  @media (max-width: 480px) {
+    padding-top: 70px;
+  }
 `;
 
 const HeroSection = styled.section`
-  background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+  background: linear-gradient(
+      135deg,
+      rgba(26, 26, 26, 0.95) 0%,
+      rgba(44, 44, 44, 0.95) 100%
+    ),
+    url("https://images.unsplash.com/photo-1504711434969-e33886168f5c?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80");
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
   color: white;
   text-align: center;
-  padding: 100px 20px;
-  min-height: 300px;
+  padding: 120px 20px 80px;
+  min-height: 60vh;
   display: flex;
   align-items: center;
   justify-content: center;
   width: 100%;
   overflow: hidden;
+  position: relative;
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 1;
+  }
 
   .hero-content {
+    position: relative;
+    z-index: 2;
     max-width: 800px;
+    margin: 0 auto;
     width: 100%;
-    padding: 0 10px;
 
     h1 {
-      font-size: 2.8rem;
-      font-weight: bold;
-      margin-bottom: 20px;
-      font-family: "Montserrat", sans-serif;
-      line-height: 1.2;
-      word-wrap: break-word;
+      font-size: 4rem;
+      margin-bottom: 30px;
+      font-family: "Korsvagen Brand", "Times New Roman", serif;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #ffffff;
+      line-height: 1.1;
 
       @media (max-width: 1024px) {
-        font-size: 2.4rem;
+        font-size: 3.5rem;
       }
 
       @media (max-width: 768px) {
-        font-size: 2rem;
-        margin-bottom: 15px;
+        font-size: 2.5rem;
+        margin-bottom: 25px;
       }
 
       @media (max-width: 480px) {
-        font-size: 1.8rem;
-        margin-bottom: 10px;
-      }
-
-      @media (max-width: 350px) {
-        font-size: 1.6rem;
+        font-size: 2rem;
+        margin-bottom: 20px;
+        letter-spacing: 0.05em;
       }
     }
 
     p {
-      font-size: 1.2rem;
-      color: #e2e8f0;
-      margin: 0;
-      line-height: 1.4;
-      word-wrap: break-word;
+      font-size: 1.3rem;
+      color: #cccccc;
+      font-weight: 300;
+      max-width: 600px;
+      margin: 0 auto;
+      line-height: 1.6;
+      font-family: "Inter", "Segoe UI", sans-serif;
+
+      @media (max-width: 1024px) {
+        font-size: 1.2rem;
+      }
 
       @media (max-width: 768px) {
         font-size: 1.1rem;
@@ -75,243 +117,431 @@ const HeroSection = styled.section`
       @media (max-width: 480px) {
         font-size: 1rem;
       }
-
-      @media (max-width: 350px) {
-        font-size: 0.9rem;
-      }
     }
   }
 
   @media (max-width: 1024px) {
-    padding: 80px 15px;
-    min-height: 250px;
+    padding: 110px 20px 70px;
+    min-height: 55vh;
+    background-attachment: scroll;
   }
 
   @media (max-width: 768px) {
-    padding: 60px 15px;
-    min-height: 200px;
+    padding: 100px 20px 60px;
+    min-height: 50vh;
   }
 
   @media (max-width: 480px) {
-    padding: 40px 10px;
-    min-height: 180px;
-  }
-
-  @media (max-width: 350px) {
-    padding: 30px 10px;
-    min-height: 160px;
+    padding: 90px 15px 50px;
+    min-height: 45vh;
   }
 `;
 
-const NewsGrid = styled.section`
-  padding: 80px 20px;
-  max-width: 1000px;
-  margin: 0 auto;
-  width: 100%;
+const NewsSection = styled.section`
+  padding: 80px 0;
+  background: #1a1a1a;
+
+  @media (max-width: 768px) {
+    padding: 60px 0;
+  }
 
   @media (max-width: 480px) {
-    padding: 60px 15px;
+    padding: 40px 0;
   }
+`;
 
-  @media (max-width: 350px) {
-    padding: 40px 10px;
+const Container = styled.div`
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+
+  @media (max-width: 768px) {
+    padding: 0 15px;
   }
+`;
 
-  .news-grid {
-    display: grid;
+const NewsGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 40px;
+  margin-bottom: 80px;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
     gap: 30px;
-    width: 100%;
+    margin-bottom: 60px;
+  }
 
-    @media (max-width: 480px) {
-      gap: 20px;
-    }
+  @media (max-width: 480px) {
+    gap: 25px;
   }
 
   .news-card {
-    background: white;
-    border-radius: 15px;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 20px;
     overflow: hidden;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
 
     &:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+      background: rgba(255, 255, 255, 0.1);
+      transform: translateY(-5px) scale(1.02);
+      transform-origin: center;
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
     }
 
     &.featured {
       grid-column: 1 / -1;
       display: grid;
       grid-template-columns: 1fr 1fr;
+      min-height: 400px;
 
       @media (max-width: 768px) {
         grid-template-columns: 1fr;
       }
+
+      .news-image {
+        height: 100%;
+        min-height: 300px;
+      }
+
+      .news-content {
+        padding: 40px;
+
+        @media (max-width: 480px) {
+          padding: 30px;
+        }
+      }
     }
 
     .news-image {
-      width: 100%;
       height: 250px;
-      background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e0 100%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #4a5568;
-      font-size: 0.9rem;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      position: relative;
+      overflow: hidden;
 
-      &.featured {
-        height: 300px;
+      &::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(
+          45deg,
+          rgba(0, 0, 0, 0.3) 0%,
+          rgba(0, 0, 0, 0.1) 100%
+        );
+        z-index: 1;
+      }
+
+      .image-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(255, 255, 255, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #cccccc;
+        font-family: "Inter", "Segoe UI", sans-serif;
+        font-size: 1rem;
+        z-index: 2;
+      }
+
+      @media (max-width: 480px) {
+        height: 200px;
       }
     }
 
     .news-content {
       padding: 30px;
 
+      @media (max-width: 480px) {
+        padding: 25px;
+      }
+
       .news-meta {
         display: flex;
         align-items: center;
         gap: 15px;
-        margin-bottom: 15px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+
+        @media (max-width: 480px) {
+          gap: 10px;
+          margin-bottom: 15px;
+        }
 
         .date {
-          color: #3182ce;
+          color: #4caf50;
           font-weight: 500;
           font-size: 0.9rem;
-        }
+          font-family: "Inter", "Segoe UI", sans-serif;
 
-        .category {
-          background: #e6fffa;
-          color: #3182ce;
-          padding: 5px 12px;
-          border-radius: 15px;
-          font-size: 0.8rem;
-          font-weight: 500;
-        }
-      }
-
-      h3 {
-        color: #2d3748;
-        margin-bottom: 15px;
-        font-family: "Montserrat", sans-serif;
-        font-size: 1.3rem;
-        line-height: 1.4;
-
-        &.featured {
-          font-size: 1.8rem;
-        }
-      }
-
-      p {
-        color: #4a5568;
-        line-height: 1.6;
-        margin-bottom: 20px;
-      }
-
-      .read-more-btn {
-        background: #3182ce;
-        color: white;
-        padding: 10px 20px;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-        font-size: 0.9rem;
-        transition: background 0.3s ease;
-
-        &:hover {
-          background: #2c5282;
-        }
-      }
-    }
-  }
-
-  .coming-soon {
-    text-align: center;
-    padding: 60px 20px;
-
-    h2 {
-      color: #4a5568;
-      margin-bottom: 20px;
-      font-family: "Montserrat", sans-serif;
-    }
-
-    p {
-      color: #718096;
-      font-size: 1.1rem;
-      margin-bottom: 30px;
-    }
-
-    .newsletter-signup {
-      background: #f7fafc;
-      padding: 30px;
-      border-radius: 10px;
-      max-width: 400px;
-      margin: 0 auto;
-
-      h3 {
-        color: #2d3748;
-        margin-bottom: 15px;
-        font-family: "Montserrat", sans-serif;
-      }
-
-      .input-group {
-        display: flex;
-        gap: 10px;
-        margin-top: 15px;
-
-        input {
-          flex: 1;
-          padding: 12px;
-          border: 1px solid #e2e8f0;
-          border-radius: 5px;
-          font-size: 0.9rem;
-
-          &:focus {
-            outline: none;
-            border-color: #3182ce;
+          @media (max-width: 480px) {
+            font-size: 0.85rem;
           }
         }
 
-        button {
-          background: #3182ce;
-          color: white;
-          border: none;
-          padding: 12px 20px;
-          border-radius: 5px;
-          cursor: pointer;
-          font-size: 0.9rem;
+        .category {
+          background: rgba(76, 175, 80, 0.1);
+          color: #4caf50;
+          padding: 8px 16px;
+          border-radius: 20px;
+          font-size: 0.8rem;
+          font-weight: 500;
+          border: 1px solid rgba(76, 175, 80, 0.2);
+          font-family: "Inter", "Segoe UI", sans-serif;
 
-          &:hover {
-            background: #2c5282;
+          @media (max-width: 480px) {
+            padding: 6px 12px;
+            font-size: 0.75rem;
+          }
+        }
+      }
+
+      h3 {
+        color: #ffffff;
+        margin-bottom: 15px;
+        font-family: "Korsvagen Brand", "Times New Roman", serif;
+        font-size: 1.4rem;
+        line-height: 1.4;
+        font-weight: 400;
+        letter-spacing: 0.02em;
+
+        &.featured {
+          font-size: 2rem;
+          margin-bottom: 20px;
+
+          @media (max-width: 768px) {
+            font-size: 1.7rem;
+          }
+
+          @media (max-width: 480px) {
+            font-size: 1.5rem;
           }
         }
 
         @media (max-width: 480px) {
-          flex-direction: column;
+          font-size: 1.2rem;
+          margin-bottom: 12px;
+        }
+      }
+
+      p {
+        color: #cccccc;
+        line-height: 1.6;
+        margin-bottom: 25px;
+        font-family: "Inter", "Segoe UI", sans-serif;
+        font-size: 1rem;
+
+        @media (max-width: 480px) {
+          font-size: 0.95rem;
+          margin-bottom: 20px;
+        }
+      }
+
+      .read-more-btn {
+        background: rgba(76, 175, 80, 0.1);
+        color: #4caf50;
+        padding: 12px 24px;
+        border: 2px solid rgba(76, 175, 80, 0.2);
+        border-radius: 30px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        font-family: "Inter", "Segoe UI", sans-serif;
+        backdrop-filter: blur(10px);
+
+        &:hover {
+          background: rgba(76, 175, 80, 0.2);
+          border-color: rgba(76, 175, 80, 0.4);
+          transform: translateY(-2px);
+        }
+
+        @media (max-width: 480px) {
+          padding: 10px 20px;
+          font-size: 0.85rem;
         }
       }
     }
   }
 `;
 
+const FilterSection = styled.div`
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 20px;
+  padding: 30px;
+  margin-bottom: 50px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+
+  @media (max-width: 768px) {
+    padding: 25px;
+    margin-bottom: 40px;
+  }
+
+  @media (max-width: 480px) {
+    padding: 20px;
+    margin-bottom: 30px;
+  }
+
+  .filter-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+
+    @media (max-width: 768px) {
+      flex-direction: column;
+      gap: 15px;
+      align-items: flex-start;
+    }
+
+    h2 {
+      color: #ffffff;
+      font-family: "Korsvagen Brand", "Times New Roman", serif;
+      font-size: 1.5rem;
+      font-weight: 400;
+      letter-spacing: 0.02em;
+      margin: 0;
+
+      @media (max-width: 768px) {
+        font-size: 1.3rem;
+      }
+
+      @media (max-width: 480px) {
+        font-size: 1.2rem;
+      }
+    }
+  }
+
+  .filter-controls {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+
+    @media (max-width: 768px) {
+      flex-direction: column;
+      gap: 15px;
+      align-items: flex-start;
+      width: 100%;
+    }
+
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+
+      label {
+        color: #cccccc;
+        font-size: 0.9rem;
+        font-family: "Inter", "Segoe UI", sans-serif;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      select {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+        color: #ffffff;
+        padding: 12px 16px;
+        font-family: "Inter", "Segoe UI", sans-serif;
+        font-size: 1rem;
+        min-width: 150px;
+        backdrop-filter: blur(10px);
+        transition: all 0.3s ease;
+        cursor: pointer;
+
+        &:hover {
+          background: rgba(255, 255, 255, 0.15);
+          border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        &:focus {
+          outline: none;
+          background: rgba(255, 255, 255, 0.2);
+          border-color: rgba(76, 175, 80, 0.5);
+          box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+        }
+
+        option {
+          background: #2a2a2a;
+          color: #ffffff;
+          padding: 10px;
+          border: none;
+        }
+
+        @media (max-width: 768px) {
+          width: 100%;
+          min-width: auto;
+        }
+      }
+    }
+
+    .results-count {
+      color: #4caf50;
+      font-size: 0.9rem;
+      font-family: "Inter", "Segoe UI", sans-serif;
+      font-weight: 500;
+    }
+  }
+`;
+
 const NewsPage: React.FC = () => {
-  const news = [
+  const navigate = useNavigate();
+  const [selectedCategory, setSelectedCategory] = React.useState<string>("all");
+
+  const allNews = [
     {
       id: 1,
-      title:
-        "KORSVAGEN S.R.L. vince il premio 'Innovazione nell'Edilizia 2024'",
+      title: "KORSVAGEN vince il premio 'Innovazione nell'Edilizia 2024'",
       excerpt:
         "La nostra azienda è stata riconosciuta per l'utilizzo di tecnologie innovative nella costruzione sostenibile e per l'approccio eco-friendly ai progetti edilizi.",
       date: "15 Dicembre 2024",
       category: "Premi",
       featured: true,
+      image:
+        "https://images.unsplash.com/photo-1504711434969-e33886168f5c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+      content: `
+        KORSVAGEN S.R.L. ha ricevuto il prestigioso premio "Innovazione nell'Edilizia 2024" durante la cerimonia tenutasi presso il Palazzo delle Stelline di Milano. 
+        
+        Il riconoscimento, assegnato dall'Associazione Nazionale Costruttori Edili, premia le aziende che si distinguono per l'utilizzo di tecnologie innovative e sostenibili nel settore delle costruzioni.
+        
+        "Questo premio rappresenta il riconoscimento del nostro impegno costante verso l'innovazione e la sostenibilità", ha dichiarato il CEO di KORSVAGEN durante la cerimonia. "Continueremo a investire in tecnologie all'avanguardia per offrire ai nostri clienti soluzioni sempre più efficienti e rispettose dell'ambiente."
+        
+        Tra i progetti che hanno contribuito al riconoscimento, spicca la recente realizzazione di un complesso residenziale a energia zero nel centro di Milano, che utilizza materiali eco-compatibili e sistemi di domotica avanzata.
+      `,
     },
     {
       id: 2,
       title: "Nuovo progetto di riqualificazione urbana a Milano",
       excerpt:
-        "Iniziati i lavori per il progetto di riqualificazione del quartiere Isola, che prevedee la costruzione di edifici residenziali ad alta efficienza energetica.",
+        "Iniziati i lavori per il progetto di riqualificazione del quartiere Isola, che prevede la costruzione di edifici residenziali ad alta efficienza energetica.",
       date: "8 Dicembre 2024",
       category: "Progetti",
+      image:
+        "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+      content: `
+        KORSVAGEN S.R.L. ha dato il via ai lavori per un ambizioso progetto di riqualificazione urbana nel quartiere Isola di Milano. 
+        
+        Il progetto prevede la costruzione di 150 unità abitative distribuite in tre edifici ad alta efficienza energetica, con certificazione LEED Gold.
+        
+        "Questo progetto rappresenta il nostro impegno verso lo sviluppo urbano sostenibile", ha spiegato il direttore tecnico. "Ogni edificio sarà dotato di pannelli solari, sistemi di raccolta dell'acqua piovana e giardini pensili per migliorare la qualità dell'aria urbana."
+        
+        I lavori, che hanno un valore complessivo di 45 milioni di euro, dovrebbero completarsi entro 24 mesi e daranno lavoro a oltre 200 professionisti del settore edile.
+      `,
     },
     {
       id: 3,
@@ -320,6 +550,17 @@ const NewsPage: React.FC = () => {
         "KORSVAGEN S.R.L. ha siglato accordi di collaborazione con il Politecnico di Milano per lo sviluppo di nuove tecnologie costruttive.",
       date: "1 Dicembre 2024",
       category: "Partnership",
+      image:
+        "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+      content: `
+        KORSVAGEN S.R.L. ha siglato un importante accordo di collaborazione con il Politecnico di Milano per lo sviluppo di nuove tecnologie costruttive sostenibili.
+        
+        La partnership prevede la creazione di un laboratorio di ricerca congiunto dove verranno sviluppati nuovi materiali biocompatibili e sistemi costruttivi innovativi.
+        
+        "La collaborazione con il mondo accademico è fondamentale per rimanere all'avanguardia nel settore", ha sottolineato il responsabile R&D di KORSVAGEN. "Insieme al Politecnico, vogliamo sviluppare soluzioni che possano rivoluzionare il modo di costruire, sempre nel rispetto dell'ambiente."
+        
+        Il progetto di ricerca, della durata di tre anni, si concentrerà principalmente su materiali da costruzione a base di canapa e sistemi di isolamento termico innovativi.
+      `,
     },
     {
       id: 4,
@@ -328,8 +569,39 @@ const NewsPage: React.FC = () => {
         "La nostra azienda ha ottenuto la certificazione ISO 14001, confermando il nostro impegno per la sostenibilità ambientale nei processi costruttivi.",
       date: "25 Novembre 2024",
       category: "Certificazioni",
+      image:
+        "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+      content: `
+        KORSVAGEN S.R.L. ha ottenuto la certificazione ISO 14001:2015 per la gestione ambientale, confermando il proprio impegno verso la sostenibilità.
+        
+        La certificazione, rilasciata da un ente accreditato internazionale, attesta che l'azienda ha implementato un sistema di gestione ambientale efficace e conforme agli standard internazionali.
+        
+        "Questa certificazione rappresenta un traguardo importante nel nostro percorso verso la sostenibilità", ha dichiarato il responsabile qualità. "Dimostra che tutti i nostri processi, dalla progettazione alla realizzazione, sono orientati alla riduzione dell'impatto ambientale."
+        
+        La certificazione copre tutti gli aspetti dell'attività aziendale, dalla gestione dei rifiuti di cantiere all'utilizzo di materiali eco-compatibili, dalla riduzione delle emissioni di CO2 al risparmio energetico.
+      `,
     },
   ];
+
+  // Filtro le news in base alla categoria selezionata
+  const filteredNews =
+    selectedCategory === "all"
+      ? allNews
+      : allNews.filter((article) => article.category === selectedCategory);
+
+  // Ottengo le categorie uniche per la select
+  const categories = [
+    "all",
+    ...Array.from(new Set(allNews.map((article) => article.category))),
+  ];
+
+  const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedCategory(e.target.value);
+  };
+
+  const handleReadMore = (newsId: number) => {
+    navigate(`/news/${newsId}`);
+  };
 
   return (
     <NewsContainer>
@@ -338,24 +610,58 @@ const NewsPage: React.FC = () => {
         <HeroSection>
           <div className="hero-content">
             <h1>News & Aggiornamenti</h1>
-            <p>Resta aggiornato sulle nostre ultime novità e progetti</p>
+            <p>
+              Resta aggiornato sulle nostre ultime novità e progetti innovativi
+            </p>
           </div>
         </HeroSection>
 
-        <NewsGrid>
-          {news.length > 0 ? (
-            <div className="news-grid">
-              {news.map((article, index) => (
+        <NewsSection>
+          <Container>
+            {/* <FilterSection>
+              <div className="filter-header">
+                <h2>Filtra per categoria</h2>
+              </div>
+              <div className="filter-controls">
+                <div className="filter-group">
+                  <label htmlFor="category-select">Categoria</label>
+                  <select
+                    id="category-select"
+                    value={selectedCategory}
+                    onChange={handleCategoryChange}
+                  >
+                    <option value="all">Tutte le categorie</option>
+                    {categories.slice(1).map((category) => (
+                      <option key={category} value={category}>
+                        {category}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="results-count">
+                  {filteredNews.length} articol
+                  {filteredNews.length !== 1 ? "i" : "o"} trovat
+                  {filteredNews.length !== 1 ? "i" : "o"}
+                </div>
+              </div>
+            </FilterSection> */}
+
+            <NewsGrid>
+              {filteredNews.map((article) => (
                 <div
                   key={article.id}
                   className={`news-card ${article.featured ? "featured" : ""}`}
+                  onClick={() => handleReadMore(article.id)}
                 >
                   <div
-                    className={`news-image ${
-                      article.featured ? "featured" : ""
-                    }`}
+                    className="news-image"
+                    style={{
+                      backgroundImage: `url(${article.image})`,
+                    }}
                   >
-                    Immagine articolo in arrivo
+                    <div className="image-overlay">
+                      {!article.image && "Immagine articolo"}
+                    </div>
                   </div>
                   <div className="news-content">
                     <div className="news-meta">
@@ -366,33 +672,23 @@ const NewsPage: React.FC = () => {
                       {article.title}
                     </h3>
                     <p>{article.excerpt}</p>
-                    <button className="read-more-btn">Leggi di più</button>
+                    <button
+                      className="read-more-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleReadMore(article.id);
+                      }}
+                    >
+                      Leggi di più
+                    </button>
                   </div>
                 </div>
               ))}
-            </div>
-          ) : (
-            <div className="coming-soon">
-              <h2>Sezione News in sviluppo</h2>
-              <p>
-                Stiamo preparando contenuti interessanti per tenerti aggiornato
-                sui nostri progetti e novità aziendali.
-              </p>
+            </NewsGrid>
+          </Container>
+        </NewsSection>
 
-              <div className="newsletter-signup">
-                <h3>Rimani aggiornato</h3>
-                <p>
-                  Iscriviti alla nostra newsletter per ricevere le ultime
-                  novità.
-                </p>
-                <div className="input-group">
-                  <input type="email" placeholder="La tua email" />
-                  <button>Iscriviti</button>
-                </div>
-              </div>
-            </div>
-          )}
-        </NewsGrid>
+        <ContactCTA />
       </MainContent>
       <Footer />
     </NewsContainer>

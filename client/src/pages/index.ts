@@ -4,6 +4,7 @@ export { default as ServicesPage } from "./ServicesPage";
 export { default as ProjectsPage } from "./ProjectsPage";
 export { default as ProjectDetailPage } from "./ProjectDetailPage";
 export { default as NewsPage } from "./NewsPage";
+export { default as NewsDetailPage } from "./NewsDetailPage";
 export { default as ContactPage } from "./ContactPage";
 export { default as CareersPage } from "./CareersPage";
 export { default as WorkInProgressPage } from "../WorkInProgressPage";

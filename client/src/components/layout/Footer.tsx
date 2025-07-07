@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
+import { contactData } from "../../data/contactData";
 
 const Footer: React.FC = () => {
   const quickLinks = [
@@ -26,28 +27,28 @@ const Footer: React.FC = () => {
       <FooterContent>
         <FooterGrid>
           <FooterSection>
-            <SectionTitle>KORSVAGEN S.R.L.</SectionTitle>
+            <SectionTitle>{contactData.company}</SectionTitle>
             <SectionDescription>
               La tua visione, la nostra esperienza. Costruiamo il futuro insieme
               con professionalità, qualità e innovazione.
             </SectionDescription>
             <SocialLinks>
               <SocialLink
-                href="https://instagram.com/korsvagensrl"
+                href={contactData.social.instagram}
                 target="_blank"
                 rel="noopener noreferrer"
                 title="Instagram"
               >
                 📷
               </SocialLink>
-              <SocialLink href="mailto:korsvagensrl@gmail.com" title="Email">
+              <SocialLink href={`mailto:${contactData.email}`} title="Email">
                 📧
               </SocialLink>
-              <SocialLink href="tel:+393494298547" title="Telefono">
+              <SocialLink href={`tel:${contactData.phone}`} title="Telefono">
                 📞
               </SocialLink>
               <SocialLink
-                href="https://www.linkedin.com/company/korsvagen"
+                href={contactData.social.linkedin}
                 target="_blank"
                 rel="noopener noreferrer"
                 title="LinkedIn"
@@ -83,21 +84,19 @@ const Footer: React.FC = () => {
               <ContactItem>
                 <strong>Indirizzo:</strong>
                 <br />
-                Via Santa Maria la Carità 18
+                {contactData.address.street}
                 <br />
-                Scafati (SA)
+                {contactData.address.city}
               </ContactItem>
               <ContactItem>
                 <strong>Telefono:</strong>
                 <br />
-                <a href="tel:+393494298547">+39 349 429 8547</a>
+                <a href={`tel:${contactData.phone}`}>{contactData.phone}</a>
               </ContactItem>
               <ContactItem>
                 <strong>Email:</strong>
                 <br />
-                <a href="mailto:korsvagensrl@gmail.com">
-                  korsvagensrl@gmail.com
-                </a>
+                <a href={`mailto:${contactData.email}`}>{contactData.email}</a>
               </ContactItem>
             </ContactInfo>
           </FooterSection>
@@ -106,10 +105,11 @@ const Footer: React.FC = () => {
         <FooterBottom>
           <div>
             <FooterText>
-              © 2025 KORSVAGEN S.R.L. - Tutti i diritti riservati
+              © 2025 {contactData.company} - Tutti i diritti riservati
             </FooterText>
             <FooterSubtext>
-              REA: 1071429 | P.IVA/C.F.: 09976601212
+              REA: {contactData.business.rea} | P.IVA/C.F.:{" "}
+              {contactData.business.piva}
             </FooterSubtext>
           </div>
 

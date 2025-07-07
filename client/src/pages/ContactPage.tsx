@@ -2,7 +2,7 @@ import React from "react";
 import styled from "styled-components";
 import Header from "../components/layout/Header";
 import Footer from "../components/layout/Footer";
-import ContactsSection from "../components/sections/ContactsSection";
+import { contactData } from "../data/contactData";
 
 const ContactContainer = styled.div`
   min-height: 100vh;
@@ -10,63 +10,105 @@ const ContactContainer = styled.div`
   flex-direction: column;
   width: 100%;
   overflow-x: hidden;
+  background: #1a1a1a;
+  color: #ffffff;
 `;
 
 const MainContent = styled.main`
   flex: 1;
   width: 100%;
+  padding-top: 110px;
+
+  @media (max-width: 1024px) {
+    padding-top: 100px;
+  }
+
+  @media (max-width: 768px) {
+    padding-top: 80px;
+  }
+
+  @media (max-width: 480px) {
+    padding-top: 70px;
+  }
 `;
 
 const HeroSection = styled.section`
-  background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+  background: linear-gradient(
+      135deg,
+      rgba(26, 26, 26, 0.95) 0%,
+      rgba(44, 44, 44, 0.95) 100%
+    ),
+    url("https://images.unsplash.com/photo-1560472354-b33ff0c44a43?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80");
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
   color: white;
   text-align: center;
-  padding: 100px 20px;
-  min-height: 300px;
+  padding: 120px 20px 80px;
+  min-height: 60vh;
   display: flex;
   align-items: center;
   justify-content: center;
   width: 100%;
   overflow: hidden;
+  position: relative;
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 1;
+  }
 
   .hero-content {
+    position: relative;
+    z-index: 2;
     max-width: 800px;
+    margin: 0 auto;
     width: 100%;
-    padding: 0 10px;
 
     h1 {
-      font-size: 2.8rem;
-      font-weight: bold;
-      margin-bottom: 20px;
-      font-family: "Montserrat", sans-serif;
-      line-height: 1.2;
-      word-wrap: break-word;
+      font-size: 4rem;
+      margin-bottom: 30px;
+      font-family: "Korsvagen Brand", "Times New Roman", serif;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #ffffff;
+      line-height: 1.1;
+      font-weight: 400;
 
       @media (max-width: 1024px) {
-        font-size: 2.4rem;
+        font-size: 3.5rem;
       }
 
       @media (max-width: 768px) {
-        font-size: 2rem;
-        margin-bottom: 15px;
+        font-size: 2.5rem;
+        margin-bottom: 25px;
       }
 
       @media (max-width: 480px) {
-        font-size: 1.8rem;
-        margin-bottom: 10px;
-      }
-
-      @media (max-width: 350px) {
-        font-size: 1.6rem;
+        font-size: 2rem;
+        margin-bottom: 20px;
+        letter-spacing: 0.05em;
       }
     }
 
     p {
-      font-size: 1.2rem;
-      color: #e2e8f0;
-      margin: 0;
-      line-height: 1.4;
-      word-wrap: break-word;
+      font-size: 1.3rem;
+      color: #cccccc;
+      font-weight: 300;
+      max-width: 600px;
+      margin: 0 auto;
+      line-height: 1.6;
+      font-family: "Inter", "Segoe UI", sans-serif;
+
+      @media (max-width: 1024px) {
+        font-size: 1.2rem;
+      }
 
       @media (max-width: 768px) {
         font-size: 1.1rem;
@@ -75,263 +117,438 @@ const HeroSection = styled.section`
       @media (max-width: 480px) {
         font-size: 1rem;
       }
-
-      @media (max-width: 350px) {
-        font-size: 0.9rem;
-      }
     }
   }
 
   @media (max-width: 1024px) {
-    padding: 80px 15px;
-    min-height: 250px;
+    padding: 110px 20px 70px;
+    min-height: 55vh;
+    background-attachment: scroll;
   }
 
   @media (max-width: 768px) {
-    padding: 60px 15px;
-    min-height: 200px;
+    padding: 100px 20px 60px;
+    min-height: 50vh;
   }
 
   @media (max-width: 480px) {
-    padding: 40px 10px;
-    min-height: 180px;
-  }
-
-  @media (max-width: 350px) {
-    padding: 30px 10px;
-    min-height: 160px;
+    padding: 90px 15px 50px;
+    min-height: 45vh;
   }
 `;
 
-const ContactContent = styled.section`
-  padding: 80px 20px;
+const ContactSection = styled.section`
+  padding: 80px 0;
+  background: #1a1a1a;
+
+  @media (max-width: 768px) {
+    padding: 60px 0;
+  }
+
+  @media (max-width: 480px) {
+    padding: 40px 0;
+  }
+`;
+
+const Container = styled.div`
   max-width: 1200px;
   margin: 0 auto;
+  padding: 0 20px;
+
+  @media (max-width: 768px) {
+    padding: 0 15px;
+  }
+`;
+
+const ContactGrid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  margin-bottom: 80px;
+
+  @media (max-width: 1024px) {
+    gap: 60px;
+  }
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 50px;
+    margin-bottom: 60px;
+  }
+
+  @media (max-width: 480px) {
+    gap: 40px;
+  }
+`;
+
+const ContactForm = styled.div`
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 20px;
+  padding: 40px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+
+  @media (max-width: 768px) {
+    padding: 30px;
+  }
+
+  @media (max-width: 480px) {
+    padding: 25px;
+  }
+
+  h3 {
+    color: #ffffff;
+    margin-bottom: 30px;
+    font-family: "Korsvagen Brand", "Times New Roman", serif;
+    font-size: 1.8rem;
+    font-weight: 400;
+    letter-spacing: 0.02em;
+
+    @media (max-width: 768px) {
+      font-size: 1.6rem;
+      margin-bottom: 25px;
+    }
+
+    @media (max-width: 480px) {
+      font-size: 1.4rem;
+      margin-bottom: 20px;
+    }
+  }
+
+  .form-group {
+    margin-bottom: 25px;
+
+    @media (max-width: 480px) {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      color: #cccccc;
+      margin-bottom: 8px;
+      font-weight: 500;
+      font-family: "Inter", "Segoe UI", sans-serif;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+
+      @media (max-width: 480px) {
+        font-size: 0.85rem;
+        margin-bottom: 6px;
+      }
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      padding: 15px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.05);
+      color: #ffffff;
+      font-family: "Inter", "Segoe UI", sans-serif;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+
+      &:focus {
+        outline: none;
+        border-color: #4caf50;
+        background: rgba(255, 255, 255, 0.1);
+      }
+
+      &::placeholder {
+        color: #999999;
+      }
+
+      @media (max-width: 480px) {
+        padding: 12px;
+        font-size: 0.95rem;
+      }
+    }
+
+    select {
+      cursor: pointer;
+
+      option {
+        background: #ffffff;
+        color: #1a1a1a;
+        padding: 10px;
+        border: none;
+        font-family: "Inter", "Segoe UI", sans-serif;
+
+        &:hover,
+        &:focus,
+        &:checked {
+          background: #f0f0f0;
+          color: #1a1a1a;
+        }
+      }
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 120px;
+    }
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+
+    @media (max-width: 480px) {
+      grid-template-columns: 1fr;
+      gap: 15px;
+    }
+  }
+
+  .submit-btn {
+    background: rgba(76, 175, 80, 0.1);
+    color: #4caf50;
+    padding: 18px 40px;
+    border: 2px solid rgba(76, 175, 80, 0.2);
+    border-radius: 50px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 100%;
+    font-family: "Inter", "Segoe UI", sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    backdrop-filter: blur(10px);
+
+    &:hover {
+      background: rgba(76, 175, 80, 0.2);
+      border-color: rgba(76, 175, 80, 0.4);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(76, 175, 80, 0.2);
+    }
+
+    @media (max-width: 480px) {
+      padding: 15px 30px;
+      font-size: 1rem;
+    }
+  }
+
+  .privacy-notice {
+    font-size: 0.85rem;
+    color: #999999;
+    margin-top: 20px;
+    line-height: 1.5;
+    font-family: "Inter", "Segoe UI", sans-serif;
+
+    a {
+      color: #4caf50;
+      text-decoration: none;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+
+    @media (max-width: 480px) {
+      font-size: 0.8rem;
+      margin-top: 15px;
+    }
+  }
+`;
+
+const ContactInfo = styled.div`
+  .info-section {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 20px;
+    padding: 30px;
+    margin-bottom: 30px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+
+    @media (max-width: 480px) {
+      padding: 25px;
+      margin-bottom: 25px;
+    }
+
+    h4 {
+      color: #ffffff;
+      margin-bottom: 25px;
+      font-family: "Korsvagen Brand", "Times New Roman", serif;
+      font-size: 1.4rem;
+      font-weight: 400;
+      letter-spacing: 0.02em;
+
+      @media (max-width: 480px) {
+        font-size: 1.2rem;
+        margin-bottom: 20px;
+      }
+    }
+
+    .info-item {
+      display: flex;
+      align-items: flex-start;
+      margin-bottom: 20px;
+
+      @media (max-width: 480px) {
+        margin-bottom: 15px;
+      }
+
+      .icon {
+        background: rgba(76, 175, 80, 0.1);
+        color: #4caf50;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 20px;
+        flex-shrink: 0;
+        font-size: 1.2rem;
+        border: 1px solid rgba(76, 175, 80, 0.2);
+
+        @media (max-width: 480px) {
+          width: 45px;
+          height: 45px;
+          margin-right: 15px;
+          font-size: 1.1rem;
+        }
+      }
+
+      .content {
+        .label {
+          font-weight: 600;
+          color: #ffffff;
+          margin-bottom: 5px;
+          font-family: "Inter", "Segoe UI", sans-serif;
+          font-size: 1rem;
+
+          @media (max-width: 480px) {
+            font-size: 0.95rem;
+          }
+        }
+
+        .value {
+          color: #cccccc;
+          line-height: 1.5;
+          font-family: "Inter", "Segoe UI", sans-serif;
+          font-size: 0.95rem;
+
+          @media (max-width: 480px) {
+            font-size: 0.9rem;
+          }
+        }
+
+        a {
+          color: #4caf50;
+          text-decoration: none;
+          transition: color 0.3s ease;
+
+          &:hover {
+            color: #66bb6a;
+            text-decoration: underline;
+          }
+        }
+      }
+    }
+  }
+
+  .office-hours {
+    background: rgba(76, 175, 80, 0.05);
+    border: 1px solid rgba(76, 175, 80, 0.1);
+    border-radius: 15px;
+    padding: 25px;
+
+    @media (max-width: 480px) {
+      padding: 20px;
+    }
+
+    h4 {
+      color: #ffffff;
+      margin-bottom: 20px;
+      font-family: "Korsvagen Brand", "Times New Roman", serif;
+      font-size: 1.2rem;
+      font-weight: 400;
+
+      @media (max-width: 480px) {
+        font-size: 1.1rem;
+        margin-bottom: 15px;
+      }
+    }
+
+    .hours-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      color: #cccccc;
+      font-family: "Inter", "Segoe UI", sans-serif;
+      font-size: 0.95rem;
+
+      @media (max-width: 480px) {
+        font-size: 0.9rem;
+        margin-bottom: 8px;
+      }
+
+      .day {
+        font-weight: 500;
+        color: #ffffff;
+      }
+
+      .time {
+        color: #4caf50;
+      }
+    }
+  }
+`;
+
+const ContactContent = styled.div`
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 80px 2rem;
+  background: #1a1a1a;
+  color: #ffffff;
+
+  @media (max-width: 768px) {
+    padding: 60px 1rem;
+  }
+
+  @media (max-width: 480px) {
+    padding: 40px 1rem;
+  }
 
   .contact-intro {
     text-align: center;
     margin-bottom: 60px;
 
     h2 {
-      color: #2d3748;
-      font-size: 2rem;
-      margin-bottom: 20px;
-      font-family: "Montserrat", sans-serif;
+      font-family: "Korsvagen Brand", Arial, sans-serif;
+      font-size: 2.5rem;
+      color: #ffffff;
+      margin-bottom: 1.5rem;
+      font-weight: 400;
+
+      @media (max-width: 768px) {
+        font-size: 2rem;
+      }
+
+      @media (max-width: 480px) {
+        font-size: 1.8rem;
+      }
     }
 
     p {
-      color: #4a5568;
-      font-size: 1.1rem;
+      font-size: 1.2rem;
+      color: #cccccc;
       line-height: 1.6;
       max-width: 600px;
       margin: 0 auto;
-    }
-  }
 
-  .contact-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 60px;
-    margin-bottom: 60px;
-
-    @media (max-width: 768px) {
-      grid-template-columns: 1fr;
-      gap: 40px;
-    }
-  }
-
-  .contact-form {
-    background: white;
-    padding: 40px;
-    border-radius: 15px;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-
-    h3 {
-      color: #2d3748;
-      margin-bottom: 30px;
-      font-family: "Montserrat", sans-serif;
-      font-size: 1.5rem;
-    }
-
-    .form-group {
-      margin-bottom: 20px;
-
-      label {
-        display: block;
-        color: #4a5568;
-        margin-bottom: 8px;
-        font-weight: 500;
+      @media (max-width: 768px) {
+        font-size: 1.1rem;
       }
-
-      input,
-      select,
-      textarea {
-        width: 100%;
-        padding: 12px;
-        border: 1px solid #e2e8f0;
-        border-radius: 5px;
-        font-size: 1rem;
-        transition: border-color 0.3s ease;
-
-        &:focus {
-          outline: none;
-          border-color: #3182ce;
-        }
-      }
-
-      textarea {
-        min-height: 120px;
-        resize: vertical;
-      }
-    }
-
-    .form-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 15px;
 
       @media (max-width: 480px) {
-        grid-template-columns: 1fr;
+        font-size: 1rem;
       }
-    }
-
-    .submit-btn {
-      background: #3182ce;
-      color: white;
-      padding: 15px 30px;
-      border: none;
-      border-radius: 5px;
-      font-size: 1.1rem;
-      cursor: pointer;
-      transition: background 0.3s ease;
-      width: 100%;
-
-      &:hover {
-        background: #2c5282;
-      }
-    }
-
-    .privacy-notice {
-      font-size: 0.9rem;
-      color: #718096;
-      margin-top: 15px;
-      line-height: 1.4;
-
-      a {
-        color: #3182ce;
-        text-decoration: none;
-
-        &:hover {
-          text-decoration: underline;
-        }
-      }
-    }
-  }
-
-  .contact-info {
-    .info-section {
-      margin-bottom: 40px;
-
-      h4 {
-        color: #2d3748;
-        margin-bottom: 20px;
-        font-family: "Montserrat", sans-serif;
-        font-size: 1.2rem;
-      }
-
-      .info-item {
-        display: flex;
-        align-items: flex-start;
-        margin-bottom: 15px;
-
-        .icon {
-          background: #3182ce;
-          color: white;
-          width: 40px;
-          height: 40px;
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          margin-right: 15px;
-          flex-shrink: 0;
-          font-weight: bold;
-        }
-
-        .content {
-          .label {
-            font-weight: 600;
-            color: #2d3748;
-            margin-bottom: 2px;
-          }
-
-          .value {
-            color: #4a5568;
-            line-height: 1.4;
-          }
-
-          a {
-            color: #3182ce;
-            text-decoration: none;
-
-            &:hover {
-              text-decoration: underline;
-            }
-          }
-        }
-      }
-    }
-
-    .office-hours {
-      background: #f7fafc;
-      padding: 25px;
-      border-radius: 10px;
-
-      h4 {
-        color: #2d3748;
-        margin-bottom: 15px;
-        font-family: "Montserrat", sans-serif;
-      }
-
-      .hours-item {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 8px;
-        color: #4a5568;
-
-        .day {
-          font-weight: 500;
-        }
-      }
-    }
-  }
-
-  .map-section {
-    background: #f7fafc;
-    padding: 40px;
-    border-radius: 15px;
-    text-align: center;
-
-    h3 {
-      color: #2d3748;
-      margin-bottom: 20px;
-      font-family: "Montserrat", sans-serif;
-    }
-
-    .map-placeholder {
-      width: 100%;
-      height: 300px;
-      background: #e2e8f0;
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #4a5568;
-      margin-bottom: 20px;
-    }
-
-    p {
-      color: #4a5568;
     }
   }
 `;
@@ -386,8 +603,8 @@ const ContactPage: React.FC = () => {
             </p>
           </div>
 
-          <div className="contact-grid">
-            <div className="contact-form">
+          <ContactGrid>
+            <ContactForm>
               <h3>Inviaci un Messaggio</h3>
               <form onSubmit={handleSubmit}>
                 <div className="form-row">
@@ -482,9 +699,9 @@ const ContactPage: React.FC = () => {
                   esclusivamente per rispondere alla tua richiesta.
                 </p>
               </form>
-            </div>
+            </ContactForm>
 
-            <div className="contact-info">
+            <ContactInfo>
               <div className="info-section">
                 <h4>Informazioni di Contatto</h4>
 
@@ -493,9 +710,9 @@ const ContactPage: React.FC = () => {
                   <div className="content">
                     <div className="label">Indirizzo</div>
                     <div className="value">
-                      Via dell'Edilizia, 123
+                      {contactData.address.street}
                       <br />
-                      20100 Milano, Italy
+                      {contactData.address.city}
                     </div>
                   </div>
                 </div>
@@ -505,7 +722,9 @@ const ContactPage: React.FC = () => {
                   <div className="content">
                     <div className="label">Telefono</div>
                     <div className="value">
-                      <a href="tel:+390212345678">+39 02 1234 5678</a>
+                      <a href={`tel:${contactData.phone}`}>
+                        {contactData.phone}
+                      </a>
                     </div>
                   </div>
                 </div>
@@ -515,7 +734,9 @@ const ContactPage: React.FC = () => {
                   <div className="content">
                     <div className="label">Email</div>
                     <div className="value">
-                      <a href="mailto:info@korsvagen.it">info@korsvagen.it</a>
+                      <a href={`mailto:${contactData.email}`}>
+                        {contactData.email}
+                      </a>
                     </div>
                   </div>
                 </div>
@@ -523,14 +744,22 @@ const ContactPage: React.FC = () => {
                 <div className="info-item">
                   <div className="icon">🌐</div>
                   <div className="content">
-                    <div className="label">Sito Web</div>
+                    <div className="label">Social Media</div>
                     <div className="value">
                       <a
-                        href="https://www.korsvagen.it"
+                        href={contactData.social.instagram}
                         target="_blank"
                         rel="noopener noreferrer"
                       >
-                        www.korsvagen.it
+                        Instagram
+                      </a>{" "}
+                      |
+                      <a
+                        href={contactData.social.linkedin}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        LinkedIn
                       </a>
                     </div>
                   </div>
@@ -541,32 +770,20 @@ const ContactPage: React.FC = () => {
                 <h4>Orari di Apertura</h4>
                 <div className="hours-item">
                   <span className="day">Lunedì - Venerdì</span>
-                  <span>9:00 - 18:00</span>
+                  <span className="time">9:00 - 18:00</span>
                 </div>
                 <div className="hours-item">
                   <span className="day">Sabato</span>
-                  <span>9:00 - 13:00</span>
+                  <span className="time">9:00 - 13:00</span>
                 </div>
                 <div className="hours-item">
                   <span className="day">Domenica</span>
-                  <span>Chiuso</span>
+                  <span className="time">Chiuso</span>
                 </div>
               </div>
-            </div>
-          </div>
-
-          <div className="map-section">
-            <h3>Dove Siamo</h3>
-            <div className="map-placeholder">Mappa interattiva in arrivo</div>
-            <p>
-              Facilmente raggiungibili con mezzi pubblici e auto. Parcheggio
-              disponibile.
-            </p>
-          </div>
+            </ContactInfo>
+          </ContactGrid>
         </ContactContent>
-
-        {/* Riutilizziamo il componente ContactsSection esistente */}
-        <ContactsSection />
       </MainContent>
       <Footer />
     </ContactContainer>

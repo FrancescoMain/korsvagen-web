@@ -482,11 +482,7 @@ const ServicesPage: React.FC = () => {
           </div>
         </ServicesGrid>
 
-        <ContactCTA
-          title="Richiedi un Preventivo"
-          subtitle="Sei interessato a uno dei nostri servizi? Compila il form e riceverai un preventivo personalizzato gratuito."
-          buttonText="Invia Richiesta"
-        />
+        <ContactCTA />
       </MainContent>
       <Footer />
     </ServicesContainer>

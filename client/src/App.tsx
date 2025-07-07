@@ -7,6 +7,7 @@ import {
   ProjectsPage,
   ProjectDetailPage,
   NewsPage,
+  NewsDetailPage,
   ContactPage,
   CareersPage,
   WorkInProgressPage,
@@ -22,6 +23,7 @@ function App() {
         <Route path="/progetti" element={<ProjectsPage />} />
         <Route path="/progetti/:projectId" element={<ProjectDetailPage />} />
         <Route path="/news" element={<NewsPage />} />
+        <Route path="/news/:newsId" element={<NewsDetailPage />} />
         <Route path="/contatti" element={<ContactPage />} />
         <Route path="/lavora-con-noi" element={<CareersPage />} />
         <Route path="/work-in-progress" element={<WorkInProgressPage />} />
