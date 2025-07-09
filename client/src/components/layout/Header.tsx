@@ -10,10 +10,10 @@ const Header: React.FC = () => {
   const menuItems = [
     { path: "/", label: "Home" },
     { path: "/chi-siamo", label: "Chi Siamo" },
+    { path: "/il-nostro-team", label: "Il Nostro Team" },
     { path: "/servizi", label: "Servizi" },
     { path: "/progetti", label: "Progetti" },
     { path: "/news", label: "News" },
-    { path: "/il-nostro-team", label: "Il Nostro Team" },
     { path: "/lavora-con-noi", label: "Lavora con Noi" },
     { path: "/contatti", label: "Contatti" },
   ];
