@@ -135,7 +135,7 @@ const HeroSection = styled.section`
 
   h1 {
     font-size: 4.5rem;
-    font-weight: 400;
+    font-weight: 700;
     margin-bottom: 20px;
     font-family: "Korsvagen Brand", "Times New Roman", serif;
     letter-spacing: 0.1em;
@@ -153,13 +153,21 @@ const HeroSection = styled.section`
     }
   }
 
-  .main-slogan {
+  .slogan-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .slogan-top,
+  .slogan-bottom {
     font-size: 3rem;
     font-weight: 300;
-    margin-bottom: 0;
+    margin: 0;
     font-family: "Inter", "Segoe UI", sans-serif;
     letter-spacing: 0.15em;
-    line-height: 1.2;
+    line-height: 1.1;
     color: #ffffff;
     text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7);
     text-transform: uppercase;
@@ -1876,15 +1884,15 @@ const HomePage: React.FC = () => {
       <MainContent>
         <HeroSection>
           <video className="hero-video" autoPlay muted loop playsInline>
-            <source
-              src="https://www.techbau.it/wp-content/uploads/2025/01/2024_RIMONTATO.mp4"
-              type="video/mp4"
-            />
+            <source src="/korsvagen-hero.mp4" type="video/mp4" />
           </video>
           <div className="hero-content">
             <div className="hero-top">
               <h1>KORSVAGEN</h1>
-              <p className="main-slogan">YOU DREAM, WE BUILD</p>
+              <div className="slogan-container">
+                <p className="slogan-top">YOU DREAM</p>
+                <p className="slogan-bottom">WE BUILD</p>
+              </div>
             </div>
             <div className="hero-bottom">
               <Link to="/chi-siamo" className="cta-button">

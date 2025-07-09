@@ -163,7 +163,7 @@ const ContactTitle = styled.h2`
   @media (max-width: 768px) {
     font-size: 2.5rem;
     margin-bottom: 1.5rem;
-    
+
     /* Assicuriamoci che sia visibile su mobile con tema scuro */
     -webkit-text-fill-color: #ffffff !important;
     background: none !important;
@@ -173,7 +173,7 @@ const ContactTitle = styled.h2`
   @media (max-width: 480px) {
     font-size: 2rem;
     margin-bottom: 1rem;
-    
+
     /* Assicuriamoci che sia visibile su mobile con tema scuro */
     -webkit-text-fill-color: #ffffff !important;
     background: none !important;

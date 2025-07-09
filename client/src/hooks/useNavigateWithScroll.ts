@@ -1,12 +1,18 @@
-import { useNavigate as useReactRouterNavigate, NavigateOptions } from "react-router-dom";
+import {
+  useNavigate as useReactRouterNavigate,
+  NavigateOptions,
+} from "react-router-dom";
 
 // Custom hook che wrappa useNavigate per aggiungere scroll to top
 export const useNavigateWithScroll = () => {
   const navigate = useReactRouterNavigate();
 
-  const navigateWithScroll = (to: string | number, options?: NavigateOptions) => {
+  const navigateWithScroll = (
+    to: string | number,
+    options?: NavigateOptions
+  ) => {
     navigate(to as any, options);
-    
+
     // Se stiamo navigando verso una nuova pagina (non indietro), scroll to top
     if (typeof to === "string") {
       setTimeout(() => {

@@ -7,4 +7,5 @@ export { default as NewsPage } from "./NewsPage";
 export { default as NewsDetailPage } from "./NewsDetailPage";
 export { default as ContactPage } from "./ContactPage";
 export { default as CareersPage } from "./CareersPage";
+export { default as TeamPage } from "./TeamPage";
 export { default as WorkInProgressPage } from "../WorkInProgressPage";

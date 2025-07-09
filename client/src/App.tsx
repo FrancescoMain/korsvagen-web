@@ -10,6 +10,7 @@ import {
   NewsDetailPage,
   ContactPage,
   CareersPage,
+  TeamPage,
   WorkInProgressPage,
 } from "./pages";
 import ScrollToTop from "./components/common/ScrollToTop";
@@ -26,6 +27,7 @@ function App() {
         <Route path="/progetti/:projectId" element={<ProjectDetailPage />} />
         <Route path="/news" element={<NewsPage />} />
         <Route path="/news/:newsId" element={<NewsDetailPage />} />
+        <Route path="/il-nostro-team" element={<TeamPage />} />
         <Route path="/contatti" element={<ContactPage />} />
         <Route path="/lavora-con-noi" element={<CareersPage />} />
         <Route path="/work-in-progress" element={<WorkInProgressPage />} />

@@ -8,7 +8,7 @@ const Link: React.FC<LinkProps> = ({ to, children, onClick, ...props }) => {
     if (onClick) {
       onClick(e);
     }
-    
+
     // Aggiungi scroll to top dopo un piccolo delay
     setTimeout(() => {
       window.scrollTo({

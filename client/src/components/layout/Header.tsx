@@ -13,6 +13,7 @@ const Header: React.FC = () => {
     { path: "/servizi", label: "Servizi" },
     { path: "/progetti", label: "Progetti" },
     { path: "/news", label: "News" },
+    { path: "/il-nostro-team", label: "Il Nostro Team" },
     { path: "/lavora-con-noi", label: "Lavora con Noi" },
     { path: "/contatti", label: "Contatti" },
   ];
@@ -101,14 +102,14 @@ const Header: React.FC = () => {
 };
 
 const HeaderContainer = styled.header`
-  background: rgba(26, 26, 26, 0.85);
+  background: rgba(255, 255, 255);
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   z-index: 1000;
   width: 100%;
-  border-bottom: 1px solid #333333;
+  border-bottom: 1px solid #e2e8f0;
   backdrop-filter: blur(12px);
 `;
 
@@ -166,7 +167,7 @@ const LogoImage = styled.img`
 const Tagline = styled.span`
   font-family: "Arial", sans-serif;
   font-size: 1rem;
-  color: #cccccc;
+  color: #666666;
   font-weight: 300;
   letter-spacing: 0.5px;
   text-align: center;
@@ -187,11 +188,11 @@ const Navigation = styled.nav<{ $menuOpen: boolean }>`
 
 const DesktopMenu = styled.div`
   display: flex;
-  gap: 2.5rem;
+  gap: 1.8rem;
   align-items: center;
 
   @media (max-width: 1200px) {
-    gap: 2rem;
+    gap: 1.5rem;
   }
 
   @media (max-width: 1280px) {
@@ -201,23 +202,24 @@ const DesktopMenu = styled.div`
 
 const MenuLink = styled(Link)<{ $isActive: boolean }>`
   font-family: "Arial", sans-serif;
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 500;
-  color: ${(props) => (props.$isActive ? "#ffffff" : "#cccccc")};
+  color: ${(props) => (props.$isActive ? "#1a1a1a" : "#4a5568")};
   text-decoration: none;
-  padding: 1.5rem 0;
+  padding: 1.2rem 0;
   transition: all 0.3s ease;
   position: relative;
   white-space: nowrap;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 0.8px;
 
   @media (max-width: 1200px) {
-    font-size: 1rem;
+    font-size: 0.9rem;
+    letter-spacing: 0.5px;
   }
 
   &:hover {
-    color: #ffffff;
+    color: #1a1a1a;
     transform: translateY(-1px);
 
     &::after {
@@ -232,14 +234,14 @@ const MenuLink = styled(Link)<{ $isActive: boolean }>`
     left: 0;
     width: 0;
     height: 4px;
-    background: #ffffff;
+    background: #1a1a1a;
     transition: width 0.3s ease;
   }
 
   ${(props) =>
     props.$isActive &&
     `
-    color: #ffffff;
+    color: #1a1a1a;
     font-weight: 600;
   `}
 `;
@@ -261,7 +263,7 @@ const MobileMenuToggle = styled.button<{ $isOpen: boolean }>`
   span {
     width: 25px;
     height: 3px;
-    background: #ffffff;
+    background: #1a1a1a;
     transition: all 0.3s ease;
     border-radius: 2px;
 
@@ -287,7 +289,7 @@ const MobileMenu = styled.div<{ $isOpen: boolean }>`
   top: 110px;
   left: 0;
   right: 0;
-  background: rgba(26, 26, 26, 0.85);
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(12px);
   z-index: 1002;
   opacity: ${(props) => (props.$isOpen ? "1" : "0")};
@@ -295,7 +297,7 @@ const MobileMenu = styled.div<{ $isOpen: boolean }>`
   transition: all 0.3s ease;
   max-height: ${(props) => (props.$isOpen ? "calc(100vh - 110px)" : "0")};
   overflow: hidden;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
 
   @media (max-width: 768px) {
     top: 80px;
@@ -322,25 +324,25 @@ const MobileMenuLink = styled(Link)<{ $isActive: boolean }>`
   font-family: "Arial", sans-serif;
   font-size: 1.2rem;
   font-weight: 500;
-  color: ${(props) => (props.$isActive ? "#ffffff" : "#cccccc")};
+  color: ${(props) => (props.$isActive ? "#1a1a1a" : "#4a5568")};
   text-decoration: none;
   padding: 1.5rem 2rem;
   transition: all 0.3s ease;
   text-transform: uppercase;
   letter-spacing: 1px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
 
   &:hover {
-    background: rgba(255, 255, 255, 0.05);
-    color: #ffffff;
+    background: rgba(0, 0, 0, 0.05);
+    color: #1a1a1a;
   }
 
   ${(props) =>
     props.$isActive &&
     `
-    color: #ffffff;
+    color: #1a1a1a;
     font-weight: 600;
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(0, 0, 0, 0.05);
   `}
 `;
 
