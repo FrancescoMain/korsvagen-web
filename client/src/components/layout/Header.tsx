@@ -89,7 +89,7 @@ const Header: React.FC = () => {
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
-              gap: "0.5rem",
+              gap: "0.3rem",
             }}
           >
             <LogoImage src="/LOGO KORSVAGEN.png" alt="Korsvagen Logo" />
@@ -156,29 +156,29 @@ const LogoImage = styled.img`
   object-fit: contain;
 
   @media (max-width: 768px) {
-    height: 40px;
+    height: 50px;
   }
 
   @media (max-width: 480px) {
-    height: 35px;
+    height: 45px;
   }
 `;
 
 const Tagline = styled.span`
   font-family: "Arial", sans-serif;
-  font-size: 1rem;
+  font-size: 0.8rem;
   color: #666666;
   font-weight: 300;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.4px;
   text-align: center;
   text-transform: uppercase;
 
   @media (max-width: 768px) {
-    font-size: 0.9rem;
+    font-size: 0.7rem;
   }
 
   @media (max-width: 480px) {
-    font-size: 0.8rem;
+    font-size: 0.65rem;
   }
 `;
 
