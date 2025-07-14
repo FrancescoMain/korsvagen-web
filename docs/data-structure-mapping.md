@@ -7,6 +7,7 @@ Questo documento identifica tutti i dati attualmente hardcoded nel progetto e pr
 ## 1. Dati di Contatto
 
 ### Stato Attuale (Statico)
+
 **File**: `src/data/contactData.ts`
 
 ```typescript
@@ -21,6 +22,7 @@ Questo documento identifica tutti i dati attualmente hardcoded nel progetto e pr
 ```
 
 ### Struttura API Proposta
+
 ```typescript
 interface CompanyInfo {
   id: string;
@@ -60,6 +62,7 @@ interface CompanyInfo {
 ## 2. Team/Staff
 
 ### Stato Attuale (Statico)
+
 **File**: `src/pages/TeamPage.tsx` (array hardcoded)
 
 ```typescript
@@ -70,11 +73,12 @@ const teamMembers = [
     name: "Marco Rossi",
     role: "Fondatore & CEO",
     // ... dati completi hardcoded
-  }
-]
+  },
+];
 ```
 
 ### Struttura API Proposta
+
 ```typescript
 interface TeamMember {
   id: string;
@@ -99,6 +103,7 @@ interface TeamMember {
 ```
 
 **Endpoints**:
+
 - `GET /api/team/members` - Lista completa
 - `GET /api/team/members/{id}` - Dettaglio singolo membro
 - `POST /api/team/members` - Aggiungi membro (admin)
@@ -110,6 +115,7 @@ interface TeamMember {
 ## 3. Servizi
 
 ### Stato Attuale (Statico)
+
 **File**: `src/pages/ServicesPage.tsx`, `src/pages/HomePage.tsx`
 
 ```typescript
@@ -125,6 +131,7 @@ interface TeamMember {
 ```
 
 ### Struttura API Proposta
+
 ```typescript
 interface Service {
   id: string;
@@ -152,6 +159,7 @@ interface ServiceCategory {
 ```
 
 **Endpoints**:
+
 - `GET /api/services` - Lista servizi
 - `GET /api/services/categories` - Categorie servizi
 - `GET /api/services/{id}` - Dettaglio servizio
@@ -162,6 +170,7 @@ interface ServiceCategory {
 ## 4. Progetti/Portfolio
 
 ### Stato Attuale (Statico)
+
 **File**: `src/pages/ProjectDetailPage.tsx`, `src/pages/HomePage.tsx`
 
 ```typescript
@@ -171,12 +180,13 @@ const projects = [
     title: "Villa Moderna",
     location: "Milano, Lombardia",
     description: "...",
-    image: "unsplash URL"
-  }
-]
+    image: "unsplash URL",
+  },
+];
 ```
 
 ### Struttura API Proposta
+
 ```typescript
 interface Project {
   id: string;
@@ -190,7 +200,7 @@ interface Project {
   description: string;
   client_name?: string;
   project_type: string;
-  status: 'planning' | 'in_progress' | 'completed';
+  status: "planning" | "in_progress" | "completed";
   start_date: string;
   end_date?: string;
   budget_range?: string;
@@ -220,6 +230,7 @@ interface ProjectImage {
 ```
 
 **Endpoints**:
+
 - `GET /api/projects` - Lista progetti (pubblici)
 - `GET /api/projects/{id}` - Dettaglio progetto
 - `GET /api/projects/featured` - Progetti in evidenza
@@ -230,6 +241,7 @@ interface ProjectImage {
 ## 5. News/Articoli
 
 ### Stato Attuale (Statico)
+
 **File**: `src/pages/NewsPage.tsx`, `src/pages/NewsDetailPage.tsx`
 
 ```typescript
@@ -240,11 +252,12 @@ const allNews = [
     title: "...",
     content: "...",
     // dati hardcoded
-  }
-]
+  },
+];
 ```
 
 ### Struttura API Proposta
+
 ```typescript
 interface NewsArticle {
   id: string;
@@ -259,7 +272,7 @@ interface NewsArticle {
   featured_image_url?: string;
   category: string;
   tags: string[];
-  status: 'draft' | 'published' | 'archived';
+  status: "draft" | "published" | "archived";
   is_featured: boolean;
   published_at: string;
   meta_description?: string;
@@ -278,6 +291,7 @@ interface NewsCategory {
 ```
 
 **Endpoints**:
+
 - `GET /api/news` - Lista articoli (pubblicati)
 - `GET /api/news/{id}` - Dettaglio articolo
 - `GET /api/news/featured` - Articoli in evidenza
@@ -288,28 +302,26 @@ interface NewsCategory {
 ## 6. Offerte Lavoro/Careers
 
 ### Stato Attuale (Statico)
+
 **File**: `src/pages/CareersPage.tsx`
 
 ```typescript
 // Benefits e positions hardcoded
-const benefits = [
-  { icon: "💼", title: "...", description: "..." }
-];
-const positions = [
-  { id: 1, title: "...", type: "...", description: "..." }
-];
+const benefits = [{ icon: "💼", title: "...", description: "..." }];
+const positions = [{ id: 1, title: "...", type: "...", description: "..." }];
 ```
 
 ### Struttura API Proposta
+
 ```typescript
 interface JobPosition {
   id: string;
   title: string;
   department: string;
-  employment_type: 'full_time' | 'part_time' | 'contract' | 'internship';
+  employment_type: "full_time" | "part_time" | "contract" | "internship";
   location: string;
   remote_allowed: boolean;
-  experience_level: 'entry' | 'mid' | 'senior' | 'lead';
+  experience_level: "entry" | "mid" | "senior" | "lead";
   description: string;
   requirements: string[];
   responsibilities: string[];
@@ -336,6 +348,7 @@ interface CompanyBenefit {
 ```
 
 **Endpoints**:
+
 - `GET /api/careers/positions` - Posizioni aperte
 - `GET /api/careers/benefits` - Benefici aziendali
 - `POST /api/careers/applications` - Invio candidatura
@@ -345,6 +358,7 @@ interface CompanyBenefit {
 ## 7. Certificazioni e Qualifiche
 
 ### Stato Attuale (Statico)
+
 **File**: `src/pages/AboutPage.tsx`
 
 ```typescript
@@ -357,6 +371,7 @@ interface CompanyBenefit {
 ```
 
 ### Struttura API Proposta
+
 ```typescript
 interface Certification {
   id: string;
@@ -375,6 +390,7 @@ interface Certification {
 ```
 
 **Endpoints**:
+
 - `GET /api/certifications` - Lista certificazioni attive
 
 ---
@@ -382,6 +398,7 @@ interface Certification {
 ## 8. Dati Aziendali Generali
 
 ### Stato Attuale (Statico)
+
 **File**: Vari (AboutPage, HomePage, etc.)
 
 ```typescript
@@ -393,6 +410,7 @@ interface Certification {
 ```
 
 ### Struttura API Proposta
+
 ```typescript
 interface CompanyStats {
   years_experience: number;
@@ -412,6 +430,7 @@ interface CompanyInfo {
 ```
 
 **Endpoints**:
+
 - `GET /api/company/stats` - Statistiche aziendali
 - `GET /api/company/about` - Informazioni aziendali
 
@@ -420,30 +439,36 @@ interface CompanyInfo {
 ## Piano di Migrazione Prioritizzato
 
 ### Fase 1 - Dati Critici (Settimana 1-2)
+
 1. **Dati di contatto** - Più frequentemente aggiornati
 2. **Team members** - Gestione HR
 
 ### Fase 2 - Contenuti Marketing (Settimana 3-4)
+
 3. **Servizi** - Per aggiornamenti marketing
 4. **News/Articoli** - Content management
 
 ### Fase 3 - Portfolio (Settimana 5-6)
+
 5. **Progetti** - Showcase aziendale
 6. **Certificazioni** - Credibilità
 
 ### Fase 4 - HR (Settimana 7-8)
+
 7. **Offerte lavoro** - Gestione HR
 8. **Statistiche aziendali** - Dashboard admin
 
 ## Considerazioni Tecniche
 
 ### Backend Requirements
+
 - **Database**: PostgreSQL o MongoDB
 - **File Storage**: AWS S3 o CloudFlare R2
 - **Image Processing**: Sharp o Cloudinary
 - **Authentication**: JWT per admin panel
 
 ### Frontend Adaptations
+
 - **State Management**: Context API + React Query
 - **Loading States**: Skeleton components
 - **Error Handling**: Error boundaries
@@ -451,6 +476,7 @@ interface CompanyInfo {
 - **Admin Panel**: Separare applicazione o sezione protetta
 
 ### API Design Principles
+
 - **RESTful**: Standard REST endpoints
 - **Pagination**: Per liste lunghe
 - **Filtering**: Query parameters per filtraggio
