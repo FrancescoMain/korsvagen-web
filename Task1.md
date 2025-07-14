@@ -1,8 +1,8 @@
-# Task 2: Setup Backend Express.js per Vercel
+# Task 3: Setup Database e Cloudinary per gestione contenuti e media
 
 ## Obiettivo
 
-Creare la struttura backend Express.js ottimizzata per il deployment su Vercel con supporto per API serverless.
+Implementare il database per la persistenza dei contenuti e configurare Cloudinary per la gestione ottimizzata di immagini e video.
 
 ## Azioni specifiche
 
@@ -11,78 +11,117 @@ Creare la struttura backend Express.js ottimizzata per il deployment su Vercel c
    - Analizzare la documentazione nella cartella /docs
    - Analizzare log nella cartella /logs
 
-1. **Struttura backend**
+1. **Database Setup**
 
-   - Creare directory `api/` per le route Vercel
-   - Setup Express.js con middleware essenziali
-   - Configurare CORS per frontend
-   - Implementare error handling globale
+   - Scegliere e configurare database (Supabase)
+   - Creare modelli dati per contenuti dinamici
+   - Setup connection pooling per Vercel serverless
+   - Implementare migrations/seeding iniziale
 
-2. **Configurazione Vercel**
+2. **Cloudinary Integration**
 
-   - Creare `vercel.json` con configurazioni API
-   - Setup variabili d'ambiente per production
-   - Configurare rewrite rules per SPA + API
+   - Setup account e configurazione API keys
+   - Implementare upload endpoint sicuri
+   - Configurare trasformazioni automatiche per ottimizzazione
+   - Setup folder structure per organizzazione media
 
-3. **Setup base delle route**
-   - `/api/auth/*` - Route autenticazione
-   - `/api/content/*` - Route gestione contenuti
-   - `/api/health` - Health check endpoint
-   - Middleware di logging e validazione
+3. **Modelli Dati**
+   ```javascript
+   // Schema Page Content
+   {
+     pageId: String,
+     sections: [{
+       id: String,
+       type: String, // 'hero', 'about', 'gallery', etc.
+       content: {
+         title: String,
+         description: String,
+         images: [{ cloudinaryId: String, url: String, alt: String }],
+         videos: [{ cloudinaryId: String, url: String, poster: String }],
+         customFields: Object
+       },
+       order: Number,
+       isActive: Boolean
+     }],
+     metadata: {
+       title: String,
+       description: String,
+       ogImage: String
+     }
+   }
+   ```
 
 ## Struttura file da creare
 
 ```
 api/
-├── auth/
-│   ├── login.js
-│   ├── logout.js
-│   └── verify.js
-├── content/
-│   ├── pages.js
-│   ├── sections.js
-│   └── media.js
+├── models/
+│   ├── Page.js
+│   ├── Section.js
+│   ├── Media.js
+│   └── User.js
 ├── utils/
-│   ├── db.js
-│   ├── auth.js
-│   └── validation.js
-└── health.js
+│   ├── database.js
+│   ├── cloudinary.js
+│   └── migrations.js
+└── media/
+    ├── upload.js
+    ├── delete.js
+    └── transform.js
 ```
 
 ## Deliverables
 
-- [x] `vercel.json` - Configurazione deployment
-- [x] `api/health.js` - Health check endpoint
-- [x] `api/utils/` - Utilities condivise
-- [x] `package.json` aggiornato con dependencies backend
-- [x] `.env.example` - Template variabili d'ambiente
+- [ ] Database connection configurato
+- [ ] Modelli dati implementati
+- [ ] Cloudinary SDK integrato
+- [ ] API endpoints per upload media
+- [ ] Seeding data iniziale
+- [ ] Documentazione schema database
 
-## Criteri di completamento
+## Configurazioni Cloudinary
 
-- Backend deployabile su Vercel
-- Endpoint health check funzionante
-- CORS configurato correttamente
-- Error handling implementato
-- Logging strutturato attivo
+- **Upload presets** per diversi tipi di media
+- **Transformations** automatiche per responsive images
+- **Folder organization**: `/korsvagen/{pageId}/{sectionType}/`
+- **Security**: Signed uploads con timestamp validation
 
 ## Dependencies da aggiungere
 
 ```json
 {
-  "express": "^4.18.2",
-  "cors": "^2.8.5",
-  "helmet": "^7.0.0",
-  "morgan": "^1.10.0",
-  "dotenv": "^16.3.1",
-  "joi": "^17.9.2"
+  "mongoose": "^7.4.0", // o "pg": "^8.11.0" per PostgreSQL
+  "cloudinary": "^1.38.0",
+  "multer": "^1.4.5-lts.1",
+  "sharp": "^0.32.1",
+  "uuid": "^9.0.0"
 }
 ```
 
+## Variabili d'ambiente richieste
+
+```
+DATABASE_URL=
+CLOUDINARY_CLOUD_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
+CLOUDINARY_UPLOAD_PRESET=
+```
+
+## Criteri di completamento
+
+- Database connesso e operativo
+- Modelli dati testati con CRUD operations
+- Upload media funzionante con Cloudinary
+- Transformations automatiche attive
+- Seeding data iniziale completato
+
 ## Log Requirements
 
-Creare file `logs/task-02-backend-setup.md` con:
+Creare file `logs/task-03-database-cloudinary.md` con:
 
 - Timestamp di inizio/fine
-- Configurazioni implementate
-- Test endpoint effettuati
-- Problemi risolti durante setup
+- Configurazione database scelta e motivazioni
+- Test upload/download media effettuati
+- Performance metrics iniziali
+- Problemi risolti durante integrazione
