@@ -1,9 +1,117 @@
-const Joi = require("joi");
-
 /**
- * Enhanced Validation Utilities with Joi
+ * Enhanced Validation Utilities
+ * Combined Joi validation with express-validator for authentication
  * Updated for Supabase database integration
  */
+
+import Joi from "joi";
+import { body, validationResult } from "express-validator";
+import { validatePasswordStrength } from "./password.js";
+
+/**
+ * Handle express-validator validation errors
+ */
+export const handleValidationErrors = (req, res, next) => {
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    return res.status(400).json({
+      success: false,
+      error: "Validation Error",
+      message: "Please check your input and try again.",
+      details: errors.array().map((error) => ({
+        field: error.path,
+        message: error.msg,
+        value: error.value,
+      })),
+    });
+  }
+
+  next();
+};
+
+/**
+ * Login validation rules
+ */
+export const validateLogin = [
+  body("email")
+    .isEmail()
+    .normalizeEmail()
+    .withMessage("Please provide a valid email address")
+    .isLength({ max: 254 })
+    .withMessage("Email address is too long"),
+
+  body("password")
+    .notEmpty()
+    .withMessage("Password is required")
+    .isLength({ min: 1, max: 128 })
+    .withMessage("Password must be between 1 and 128 characters"),
+
+  handleValidationErrors,
+];
+
+/**
+ * Change password validation rules
+ */
+export const validateChangePassword = [
+  body("currentPassword")
+    .notEmpty()
+    .withMessage("Current password is required"),
+
+  body("newPassword")
+    .isLength({ min: 8, max: 128 })
+    .withMessage("New password must be between 8 and 128 characters")
+    .custom((value) => {
+      const validation = validatePasswordStrength(value);
+      if (!validation.isValid) {
+        throw new Error(validation.errors.join(", "));
+      }
+      return true;
+    }),
+
+  body("confirmPassword").custom((value, { req }) => {
+    if (value !== req.body.newPassword) {
+      throw new Error("Password confirmation does not match");
+    }
+    return true;
+  }),
+
+  handleValidationErrors,
+];
+
+/**
+ * Refresh token validation
+ */
+export const validateRefreshToken = [
+  body("refreshToken")
+    .notEmpty()
+    .withMessage("Refresh token is required")
+    .isJWT()
+    .withMessage("Invalid refresh token format"),
+
+  handleValidationErrors,
+];
+
+/**
+ * Sanitize user input
+ */
+export const sanitizeInput = (req, res, next) => {
+  // Remove any HTML tags from string fields
+  const sanitizeString = (str) => {
+    if (typeof str !== "string") return str;
+    return str.replace(/<[^>]*>/g, "").trim();
+  };
+
+  if (req.body) {
+    Object.keys(req.body).forEach((key) => {
+      if (typeof req.body[key] === "string") {
+        req.body[key] = sanitizeString(req.body[key]);
+      }
+    });
+  }
+
+  next();
+};
 
 // Validation schemas
 export const pageContentValidation = Joi.object({

@@ -1,8 +1,8 @@
-# Task 3: Setup Database e Cloudinary per gestione contenuti e media
+Task 4: Implementazione Sistema di Autenticazione Sicuro
 
 ## Obiettivo
 
-Implementare il database per la persistenza dei contenuti e configurare Cloudinary per la gestione ottimizzata di immagini e video.
+Implementare un sistema di autenticazione robusto con JWT, protezione CSRF, rate limiting e gestione sessioni per l'accesso alla dashboard CMS.
 
 ## Azioni specifiche
 
@@ -11,117 +11,133 @@ Implementare il database per la persistenza dei contenuti e configurare Cloudina
    - Analizzare la documentazione nella cartella /docs
    - Analizzare log nella cartella /logs
 
-1. **Database Setup**
+1. **JWT Authentication**
 
-   - Scegliere e configurare database (Supabase)
-   - Creare modelli dati per contenuti dinamici
-   - Setup connection pooling per Vercel serverless
-   - Implementare migrations/seeding iniziale
+   - Implementare login con email/password
+   - Generazione e validazione JWT tokens
+   - Refresh token mechanism per sicurezza
+   - Middleware di autenticazione per route protette
 
-2. **Cloudinary Integration**
+2. **Security Features**
 
-   - Setup account e configurazione API keys
-   - Implementare upload endpoint sicuri
-   - Configurare trasformazioni automatiche per ottimizzazione
-   - Setup folder structure per organizzazione media
+   - Password hashing con bcrypt
+   - Rate limiting per login attempts
+   - CSRF protection
+   - Session management sicuro
+   - Logout con token blacklisting
 
-3. **Modelli Dati**
-   ```javascript
-   // Schema Page Content
-   {
-     pageId: String,
-     sections: [{
-       id: String,
-       type: String, // 'hero', 'about', 'gallery', etc.
-       content: {
-         title: String,
-         description: String,
-         images: [{ cloudinaryId: String, url: String, alt: String }],
-         videos: [{ cloudinaryId: String, url: String, poster: String }],
-         customFields: Object
-       },
-       order: Number,
-       isActive: Boolean
-     }],
-     metadata: {
-       title: String,
-       description: String,
-       ogImage: String
-     }
-   }
-   ```
+3. **User Management**
+   - Modello User con ruoli (admin, editor)
+   - Password reset via email (opzionale per MVP)
+   - Account lockout dopo tentativi falliti
+   - Audit log per accessi
+
+## Struttura API Endpoints
+
+```
+POST /api/auth/login
+POST /api/auth/logout
+POST /api/auth/refresh
+GET  /api/auth/me
+POST /api/auth/change-password
+```
+
+## Middleware di sicurezza
+
+```javascript
+// authMiddleware.js
+const authenticateToken = (req, res, next) => {
+  // Verifica JWT token
+};
+
+const requireAdmin = (req, res, next) => {
+  // Verifica ruolo admin
+};
+
+const rateLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minuti
+  max: 5, // max 5 tentativi login
+});
+```
 
 ## Struttura file da creare
 
 ```
 api/
-├── models/
-│   ├── Page.js
-│   ├── Section.js
-│   ├── Media.js
-│   └── User.js
-├── utils/
-│   ├── database.js
-│   ├── cloudinary.js
-│   └── migrations.js
-└── media/
-    ├── upload.js
-    ├── delete.js
-    └── transform.js
+├── auth/
+│   ├── login.js
+│   ├── logout.js
+│   ├── refresh.js
+│   ├── me.js
+│   └── change-password.js
+├── middleware/
+│   ├── auth.js
+│   ├── rateLimiter.js
+│   └── validation.js
+└── utils/
+    ├── jwt.js
+    ├── password.js
+    └── security.js
 ```
 
 ## Deliverables
 
-- [ ] Database connection configurato
-- [ ] Modelli dati implementati
-- [ ] Cloudinary SDK integrato
-- [ ] API endpoints per upload media
-- [ ] Seeding data iniziale
-- [ ] Documentazione schema database
-
-## Configurazioni Cloudinary
-
-- **Upload presets** per diversi tipi di media
-- **Transformations** automatiche per responsive images
-- **Folder organization**: `/korsvagen/{pageId}/{sectionType}/`
-- **Security**: Signed uploads con timestamp validation
+- [ ] JWT authentication implementato
+- [ ] Login/logout endpoints funzionanti
+- [ ] Middleware di autenticazione
+- [ ] Rate limiting configurato
+- [ ] Password hashing sicuro
+- [ ] Refresh token mechanism
+- [ ] Documentazione API auth
 
 ## Dependencies da aggiungere
 
 ```json
 {
-  "mongoose": "^7.4.0", // o "pg": "^8.11.0" per PostgreSQL
-  "cloudinary": "^1.38.0",
-  "multer": "^1.4.5-lts.1",
-  "sharp": "^0.32.1",
-  "uuid": "^9.0.0"
+  "jsonwebtoken": "^9.0.1",
+  "bcryptjs": "^2.4.3",
+  "express-rate-limit": "^6.7.1",
+  "express-validator": "^7.0.1",
+  "cookie-parser": "^1.4.6",
+  "express-session": "^1.17.3"
 }
 ```
 
 ## Variabili d'ambiente richieste
 
 ```
-DATABASE_URL=
-CLOUDINARY_CLOUD_NAME=
-CLOUDINARY_API_KEY=
-CLOUDINARY_API_SECRET=
-CLOUDINARY_UPLOAD_PRESET=
+JWT_SECRET=your_super_secret_jwt_key_256_bits
+JWT_REFRESH_SECRET=your_refresh_token_secret
+JWT_EXPIRES_IN=1h
+JWT_REFRESH_EXPIRES_IN=7d
+SESSION_SECRET=your_session_secret
 ```
+
+## Security Checklist
+
+- [ ] Password strength validation
+- [ ] JWT secret sufficientemente complesso
+- [ ] Rate limiting su login endpoint
+- [ ] Secure cookie settings (httpOnly, secure, sameSite)
+- [ ] CORS configurato correttamente
+- [ ] Input validation su tutti i campi
+- [ ] Error messages che non rivelano info sensibili
 
 ## Criteri di completamento
 
-- Database connesso e operativo
-- Modelli dati testati con CRUD operations
-- Upload media funzionante con Cloudinary
-- Transformations automatiche attive
-- Seeding data iniziale completato
+- Login funzionante con credenziali valide
+- Token JWT generato e validato correttamente
+- Middleware di auth protegge route sensibili
+- Rate limiting previene brute force attacks
+- Logout invalida correttamente i token
+- Refresh token mechanism operativo
 
 ## Log Requirements
 
-Creare file `logs/task-03-database-cloudinary.md` con:
+Creare file `logs/task-04-authentication.md` con:
 
 - Timestamp di inizio/fine
-- Configurazione database scelta e motivazioni
-- Test upload/download media effettuati
-- Performance metrics iniziali
-- Problemi risolti durante integrazione
+- Test di sicurezza effettuati
+- Configurazioni JWT implementate
+- Rate limiting testato
+- Problemi di sicurezza identificati e risolti

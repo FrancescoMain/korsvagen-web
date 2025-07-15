@@ -4,6 +4,7 @@
  */
 
 import { getSupabase, executeQuery } from "../utils/database.js";
+import { hashPassword, comparePassword } from "../utils/password.js";
 import jwt from "jsonwebtoken";
 
 export class User {
@@ -172,82 +173,178 @@ export class User {
   }
 
   /**
-   * Authenticate user (for mock authentication)
+   * Find user by email with password (for authentication)
+   */
+  static async findByEmailWithPassword(email) {
+    return executeQuery(async (supabase) => {
+      return await supabase
+        .from("users")
+        .select(
+          "id, email, name, role, is_active, password_hash, failed_login_attempts, locked_until, last_login"
+        )
+        .eq("email", email.toLowerCase())
+        .single();
+    });
+  }
+
+  /**
+   * Authenticate user with email and password
    */
   static async authenticate(email, password) {
-    // In a real implementation, you would hash and compare passwords
-    // For now, this is a mock implementation
-    const mockUsers = [
-      {
-        id: "1",
-        email: "admin@korsvagen.com",
-        name: "Admin User",
-        role: "admin",
-        password: "admin123", // In production, this would be hashed
-      },
-    ];
+    try {
+      const result = await User.findByEmailWithPassword(email);
+      if (!result.success || !result.data) {
+        throw new Error("Invalid credentials");
+      }
 
-    const user = mockUsers.find(
-      (u) =>
-        u.email.toLowerCase() === email.toLowerCase() && u.password === password
-    );
+      const user = result.data;
 
-    if (!user) {
+      // Check if user is active
+      if (!user.is_active) {
+        throw new Error("Account is inactive");
+      }
+
+      // Check if account is locked
+      if (user.locked_until && new Date(user.locked_until) > new Date()) {
+        const lockDuration = Math.ceil(
+          (new Date(user.locked_until) - new Date()) / 60000
+        );
+        throw new Error(`Account is locked for ${lockDuration} more minutes`);
+      }
+
+      // Verify password
+      const isPasswordValid = await comparePassword(
+        password,
+        user.password_hash
+      );
+      if (!isPasswordValid) {
+        // Increment failed login attempts
+        await User.incrementFailedAttempts(user.id);
+        throw new Error("Invalid credentials");
+      }
+
+      // Reset failed attempts and update last login
+      await User.resetFailedAttempts(user.id);
+      await User.updateLastLogin(user.id);
+
+      // Return user without sensitive data
       return {
-        success: false,
-        error: "Invalid credentials",
-      };
-    }
-
-    // Create user in database if doesn't exist
-    const existingUser = await this.findByEmail(email);
-    let dbUser;
-
-    if (!existingUser.success || !existingUser.data) {
-      const createResult = await this.create({
+        id: user.id,
         email: user.email,
         name: user.name,
         role: user.role,
-      });
+        isActive: user.is_active,
+        lastLogin: user.last_login,
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
 
-      if (!createResult.success) {
-        return {
-          success: false,
-          error: "Failed to create user",
-        };
+  /**
+   * Update user password
+   */
+  static async updatePassword(id, newPassword) {
+    return executeQuery(async (supabase) => {
+      const hashedPassword = await hashPassword(newPassword);
+
+      return await supabase
+        .from("users")
+        .update({
+          password_hash: hashedPassword,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", id)
+        .select()
+        .single();
+    });
+  }
+
+  /**
+   * Increment failed login attempts
+   */
+  static async incrementFailedAttempts(id) {
+    return executeQuery(async (supabase) => {
+      const { data: user } = await supabase
+        .from("users")
+        .select("failed_login_attempts")
+        .eq("id", id)
+        .single();
+
+      const attempts = (user?.failed_login_attempts || 0) + 1;
+      const maxAttempts = 5;
+      const lockDuration = 30 * 60 * 1000; // 30 minutes
+
+      const updateData = {
+        failed_login_attempts: attempts,
+        updated_at: new Date().toISOString(),
+      };
+
+      // Lock account after max attempts
+      if (attempts >= maxAttempts) {
+        updateData.locked_until = new Date(
+          Date.now() + lockDuration
+        ).toISOString();
       }
 
-      dbUser = createResult.data;
-    } else {
-      dbUser = existingUser.data;
-    }
+      return await supabase.from("users").update(updateData).eq("id", id);
+    });
+  }
 
-    // Update last login
-    await this.updateLastLogin(dbUser.id);
+  /**
+   * Reset failed login attempts
+   */
+  static async resetFailedAttempts(id) {
+    return executeQuery(async (supabase) => {
+      return await supabase
+        .from("users")
+        .update({
+          failed_login_attempts: 0,
+          locked_until: null,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", id);
+    });
+  }
 
-    // Generate JWT token
-    const token = jwt.sign(
-      {
-        userId: dbUser.id,
-        email: dbUser.email,
-        role: dbUser.role,
-      },
-      process.env.JWT_SECRET || "korsvagen-secret-key",
-      { expiresIn: "24h" }
-    );
+  /**
+   * Update last login timestamp
+   */
+  static async updateLastLogin(id) {
+    return executeQuery(async (supabase) => {
+      return await supabase
+        .from("users")
+        .update({
+          last_login: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", id);
+    });
+  }
 
-    return {
-      success: true,
-      data: {
-        user: {
-          id: dbUser.id,
-          email: dbUser.email,
-          name: dbUser.name,
-          role: dbUser.role,
-        },
-        token,
-      },
-    };
+  /**
+   * Create user with hashed password
+   */
+  static async createWithPassword(userData) {
+    return executeQuery(async (supabase) => {
+      const hashedPassword = await hashPassword(userData.password);
+
+      const data = {
+        email: userData.email.toLowerCase(),
+        name: userData.name,
+        password_hash: hashedPassword,
+        role: userData.role || "admin",
+        is_active: userData.isActive !== undefined ? userData.isActive : true,
+        failed_login_attempts: 0,
+        updated_at: new Date().toISOString(),
+      };
+
+      return await supabase
+        .from("users")
+        .insert(data)
+        .select("id, email, name, role, is_active, created_at, updated_at")
+        .single();
+    });
   }
 
   /**

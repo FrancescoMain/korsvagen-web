@@ -4,19 +4,24 @@
  * Handles user authentication with security features
  */
 
-import { User } from '../models/User.js';
-import { generateTokenPair } from '../utils/jwt.js';
-import { authRateLimit, progressiveRateLimit, recordFailedAttempt, clearFailedAttempts } from '../utils/rateLimiter.js';
-import { validateLogin, sanitizeInput } from '../utils/validation.js';
-import { generateCSRFToken } from '../utils/security.js';
+import { User } from "../models/User.js";
+import { generateTokenPair } from "../utils/jwt.js";
+import {
+  authRateLimit,
+  progressiveRateLimit,
+  recordFailedAttempt,
+  clearFailedAttempts,
+} from "../utils/rateLimiter.js";
+import { validateLogin, sanitizeInput } from "../utils/validation.js";
+import { generateCSRFToken } from "../utils/security.js";
 
 export default async function handler(req, res) {
   // Only allow POST method
-  if (req.method !== 'POST') {
+  if (req.method !== "POST") {
     return res.status(405).json({
       success: false,
-      error: 'Method Not Allowed',
-      message: 'Only POST method is allowed for this endpoint'
+      error: "Method Not Allowed",
+      message: "Only POST method is allowed for this endpoint",
     });
   }
 
@@ -61,9 +66,9 @@ export default async function handler(req, res) {
       recordFailedAttempt(req, email);
       return res.status(400).json({
         success: false,
-        error: 'Missing Credentials',
-        message: 'Email and password are required',
-        code: 'MISSING_CREDENTIALS'
+        error: "Missing Credentials",
+        message: "Email and password are required",
+        code: "MISSING_CREDENTIALS",
       });
     }
 
@@ -73,12 +78,12 @@ export default async function handler(req, res) {
       user = await User.authenticate(email, password);
     } catch (authError) {
       recordFailedAttempt(req, email);
-      
+
       return res.status(401).json({
         success: false,
-        error: 'Authentication Failed',
-        message: 'Invalid email or password',
-        code: 'INVALID_CREDENTIALS'
+        error: "Authentication Failed",
+        message: "Invalid email or password",
+        code: "INVALID_CREDENTIALS",
       });
     }
 
@@ -89,7 +94,7 @@ export default async function handler(req, res) {
     const tokenPayload = {
       id: user.id,
       email: user.email,
-      role: user.role
+      role: user.role,
     };
 
     const tokens = generateTokenPair(tokenPayload);
@@ -100,55 +105,56 @@ export default async function handler(req, res) {
     // Set secure HTTP-only cookie for refresh token
     const cookieOptions = {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-      path: '/api/auth'
+      path: "/api/auth",
     };
 
-    res.setHeader('Set-Cookie', [
+    res.setHeader("Set-Cookie", [
       `refreshToken=${tokens.refreshToken}; ${Object.entries(cookieOptions)
         .map(([key, value]) => `${key}=${value}`)
-        .join('; ')}`,
+        .join("; ")}`,
       `csrfToken=${csrfToken}; ${Object.entries({
         ...cookieOptions,
-        httpOnly: false // CSRF token needs to be accessible to client
+        httpOnly: false, // CSRF token needs to be accessible to client
       })
         .map(([key, value]) => `${key}=${value}`)
-        .join('; ')}`
+        .join("; ")}`,
     ]);
 
     // Log successful login
-    console.log(`Successful login for user: ${user.email} at ${new Date().toISOString()}`);
+    console.log(
+      `Successful login for user: ${user.email} at ${new Date().toISOString()}`
+    );
 
     return res.status(200).json({
       success: true,
-      message: 'Login successful',
+      message: "Login successful",
       data: {
         user: {
           id: user.id,
           email: user.email,
           name: user.name,
-          role: user.role
+          role: user.role,
         },
         accessToken: tokens.accessToken,
         expiresIn: tokens.expiresIn,
         tokenType: tokens.tokenType,
-        csrfToken
-      }
+        csrfToken,
+      },
     });
-
   } catch (error) {
-    console.error('Login error:', error);
-    
+    console.error("Login error:", error);
+
     // Don't expose internal errors in production
-    const isDevelopment = process.env.NODE_ENV === 'development';
-    
+    const isDevelopment = process.env.NODE_ENV === "development";
+
     return res.status(500).json({
       success: false,
-      error: 'Internal Server Error',
-      message: isDevelopment ? error.message : 'An unexpected error occurred',
-      ...(isDevelopment && { stack: error.stack })
+      error: "Internal Server Error",
+      message: isDevelopment ? error.message : "An unexpected error occurred",
+      ...(isDevelopment && { stack: error.stack }),
     });
   }
 }
