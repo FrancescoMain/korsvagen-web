@@ -1,28 +1,25 @@
 /**
- * Pages Content API Endpoint
- * Comprehensive CRUD operations for page content management
+ * Media Gallery API Endpoint
+ * Handles media file listing, filtering, and management
  */
 
 import { applyMiddleware } from "../utils/middleware.js";
 import { requireAuth } from "../utils/auth.js";
 import {
-  validatePageCreate,
-  validatePageUpdate,
-  validatePageQuery,
-  validatePageParam,
-} from "../validators/pageValidator.js";
-import { PageController } from "../controllers/pageController.js";
+  validateMediaQuery,
+  validateMediaParam,
+  validateMediaUpdate,
+} from "../validators/mediaValidator.js";
+import { MediaController } from "../controllers/mediaController.js";
 
 async function handler(req, res) {
   const { method } = req;
-  const { pageId } = req.query;
+  const { mediaId } = req.query;
 
   try {
     switch (method) {
       case "GET":
         return await handleGet(req, res);
-      case "POST":
-        return await handlePost(req, res);
       case "PUT":
         return await handlePut(req, res);
       case "DELETE":
@@ -35,7 +32,7 @@ async function handler(req, res) {
         });
     }
   } catch (error) {
-    console.error("Pages API error:", error);
+    console.error("Media Gallery API error:", error);
     return res.status(500).json({
       success: false,
       error: "Internal Server Error",
@@ -45,14 +42,16 @@ async function handler(req, res) {
 }
 
 /**
- * GET /api/content/pages
- * GET /api/content/pages?pageId=home
+ * GET /api/media/gallery
+ * GET /api/media/gallery?mediaId=123
+ * Get media gallery or specific media file
  */
 async function handleGet(req, res) {
   const {
-    pageId,
-    withSections = "false",
-    published = "true",
+    mediaId,
+    resourceType,
+    folder,
+    tags,
     limit = "50",
     offset = "0",
     sortBy = "created_at",
@@ -67,11 +66,13 @@ async function handleGet(req, res) {
   if (offset && (isNaN(offset) || parseInt(offset) < 0)) {
     validationErrors.push("Offset must be a non-negative integer");
   }
-  if (withSections && !["true", "false"].includes(withSections)) {
-    validationErrors.push("withSections must be true or false");
-  }
-  if (published && !["true", "false"].includes(published)) {
-    validationErrors.push("published must be true or false");
+  if (
+    resourceType &&
+    !["image", "video", "document", "raw"].includes(resourceType)
+  ) {
+    validationErrors.push(
+      "Resource type must be one of: image, video, document, raw"
+    );
   }
 
   if (validationErrors.length > 0) {
@@ -83,11 +84,9 @@ async function handleGet(req, res) {
   }
 
   try {
-    if (pageId) {
-      // Get specific page
-      const result = await PageController.getPageWithContent(pageId, {
-        published: published === "true",
-      });
+    if (mediaId) {
+      // Get specific media file
+      const result = await MediaController.getMediaById(mediaId);
 
       if (!result.success) {
         const statusCode = result.statusCode || 500;
@@ -103,14 +102,13 @@ async function handleGet(req, res) {
         data: result.data,
       });
     } else {
-      // Get all pages
-      const result = await PageController.getAllPages({
-        published: published === "true",
-        withSections: withSections === "true",
+      // Get media gallery
+      const result = await MediaController.getMediaGallery({
+        folder,
+        resourceType,
+        tags,
         limit: parseInt(limit),
         offset: parseInt(offset),
-        sortBy,
-        sortOrder,
       });
 
       if (!result.success) {
@@ -127,88 +125,43 @@ async function handleGet(req, res) {
       });
     }
   } catch (error) {
-    console.error("GET pages error:", error);
+    console.error("GET media gallery error:", error);
     return res.status(500).json({
       success: false,
-      error: "Failed to retrieve pages",
+      error: "Failed to retrieve media",
       message: error.message,
     });
   }
 }
 
 /**
- * POST /api/content/pages
- * Create a new page
- */
-async function handlePost(req, res) {
-  // Authentication required for creating pages
-  const authResult = await requireAuth(req, res);
-  if (!authResult.success) {
-    return res.status(401).json({
-      success: false,
-      error: "Authentication required",
-      message: "You must be logged in to create pages",
-    });
-  }
-
-  const userId = authResult.user.id;
-
-  try {
-    const result = await PageController.createPage(req.body, userId);
-
-    if (!result.success) {
-      const statusCode = result.statusCode || 400;
-      return res.status(statusCode).json({
-        success: false,
-        error: result.error,
-        message: result.error,
-        details: result.details,
-      });
-    }
-
-    return res.status(201).json({
-      success: true,
-      data: result.data,
-      message: result.message,
-    });
-  } catch (error) {
-    console.error("POST pages error:", error);
-    return res.status(500).json({
-      success: false,
-      error: "Failed to create page",
-      message: error.message,
-    });
-  }
-}
-
-/**
- * PUT /api/content/pages?pageId=home
- * Update an existing page
+ * PUT /api/media/gallery?mediaId=123
+ * Update media metadata
  */
 async function handlePut(req, res) {
-  // Authentication required for updating pages
+  // Authentication required for updating media
   const authResult = await requireAuth(req, res);
   if (!authResult.success) {
     return res.status(401).json({
       success: false,
       error: "Authentication required",
-      message: "You must be logged in to update pages",
+      message: "You must be logged in to update media",
     });
   }
 
-  const { pageId } = req.query;
-  if (!pageId) {
+  const { mediaId } = req.query;
+  if (!mediaId) {
     return res.status(400).json({
       success: false,
-      error: "Missing pageId",
-      message: "pageId is required in query parameters",
+      error: "Missing mediaId",
+      message: "mediaId is required in query parameters",
     });
   }
 
   const userId = authResult.user.id;
 
   try {
-    const result = await PageController.updatePage(pageId, req.body, userId);
+    const result = await MediaController.updateMedia(mediaId, req.body, userId);
 
     if (!result.success) {
       const statusCode = result.statusCode || 400;
@@ -216,7 +169,6 @@ async function handlePut(req, res) {
         success: false,
         error: result.error,
         message: result.error,
-        details: result.details,
       });
     }
 
@@ -226,43 +178,43 @@ async function handlePut(req, res) {
       message: result.message,
     });
   } catch (error) {
-    console.error("PUT pages error:", error);
+    console.error("PUT media error:", error);
     return res.status(500).json({
       success: false,
-      error: "Failed to update page",
+      error: "Failed to update media",
       message: error.message,
     });
   }
 }
 
 /**
- * DELETE /api/content/pages?pageId=home
- * Delete a page and all its sections
+ * DELETE /api/media/gallery?mediaId=123
+ * Delete media file
  */
 async function handleDelete(req, res) {
-  // Authentication required for deleting pages
+  // Authentication required for deleting media
   const authResult = await requireAuth(req, res);
   if (!authResult.success) {
     return res.status(401).json({
       success: false,
       error: "Authentication required",
-      message: "You must be logged in to delete pages",
+      message: "You must be logged in to delete media",
     });
   }
 
-  const { pageId } = req.query;
-  if (!pageId) {
+  const { mediaId } = req.query;
+  if (!mediaId) {
     return res.status(400).json({
       success: false,
-      error: "Missing pageId",
-      message: "pageId is required in query parameters",
+      error: "Missing mediaId",
+      message: "mediaId is required in query parameters",
     });
   }
 
   const userId = authResult.user.id;
 
   try {
-    const result = await PageController.deletePage(pageId, userId);
+    const result = await MediaController.deleteMedia(mediaId, userId);
 
     if (!result.success) {
       const statusCode = result.statusCode || 400;
@@ -278,10 +230,10 @@ async function handleDelete(req, res) {
       message: result.message,
     });
   } catch (error) {
-    console.error("DELETE pages error:", error);
+    console.error("DELETE media error:", error);
     return res.status(500).json({
       success: false,
-      error: "Failed to delete page",
+      error: "Failed to delete media",
       message: error.message,
     });
   }

@@ -1,329 +1,421 @@
 /**
- * Sections API Endpoint
- * Handles CRUD operations for website sections using Supabase
+ * Sections Content API Endpoint
+ * Comprehensive CRUD operations for section content management
  */
 
-import { applyMiddleware } from '../utils/middleware.js';
-import { validateRequest, sectionValidation } from '../utils/validation.js';
-import { requireAuth } from '../utils/auth.js';
-import { Section } from '../models/Section.js';
+import { applyMiddleware } from "../utils/middleware.js";
+import { requireAuth } from "../utils/auth.js";
+import {
+  validateSectionCreate,
+  validateSectionUpdate,
+  validateSectionReorder,
+  validateSectionQuery,
+  validatePageParam,
+  validateSectionParam,
+} from "../validators/sectionValidator.js";
+import { SectionController } from "../controllers/sectionController.js";
 
 async function handler(req, res) {
-  if (req.method === 'GET') {
-    // Public endpoint - Get active sections
-    const { pageId, type, sectionId } = req.query;
-    
-    try {
-      if (sectionId) {
-        // Get specific section by ID
-        const result = await Section.findBySectionId(sectionId);
-        
-        if (!result.success || !result.data) {
-          return res.status(404).json({
-            success: false,
-            error: 'Section not found'
-          });
-        }
-        
-        // Check if section is active (for public access)
-        if (!result.data.is_active) {
-          return res.status(404).json({
-            success: false,
-            error: 'Section not found'
-          });
-        }
-        
-        res.json({
-          success: true,
-          data: result.data
-        });
-      } else if (pageId) {
-        // Get sections for a specific page
-        const result = await Section.findByPageId(pageId, { activeOnly: true });
-        
-        if (!result.success) {
-          throw new Error(result.error);
-        }
-        
-        res.json({
-          success: true,
-          data: result.data || []
-        });
-      } else if (type) {
-        // Get sections by type
-        const result = await Section.findByType(type, { activeOnly: true });
-        
-        if (!result.success) {
-          throw new Error(result.error);
-        }
-        
-        res.json({
-          success: true,
-          data: result.data || []
-        });
-      } else {
-        return res.status(400).json({
+  const { method } = req;
+  const { pageId, sectionId } = req.query;
+
+  try {
+    switch (method) {
+      case "GET":
+        return await handleGet(req, res);
+      case "POST":
+        return await handlePost(req, res);
+      case "PUT":
+        return await handlePut(req, res);
+      case "DELETE":
+        return await handleDelete(req, res);
+      case "PATCH":
+        return await handlePatch(req, res);
+      default:
+        return res.status(405).json({
           success: false,
-          error: 'pageId, type, or sectionId parameter is required'
+          error: "Method not allowed",
+          message: `${method} method is not supported for this endpoint`,
         });
-      }
-    } catch (error) {
-      console.error('Get sections error:', error);
-      res.status(500).json({
-        success: false,
-        error: 'Failed to retrieve sections'
-      });
     }
-  } else if (req.method === 'POST') {
-    // Protected endpoint - Create new section
-    const authResult = await requireAuth(req);
-    if (!authResult.success) {
-      return res.status(401).json({
-        success: false,
-        error: authResult.error
-      });
-    }
-    
-    try {
-      // Validate request body
-      const validation = validateRequest(req.body, sectionValidation);
-      if (!validation.isValid) {
-        return res.status(400).json({
-          success: false,
-          error: 'Validation failed',
-          details: validation.errors
-        });
-      }
-      
-      const sectionData = req.body;
-      
-      // Check if section with same sectionId already exists
-      if (sectionData.sectionId) {
-        const existingSection = await Section.findBySectionId(sectionData.sectionId);
-        if (existingSection.success && existingSection.data) {
-          return res.status(409).json({
-            success: false,
-            error: 'Section with this sectionId already exists'
-          });
-        }
-      }
-      
-      // Create new section
-      const result = await Section.create(sectionData);
-      
-      if (!result.success) {
-        throw new Error(result.error);
-      }
-      
-      res.status(201).json({
-        success: true,
-        message: 'Section created successfully',
-        data: result.data
-      });
-      
-    } catch (error) {
-      console.error('Create section error:', error);
-      res.status(500).json({
-        success: false,
-        error: 'Failed to create section'
-      });
-    }
-  } else if (req.method === 'PUT') {
-    // Protected endpoint - Update section
-    const authResult = await requireAuth(req);
-    if (!authResult.success) {
-      return res.status(401).json({
-        success: false,
-        error: authResult.error
-      });
-    }
-    
-    try {
-      const { id, ...updateData } = req.body;
-      
-      if (!id) {
-        return res.status(400).json({
-          success: false,
-          error: 'id is required'
-        });
-      }
-      
-      // Update section
-      const result = await Section.update(id, updateData);
-      
-      if (!result.success) {
-        if (result.error.includes('not found')) {
-          return res.status(404).json({
-            success: false,
-            error: 'Section not found'
-          });
-        }
-        throw new Error(result.error);
-      }
-      
-      res.json({
-        success: true,
-        message: 'Section updated successfully',
-        data: result.data
-      });
-      
-    } catch (error) {
-      console.error('Update section error:', error);
-      res.status(500).json({
-        success: false,
-        error: 'Failed to update section'
-      });
-    }
-  } else if (req.method === 'DELETE') {
-    // Protected endpoint - Delete section
-    const authResult = await requireAuth(req);
-    if (!authResult.success) {
-      return res.status(401).json({
-        success: false,
-        error: authResult.error
-      });
-    }
-    
-    try {
-      const { id } = req.body;
-      
-      if (!id) {
-        return res.status(400).json({
-          success: false,
-          error: 'id is required'
-        });
-      }
-      
-      // Delete section
-      const result = await Section.delete(id);
-      
-      if (!result.success) {
-        if (result.error.includes('not found')) {
-          return res.status(404).json({
-            success: false,
-            error: 'Section not found'
-          });
-        }
-        throw new Error(result.error);
-      }
-      
-      res.json({
-        success: true,
-        message: 'Section deleted successfully'
-      });
-      
-    } catch (error) {
-      console.error('Delete section error:', error);
-      res.status(500).json({
-        success: false,
-        error: 'Failed to delete section'
-      });
-    }
-  } else if (req.method === 'PATCH') {
-    // Protected endpoint - Special operations (reorder, toggle active, etc.)
-    const authResult = await requireAuth(req);
-    if (!authResult.success) {
-      return res.status(401).json({
-        success: false,
-        error: authResult.error
-      });
-    }
-    
-    try {
-      const { action, ...actionData } = req.body;
-      
-      if (!action) {
-        return res.status(400).json({
-          success: false,
-          error: 'action is required'
-        });
-      }
-      
-      switch (action) {
-        case 'reorder':
-          const { pageId, sections } = actionData;
-          if (!pageId || !Array.isArray(sections)) {
-            return res.status(400).json({
-              success: false,
-              error: 'pageId and sections array are required for reorder action'
-            });
-          }
-          
-          const reorderResult = await Section.reorder(pageId, sections);
-          if (!reorderResult.success) {
-            throw new Error(reorderResult.error);
-          }
-          
-          res.json({
-            success: true,
-            message: 'Sections reordered successfully',
-            data: reorderResult.data
-          });
-          break;
-          
-        case 'toggle-active':
-          const { id } = actionData;
-          if (!id) {
-            return res.status(400).json({
-              success: false,
-              error: 'id is required for toggle-active action'
-            });
-          }
-          
-          const toggleResult = await Section.toggleActive(id);
-          if (!toggleResult.success) {
-            throw new Error(toggleResult.error);
-          }
-          
-          res.json({
-            success: true,
-            message: 'Section status toggled successfully',
-            data: toggleResult.data
-          });
-          break;
-          
-        case 'duplicate':
-          const { sourceId, targetPageId } = actionData;
-          if (!sourceId) {
-            return res.status(400).json({
-              success: false,
-              error: 'sourceId is required for duplicate action'
-            });
-          }
-          
-          const duplicateResult = await Section.duplicate(sourceId, targetPageId);
-          if (!duplicateResult.success) {
-            throw new Error(duplicateResult.error);
-          }
-          
-          res.json({
-            success: true,
-            message: 'Section duplicated successfully',
-            data: duplicateResult.data
-          });
-          break;
-          
-        default:
-          return res.status(400).json({
-            success: false,
-            error: `Unknown action: ${action}`
-          });
-      }
-      
-    } catch (error) {
-      console.error('Section action error:', error);
-      res.status(500).json({
-        success: false,
-        error: 'Failed to perform section action'
-      });
-    }
-  } else {
-    res.setHeader('Allow', ['GET', 'POST', 'PUT', 'DELETE', 'PATCH']);
-    res.status(405).json({
+  } catch (error) {
+    console.error("Sections API error:", error);
+    return res.status(500).json({
       success: false,
-      error: 'Method not allowed'
+      error: "Internal Server Error",
+      message: "An unexpected error occurred",
     });
   }
 }
 
-export default applyMiddleware(handler);
+/**
+ * GET /api/content/sections?pageId=home
+ * GET /api/content/sections?sectionId=hero-1
+ */
+async function handleGet(req, res) {
+  const {
+    pageId,
+    sectionId,
+    type,
+    activeOnly = "true",
+    sortBy = "order_index",
+    sortOrder = "asc",
+  } = req.query;
+
+  try {
+    if (sectionId) {
+      // Get specific section
+      const result = await SectionController.getSectionById(sectionId);
+
+      if (!result.success) {
+        const statusCode = result.statusCode || 500;
+        return res.status(statusCode).json({
+          success: false,
+          error: result.error,
+          message: result.error,
+        });
+      }
+
+      return res.json({
+        success: true,
+        data: result.data,
+      });
+    } else if (pageId) {
+      // Get sections for a page
+      const result = await SectionController.getSectionsByPageId(pageId, {
+        activeOnly: activeOnly === "true",
+        sortBy,
+        sortOrder,
+      });
+
+      if (!result.success) {
+        const statusCode = result.statusCode || 500;
+        return res.status(statusCode).json({
+          success: false,
+          error: result.error,
+          message: result.error,
+        });
+      }
+
+      return res.json({
+        success: true,
+        data: result.data,
+      });
+    } else {
+      return res.status(400).json({
+        success: false,
+        error: "Missing parameter",
+        message: "Either pageId or sectionId is required",
+      });
+    }
+  } catch (error) {
+    console.error("GET sections error:", error);
+    return res.status(500).json({
+      success: false,
+      error: "Failed to retrieve sections",
+      message: error.message,
+    });
+  }
+}
+
+/**
+ * POST /api/content/sections?pageId=home
+ * Create a new section for a page
+ */
+async function handlePost(req, res) {
+  // Authentication required for creating sections
+  const authResult = await requireAuth(req, res);
+  if (!authResult.success) {
+    return res.status(401).json({
+      success: false,
+      error: "Authentication required",
+      message: "You must be logged in to create sections",
+    });
+  }
+
+  const { pageId } = req.query;
+  if (!pageId) {
+    return res.status(400).json({
+      success: false,
+      error: "Missing pageId",
+      message: "pageId is required in query parameters",
+    });
+  }
+
+  const userId = authResult.user.id;
+
+  try {
+    const result = await SectionController.createSection(
+      pageId,
+      req.body,
+      userId
+    );
+
+    if (!result.success) {
+      const statusCode = result.statusCode || 400;
+      return res.status(statusCode).json({
+        success: false,
+        error: result.error,
+        message: result.error,
+        details: result.details,
+      });
+    }
+
+    return res.status(201).json({
+      success: true,
+      data: result.data,
+      message: result.message,
+    });
+  } catch (error) {
+    console.error("POST sections error:", error);
+    return res.status(500).json({
+      success: false,
+      error: "Failed to create section",
+      message: error.message,
+    });
+  }
+}
+
+/**
+ * PUT /api/content/sections?sectionId=hero-1
+ * Update an existing section
+ */
+async function handlePut(req, res) {
+  // Authentication required for updating sections
+  const authResult = await requireAuth(req, res);
+  if (!authResult.success) {
+    return res.status(401).json({
+      success: false,
+      error: "Authentication required",
+      message: "You must be logged in to update sections",
+    });
+  }
+
+  const { sectionId } = req.query;
+  if (!sectionId) {
+    return res.status(400).json({
+      success: false,
+      error: "Missing sectionId",
+      message: "sectionId is required in query parameters",
+    });
+  }
+
+  const userId = authResult.user.id;
+
+  try {
+    const result = await SectionController.updateSection(
+      sectionId,
+      req.body,
+      userId
+    );
+
+    if (!result.success) {
+      const statusCode = result.statusCode || 400;
+      return res.status(statusCode).json({
+        success: false,
+        error: result.error,
+        message: result.error,
+        details: result.details,
+      });
+    }
+
+    return res.json({
+      success: true,
+      data: result.data,
+      message: result.message,
+    });
+  } catch (error) {
+    console.error("PUT sections error:", error);
+    return res.status(500).json({
+      success: false,
+      error: "Failed to update section",
+      message: error.message,
+    });
+  }
+}
+
+/**
+ * DELETE /api/content/sections?sectionId=hero-1
+ * Delete a section
+ */
+async function handleDelete(req, res) {
+  // Authentication required for deleting sections
+  const authResult = await requireAuth(req, res);
+  if (!authResult.success) {
+    return res.status(401).json({
+      success: false,
+      error: "Authentication required",
+      message: "You must be logged in to delete sections",
+    });
+  }
+
+  const { sectionId } = req.query;
+  if (!sectionId) {
+    return res.status(400).json({
+      success: false,
+      error: "Missing sectionId",
+      message: "sectionId is required in query parameters",
+    });
+  }
+
+  const userId = authResult.user.id;
+
+  try {
+    const result = await SectionController.deleteSection(sectionId, userId);
+
+    if (!result.success) {
+      const statusCode = result.statusCode || 400;
+      return res.status(statusCode).json({
+        success: false,
+        error: result.error,
+        message: result.error,
+      });
+    }
+
+    return res.json({
+      success: true,
+      message: result.message,
+    });
+  } catch (error) {
+    console.error("DELETE sections error:", error);
+    return res.status(500).json({
+      success: false,
+      error: "Failed to delete section",
+      message: error.message,
+    });
+  }
+}
+
+/**
+ * PATCH /api/content/sections?sectionId=hero-1
+ * Special operations: reorder, toggle status, duplicate
+ */
+async function handlePatch(req, res) {
+  // Authentication required for section operations
+  const authResult = await requireAuth(req, res);
+  if (!authResult.success) {
+    return res.status(401).json({
+      success: false,
+      error: "Authentication required",
+      message: "You must be logged in to perform section operations",
+    });
+  }
+
+  const { sectionId } = req.query;
+  const { action, ...actionData } = req.body;
+
+  if (!action) {
+    return res.status(400).json({
+      success: false,
+      error: "Missing action",
+      message: "action is required in request body",
+    });
+  }
+
+  const userId = authResult.user.id;
+
+  try {
+    let result;
+
+    switch (action) {
+      case "reorder":
+        if (!sectionId) {
+          return res.status(400).json({
+            success: false,
+            error: "Missing sectionId",
+            message: "sectionId is required for reorder action",
+          });
+        }
+
+        const { newOrder } = actionData;
+        if (typeof newOrder !== "number") {
+          return res.status(400).json({
+            success: false,
+            error: "Invalid newOrder",
+            message: "newOrder must be a number",
+          });
+        }
+
+        result = await SectionController.reorderSection(
+          sectionId,
+          newOrder,
+          userId
+        );
+        break;
+
+      case "toggle-status":
+        if (!sectionId) {
+          return res.status(400).json({
+            success: false,
+            error: "Missing sectionId",
+            message: "sectionId is required for toggle-status action",
+          });
+        }
+
+        const { isActive } = actionData;
+        if (typeof isActive !== "boolean") {
+          return res.status(400).json({
+            success: false,
+            error: "Invalid isActive",
+            message: "isActive must be a boolean",
+          });
+        }
+
+        result = await SectionController.toggleSectionStatus(
+          sectionId,
+          isActive,
+          userId
+        );
+        break;
+
+      case "duplicate":
+        if (!sectionId) {
+          return res.status(400).json({
+            success: false,
+            error: "Missing sectionId",
+            message: "sectionId is required for duplicate action",
+          });
+        }
+
+        result = await SectionController.duplicateSection(sectionId, userId);
+        break;
+
+      default:
+        return res.status(400).json({
+          success: false,
+          error: "Invalid action",
+          message: `Unsupported action: ${action}`,
+        });
+    }
+
+    if (!result.success) {
+      const statusCode = result.statusCode || 400;
+      return res.status(statusCode).json({
+        success: false,
+        error: result.error,
+        message: result.error,
+      });
+    }
+
+    return res.json({
+      success: true,
+      data: result.data || null,
+      message: result.message,
+    });
+  } catch (error) {
+    console.error("PATCH sections error:", error);
+    return res.status(500).json({
+      success: false,
+      error: "Failed to perform section operation",
+      message: error.message,
+    });
+  }
+}
+
+// Apply middleware and export
+export default applyMiddleware(handler, {
+  auth: false, // Authentication handled per method
+  rateLimiting: true,
+  cors: true,
+  compression: true,
+});

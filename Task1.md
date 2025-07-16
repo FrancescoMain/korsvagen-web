@@ -1,8 +1,8 @@
-Task 4: Implementazione Sistema di Autenticazione Sicuro
+# Task 5: API RESTful per gestione contenuti CMS
 
 ## Obiettivo
 
-Implementare un sistema di autenticazione robusto con JWT, protezione CSRF, rate limiting e gestione sessioni per l'accesso alla dashboard CMS.
+Implementare API complete per CRUD operations sui contenuti dinamici delle pagine, con supporto per media Cloudinary e validazione robusta.
 
 ## Azioni specifiche
 
@@ -11,133 +11,156 @@ Implementare un sistema di autenticazione robusto con JWT, protezione CSRF, rate
    - Analizzare la documentazione nella cartella /docs
    - Analizzare log nella cartella /logs
 
-1. **JWT Authentication**
+1. **Pages API**
 
-   - Implementare login con email/password
-   - Generazione e validazione JWT tokens
-   - Refresh token mechanism per sicurezza
-   - Middleware di autenticazione per route protette
+   - GET /api/content/pages - Lista tutte le pagine
+   - GET /api/content/pages/:pageId - Dettagli pagina specifica
+   - PUT /api/content/pages/:pageId - Aggiorna contenuti pagina
+   - POST /api/content/pages - Crea nuova pagina
 
-2. **Security Features**
+2. **Sections API**
 
-   - Password hashing con bcrypt
-   - Rate limiting per login attempts
-   - CSRF protection
-   - Session management sicuro
-   - Logout con token blacklisting
+   - GET /api/content/sections/:pageId - Sezioni di una pagina
+   - POST /api/content/sections/:pageId - Aggiungi sezione
+   - PUT /api/content/sections/:sectionId - Aggiorna sezione
+   - DELETE /api/content/sections/:sectionId - Elimina sezione
+   - PUT /api/content/sections/:sectionId/reorder - Riordina sezioni
 
-3. **User Management**
-   - Modello User con ruoli (admin, editor)
-   - Password reset via email (opzionale per MVP)
-   - Account lockout dopo tentativi falliti
-   - Audit log per accessi
+3. **Media API (integrata con Cloudinary)**
+   - POST /api/media/upload - Upload immagini/video
+   - DELETE /api/media/:mediaId - Elimina media
+   - GET /api/media/gallery - Gallery media esistenti
+   - POST /api/media/optimize - Ottimizza media esistenti
 
-## Struttura API Endpoints
-
-```
-POST /api/auth/login
-POST /api/auth/logout
-POST /api/auth/refresh
-GET  /api/auth/me
-POST /api/auth/change-password
-```
-
-## Middleware di sicurezza
+## Struttura API Response
 
 ```javascript
-// authMiddleware.js
-const authenticateToken = (req, res, next) => {
-  // Verifica JWT token
-};
-
-const requireAdmin = (req, res, next) => {
-  // Verifica ruolo admin
-};
-
-const rateLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minuti
-  max: 5, // max 5 tentativi login
-});
+// GET /api/content/pages/home
+{
+  "success": true,
+  "data": {
+    "pageId": "home",
+    "metadata": {
+      "title": "Homepage",
+      "description": "Welcome to our site",
+      "ogImage": "https://res.cloudinary.com/..."
+    },
+    "sections": [
+      {
+        "id": "hero-1",
+        "type": "hero",
+        "order": 1,
+        "isActive": true,
+        "content": {
+          "title": "Welcome",
+          "description": "Our amazing site",
+          "images": [
+            {
+              "cloudinaryId": "hero_image_abc123",
+              "url": "https://res.cloudinary.com/...",
+              "alt": "Hero image",
+              "transformations": {
+                "thumbnail": "c_thumb,w_300,h_200",
+                "mobile": "c_scale,w_768",
+                "desktop": "c_scale,w_1920"
+              }
+            }
+          ],
+          "customFields": {
+            "buttonText": "Learn More",
+            "buttonLink": "/about"
+          }
+        }
+      }
+    ]
+  }
+}
 ```
 
 ## Struttura file da creare
 
 ```
 api/
-├── auth/
-│   ├── login.js
-│   ├── logout.js
-│   ├── refresh.js
-│   ├── me.js
-│   └── change-password.js
-├── middleware/
-│   ├── auth.js
-│   ├── rateLimiter.js
-│   └── validation.js
-└── utils/
-    ├── jwt.js
-    ├── password.js
-    └── security.js
+├── content/
+│   ├── pages/
+│   │   ├── index.js         // Lista pagine
+│   │   ├── [pageId].js      // CRUD singola pagina
+│   │   └── create.js        // Crea nuova pagina
+│   ├── sections/
+│   │   ├── [pageId].js      // Sezioni per pagina
+│   │   ├── create.js        // Crea sezione
+│   │   ├── update.js        // Aggiorna sezione
+│   │   ├── delete.js        // Elimina sezione
+│   │   └── reorder.js       // Riordina sezioni
+│   └── media/
+│       ├── upload.js        // Upload media
+│       ├── delete.js        // Elimina media
+│       ├── gallery.js       // Lista media
+│       └── optimize.js      // Ottimizza media
+├── validators/
+│   ├── pageValidator.js
+│   ├── sectionValidator.js
+│   └── mediaValidator.js
+└── controllers/
+    ├── pageController.js
+    ├── sectionController.js
+    └── mediaController.js
 ```
 
 ## Deliverables
 
-- [ ] JWT authentication implementato
-- [ ] Login/logout endpoints funzionanti
-- [ ] Middleware di autenticazione
-- [ ] Rate limiting configurato
-- [ ] Password hashing sicuro
-- [ ] Refresh token mechanism
-- [ ] Documentazione API auth
+- [ ] CRUD completo per Pages
+- [ ] CRUD completo per Sections
+- [ ] API Media con Cloudinary
+- [ ] Validazione input robusta
+- [ ] Error handling standardizzato
+- [ ] Documentazione API (Postman/Swagger)
+- [ ] Test API con dati reali
 
-## Dependencies da aggiungere
+## Validation Rules
 
-```json
-{
-  "jsonwebtoken": "^9.0.1",
-  "bcryptjs": "^2.4.3",
-  "express-rate-limit": "^6.7.1",
-  "express-validator": "^7.0.1",
-  "cookie-parser": "^1.4.6",
-  "express-session": "^1.17.3"
-}
+```javascript
+// Page validation
+const pageSchema = {
+  pageId: { required: true, type: "string", pattern: /^[a-z0-9-]+$/ },
+  metadata: {
+    title: { required: true, type: "string", maxLength: 100 },
+    description: { required: true, type: "string", maxLength: 300 },
+  },
+};
+
+// Section validation
+const sectionSchema = {
+  type: { required: true, enum: ["hero", "about", "gallery", "contact"] },
+  content: { required: true, type: "object" },
+  order: { required: true, type: "number", min: 0 },
+};
 ```
 
-## Variabili d'ambiente richieste
+## Security Features
 
-```
-JWT_SECRET=your_super_secret_jwt_key_256_bits
-JWT_REFRESH_SECRET=your_refresh_token_secret
-JWT_EXPIRES_IN=1h
-JWT_REFRESH_EXPIRES_IN=7d
-SESSION_SECRET=your_session_secret
-```
-
-## Security Checklist
-
-- [ ] Password strength validation
-- [ ] JWT secret sufficientemente complesso
-- [ ] Rate limiting su login endpoint
-- [ ] Secure cookie settings (httpOnly, secure, sameSite)
-- [ ] CORS configurato correttamente
-- [ ] Input validation su tutti i campi
-- [ ] Error messages che non rivelano info sensibili
+- [ ] Autenticazione JWT richiesta per tutte le operations
+- [ ] Validazione input sanitization
+- [ ] Rate limiting su upload endpoints
+- [ ] File type validation per media
+- [ ] Size limits per upload
+- [ ] CSRF protection
 
 ## Criteri di completamento
 
-- Login funzionante con credenziali valide
-- Token JWT generato e validato correttamente
-- Middleware di auth protegge route sensibili
-- Rate limiting previene brute force attacks
-- Logout invalida correttamente i token
-- Refresh token mechanism operativo
+- Tutte le API endpoint funzionanti
+- Validazione completa implementata
+- Upload media integrato con Cloudinary
+- Error handling standardizzato
+- Documentazione API completa
+- Test coverage > 80%
 
 ## Log Requirements
 
-Creare file `logs/task-04-authentication.md` con:
+Creare file `logs/task-05-content-api.md` con:
 
 - Timestamp di inizio/fine
-- Test di sicurezza effettuati
-- Configurazioni JWT implementate
-- Rate limiting testato
-- Problemi di sicurezza identificati e risolti
+- Endpoint implementati e testati
+- Performance tests risultati
+- Integrazione Cloudinary verificata
+- Problemi riscontrati e soluzioni

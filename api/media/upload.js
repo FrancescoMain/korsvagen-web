@@ -1,120 +1,132 @@
 /**
  * Media Upload API Endpoint
- * Handles secure file uploads to Cloudinary
+ * Comprehensive file upload with Cloudinary integration and validation
  */
 
-import {
-  upload,
-  uploadToCloudinary,
-  generateFolderPath,
-} from "../utils/cloudinary.js";
-import { Media } from "../models/Media.js";
 import { applyMiddleware } from "../utils/middleware.js";
-import { validateRequest, uploadValidation } from "../utils/validation.js";
+import { requireAuth } from "../utils/auth.js";
+import {
+  validateMediaUpload,
+  multerConfig,
+  validateFileType,
+  validateFileSize,
+} from "../validators/mediaValidator.js";
+import { MediaController } from "../controllers/mediaController.js";
 
 async function handler(req, res) {
-  if (req.method === "POST") {
-    // Handle file upload
-    upload.array("files", 10)(req, res, async (err) => {
-      if (err) {
-        console.error("Upload error:", err);
-        return res.status(400).json({
-          success: false,
-          error: err.message,
-        });
-      }
-
-      try {
-        const { pageId, sectionType, tags, altTexts } = req.body;
-        const files = req.files;
-
-        if (!files || files.length === 0) {
-          return res.status(400).json({
-            success: false,
-            error: "No files uploaded",
-          });
-        }
-
-        // Process uploaded files
-        const uploadResults = [];
-        const altTextArray = altTexts ? altTexts.split(",") : [];
-
-        for (let i = 0; i < files.length; i++) {
-          const file = files[i];
-          const altText = altTextArray[i] || "";
-
-          // File was already uploaded to Cloudinary via multer-storage-cloudinary
-          const mediaData = {
-            cloudinaryId: file.filename, // This is actually the public_id from Cloudinary
-            publicId: file.filename,
-            url: file.path, // This is the Cloudinary URL
-            secureUrl: file.path.replace("http://", "https://"),
-            format: file.originalname.split(".").pop().toLowerCase(),
-            resourceType: file.mimetype.startsWith("video/")
-              ? "video"
-              : "image",
-            width: file.width,
-            height: file.height,
-            bytes: file.size,
-            altText: altText,
-            folder: generateFolderPath(pageId, sectionType),
-            tags: tags ? tags.split(",").map((tag) => tag.trim()) : [],
-            metadata: {
-              originalName: file.originalname,
-              mimetype: file.mimetype,
-              uploadedAt: new Date().toISOString(),
-            },
-          };
-
-          // Save to database
-          const dbResult = await Media.create(mediaData);
-
-          if (dbResult.success) {
-            uploadResults.push({
-              success: true,
-              data: dbResult.data,
-              originalName: file.originalname,
-            });
-          } else {
-            uploadResults.push({
-              success: false,
-              error: dbResult.error,
-              originalName: file.originalname,
-            });
-          }
-        }
-
-        // Check if all uploads were successful
-        const successCount = uploadResults.filter((r) => r.success).length;
-        const failCount = uploadResults.length - successCount;
-
-        res.status(successCount > 0 ? 200 : 400).json({
-          success: successCount > 0,
-          message: `${successCount} files uploaded successfully${
-            failCount > 0 ? `, ${failCount} failed` : ""
-          }`,
-          data: uploadResults,
-          stats: {
-            total: uploadResults.length,
-            successful: successCount,
-            failed: failCount,
-          },
-        });
-      } catch (error) {
-        console.error("Upload processing error:", error);
-        res.status(500).json({
-          success: false,
-          error: "Failed to process uploads",
-        });
-      }
-    });
-  } else {
-    res.setHeader("Allow", ["POST"]);
-    res.status(405).json({
+  if (req.method !== "POST") {
+    return res.status(405).json({
       success: false,
       error: "Method not allowed",
+      message: "Only POST method is supported for file uploads",
     });
   }
+
+  // Authentication required for uploads
+  const authResult = await requireAuth(req, res);
+  if (!authResult.success) {
+    return res.status(401).json({
+      success: false,
+      error: "Authentication required",
+      message: "You must be logged in to upload files",
+    });
+  }
+
+  const userId = authResult.user.id;
+
+  // Handle file upload with multer
+  multerConfig.array("files", 10)(req, res, async (err) => {
+    if (err) {
+      console.error("Upload error:", err);
+      return res.status(400).json({
+        success: false,
+        error:
+          err.code === "LIMIT_FILE_SIZE"
+            ? "File size exceeds limit"
+            : err.message,
+        message: "File upload failed",
+      });
+    }
+
+    try {
+      const files = req.files;
+      if (!files || files.length === 0) {
+        return res.status(400).json({
+          success: false,
+          error: "No files provided",
+          message: "Please select files to upload",
+        });
+      }
+
+      // Validate files before processing
+      const fileValidationErrors = [];
+      for (const file of files) {
+        const sizeValidation = validateFileSize(file);
+        if (!sizeValidation.valid) {
+          fileValidationErrors.push({
+            filename: file.originalname,
+            error: sizeValidation.error,
+          });
+        }
+      }
+
+      if (fileValidationErrors.length > 0) {
+        return res.status(400).json({
+          success: false,
+          error: "File validation failed",
+          details: fileValidationErrors,
+        });
+      }
+
+      // Extract upload configuration from request body
+      const uploadConfig = {
+        folder: req.body.folder || "uploads",
+        tags: req.body.tags
+          ? req.body.tags.split(",").map((tag) => tag.trim())
+          : [],
+        altText: req.body.altText || "",
+        quality: req.body.quality ? parseInt(req.body.quality) : 85,
+        transformation: {
+          quality: req.body.quality ? parseInt(req.body.quality) : 85,
+          format: req.body.format || "auto",
+        },
+      };
+
+      // Upload files using MediaController
+      const result = await MediaController.uploadMedia(
+        files,
+        uploadConfig,
+        userId
+      );
+
+      if (!result.success) {
+        return res.status(400).json({
+          success: false,
+          error: result.error,
+          message: result.error,
+        });
+      }
+
+      return res.status(201).json({
+        success: true,
+        data: result.data,
+        message: result.message,
+      });
+    } catch (error) {
+      console.error("Upload processing error:", error);
+      return res.status(500).json({
+        success: false,
+        error: "Failed to process uploads",
+        message: error.message,
+      });
+    }
+  });
 }
 
-export default applyMiddleware(handler);
+// Apply middleware and export
+export default applyMiddleware(handler, {
+  auth: false, // Authentication handled in handler
+  rateLimiting: true,
+  cors: true,
+  compression: false, // Don't compress file uploads
+});
