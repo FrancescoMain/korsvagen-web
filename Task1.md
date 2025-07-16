@@ -1,8 +1,8 @@
-# Task 5: API RESTful per gestione contenuti CMS
+# Task 6: Dashboard Frontend con interfaccia di login
 
 ## Obiettivo
 
-Implementare API complete per CRUD operations sui contenuti dinamici delle pagine, con supporto per media Cloudinary e validazione robusta.
+Creare l'interfaccia frontend della dashboard CMS con sistema di login, navigazione e layout responsive per la gestione dei contenuti.
 
 ## Azioni specifiche
 
@@ -11,156 +11,208 @@ Implementare API complete per CRUD operations sui contenuti dinamici delle pagin
    - Analizzare la documentazione nella cartella /docs
    - Analizzare log nella cartella /logs
 
-1. **Pages API**
+1. **Login Interface**
 
-   - GET /api/content/pages - Lista tutte le pagine
-   - GET /api/content/pages/:pageId - Dettagli pagina specifica
-   - PUT /api/content/pages/:pageId - Aggiorna contenuti pagina
-   - POST /api/content/pages - Crea nuova pagina
+   - Form di login con validazione frontend
+   - Gestione stato autenticazione (Context/Redux)
+   - Auto-logout su token scaduto
+   - Remember me functionality
+   - Loading states e error handling
 
-2. **Sections API**
+2. **Dashboard Layout**
 
-   - GET /api/content/sections/:pageId - Sezioni di una pagina
-   - POST /api/content/sections/:pageId - Aggiungi sezione
-   - PUT /api/content/sections/:sectionId - Aggiorna sezione
-   - DELETE /api/content/sections/:sectionId - Elimina sezione
-   - PUT /api/content/sections/:sectionId/reorder - Riordina sezioni
+   - Sidebar di navigazione con sezioni
+   - Header con info utente e logout
+   - Layout responsive per mobile/tablet/desktop
+   - Dark/Light mode toggle (opzionale)
+   - Breadcrumb navigation
 
-3. **Media API (integrata con Cloudinary)**
-   - POST /api/media/upload - Upload immagini/video
-   - DELETE /api/media/:mediaId - Elimina media
-   - GET /api/media/gallery - Gallery media esistenti
-   - POST /api/media/optimize - Ottimizza media esistenti
+3. **Authentication Flow**
+   - Protected routes con redirect
+   - Token storage e refresh automatico
+   - Session persistence
+   - Logout con cleanup completo
 
-## Struttura API Response
+## Struttura Components
 
-```javascript
-// GET /api/content/pages/home
-{
-  "success": true,
-  "data": {
-    "pageId": "home",
-    "metadata": {
-      "title": "Homepage",
-      "description": "Welcome to our site",
-      "ogImage": "https://res.cloudinary.com/..."
-    },
-    "sections": [
-      {
-        "id": "hero-1",
-        "type": "hero",
-        "order": 1,
-        "isActive": true,
-        "content": {
-          "title": "Welcome",
-          "description": "Our amazing site",
-          "images": [
-            {
-              "cloudinaryId": "hero_image_abc123",
-              "url": "https://res.cloudinary.com/...",
-              "alt": "Hero image",
-              "transformations": {
-                "thumbnail": "c_thumb,w_300,h_200",
-                "mobile": "c_scale,w_768",
-                "desktop": "c_scale,w_1920"
-              }
-            }
-          ],
-          "customFields": {
-            "buttonText": "Learn More",
-            "buttonLink": "/about"
-          }
-        }
-      }
-    ]
-  }
+```
+src/
+├── components/
+│   ├── Dashboard/
+│   │   ├── DashboardLayout.jsx
+│   │   ├── Sidebar.jsx
+│   │   ├── Header.jsx
+│   │   └── Breadcrumb.jsx
+│   ├── Auth/
+│   │   ├── LoginForm.jsx
+│   │   ├── ProtectedRoute.jsx
+│   │   └── AuthProvider.jsx
+│   └── UI/
+│       ├── Button.jsx
+│       ├── Input.jsx
+│       ├── Modal.jsx
+│       └── LoadingSpinner.jsx
+├── contexts/
+│   ├── AuthContext.js
+│   └── ThemeContext.js
+├── hooks/
+│   ├── useAuth.js
+│   ├── useApi.js
+│   └── useLocalStorage.js
+└── utils/
+    ├── api.js
+    ├── auth.js
+    └── storage.js
+```
+
+## UI/UX Design
+
+```scss
+// Dashboard color scheme
+:root {
+  --primary: #2563eb;
+  --primary-dark: #1d4ed8;
+  --secondary: #64748b;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --error: #ef4444;
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8fafc;
+  --text-primary: #1e293b;
+  --text-secondary: #64748b;
+}
+
+.dashboard-layout {
+  display: grid;
+  grid-template-areas:
+    "sidebar header"
+    "sidebar main";
+  grid-template-columns: 250px 1fr;
+  grid-template-rows: 60px 1fr;
+  min-height: 100vh;
 }
 ```
 
-## Struttura file da creare
+## Sidebar Navigation
 
-```
-api/
-├── content/
-│   ├── pages/
-│   │   ├── index.js         // Lista pagine
-│   │   ├── [pageId].js      // CRUD singola pagina
-│   │   └── create.js        // Crea nuova pagina
-│   ├── sections/
-│   │   ├── [pageId].js      // Sezioni per pagina
-│   │   ├── create.js        // Crea sezione
-│   │   ├── update.js        // Aggiorna sezione
-│   │   ├── delete.js        // Elimina sezione
-│   │   └── reorder.js       // Riordina sezioni
-│   └── media/
-│       ├── upload.js        // Upload media
-│       ├── delete.js        // Elimina media
-│       ├── gallery.js       // Lista media
-│       └── optimize.js      // Ottimizza media
-├── validators/
-│   ├── pageValidator.js
-│   ├── sectionValidator.js
-│   └── mediaValidator.js
-└── controllers/
-    ├── pageController.js
-    ├── sectionController.js
-    └── mediaController.js
+```javascript
+const navigationItems = [
+  {
+    title: "Dashboard",
+    icon: "📊",
+    path: "/dashboard",
+    active: true,
+  },
+  {
+    title: "Pagine",
+    icon: "📄",
+    path: "/dashboard/pages",
+    children: [
+      { title: "Homepage", path: "/dashboard/pages/home" },
+      { title: "About", path: "/dashboard/pages/about" },
+      { title: "Contact", path: "/dashboard/pages/contact" },
+    ],
+  },
+  {
+    title: "Media Library",
+    icon: "🖼️",
+    path: "/dashboard/media",
+  },
+  {
+    title: "Impostazioni",
+    icon: "⚙️",
+    path: "/dashboard/settings",
+  },
+];
 ```
 
 ## Deliverables
 
-- [ ] CRUD completo per Pages
-- [ ] CRUD completo per Sections
-- [ ] API Media con Cloudinary
-- [ ] Validazione input robusta
-- [ ] Error handling standardizzato
-- [ ] Documentazione API (Postman/Swagger)
-- [ ] Test API con dati reali
+- [ ] Login form responsive e accessibile
+- [ ] Dashboard layout con sidebar e header
+- [ ] Sistema di navigazione funzionante
+- [ ] Gestione stato autenticazione
+- [ ] Protected routes implementate
+- [ ] Error boundaries e loading states
+- [ ] Responsive design per tutti i device
 
-## Validation Rules
+## Dependencies da aggiungere
+
+```json
+{
+  "react-router-dom": "^6.14.1",
+  "axios": "^1.4.0",
+  "react-hook-form": "^7.45.1",
+  "@hookform/resolvers": "^3.1.1",
+  "yup": "^1.2.0",
+  "react-hot-toast": "^2.4.1",
+  "lucide-react": "^0.259.0"
+}
+```
+
+## Routes Structure
 
 ```javascript
-// Page validation
-const pageSchema = {
-  pageId: { required: true, type: "string", pattern: /^[a-z0-9-]+$/ },
-  metadata: {
-    title: { required: true, type: "string", maxLength: 100 },
-    description: { required: true, type: "string", maxLength: 300 },
-  },
-};
+// App routing
+<Routes>
+  <Route path="/login" element={<LoginPage />} />
+  <Route
+    path="/dashboard"
+    element={
+      <ProtectedRoute>
+        <DashboardLayout />
+      </ProtectedRoute>
+    }
+  >
+    <Route index element={<DashboardHome />} />
+    <Route path="pages" element={<PagesOverview />} />
+    <Route path="pages/:pageId" element={<PageEditor />} />
+    <Route path="media" element={<MediaLibrary />} />
+    <Route path="settings" element={<Settings />} />
+  </Route>
+  <Route path="*" element={<Navigate to="/dashboard" />} />
+</Routes>
+```
 
-// Section validation
-const sectionSchema = {
-  type: { required: true, enum: ["hero", "about", "gallery", "contact"] },
-  content: { required: true, type: "object" },
-  order: { required: true, type: "number", min: 0 },
+## Authentication Context
+
+```javascript
+const AuthContext = createContext();
+
+export const AuthProvider = ({ children }) => {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [token, setToken] = useState(localStorage.getItem("token"));
+
+  // Auto refresh token logic
+  // Login/logout functions
+  // API interceptors
 };
 ```
 
-## Security Features
+## Responsive Breakpoints
 
-- [ ] Autenticazione JWT richiesta per tutte le operations
-- [ ] Validazione input sanitization
-- [ ] Rate limiting su upload endpoints
-- [ ] File type validation per media
-- [ ] Size limits per upload
-- [ ] CSRF protection
+- Mobile: < 768px (sidebar collapsed)
+- Tablet: 768px - 1024px (sidebar overlay)
+- Desktop: > 1024px (sidebar fixed)
 
 ## Criteri di completamento
 
-- Tutte le API endpoint funzionanti
-- Validazione completa implementata
-- Upload media integrato con Cloudinary
-- Error handling standardizzato
-- Documentazione API completa
-- Test coverage > 80%
+- Login form funziona con API backend
+- Dashboard layout responsive su tutti i device
+- Navigazione sidebar operativa
+- Protected routes funzionanti
+- Token refresh automatico
+- Error handling implementato
+- Loading states su tutte le azioni
 
 ## Log Requirements
 
-Creare file `logs/task-05-content-api.md` con:
+Creare file `logs/task-06-dashboard-frontend.md` con:
 
 - Timestamp di inizio/fine
-- Endpoint implementati e testati
-- Performance tests risultati
-- Integrazione Cloudinary verificata
-- Problemi riscontrati e soluzioni
+- Components implementati e testati
+- Responsive design verificato su device
+- Integrazione API authentication testata
+- Performance metrics frontend
+- Problemi UI/UX identificati e risolti
