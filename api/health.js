@@ -1,5 +1,5 @@
-const { cors, helmet, morgan } = require("./utils/middleware");
-const { db } = require("./utils/db");
+import { cors, helmet, morgan } from "./utils/middleware.js";
+import { db } from "./utils/db.js";
 
 // Error handler
 const handleError = (error, req, res) => {
@@ -15,7 +15,7 @@ const handleError = (error, req, res) => {
 };
 
 // Main handler function
-module.exports = async (req, res) => {
+export default async (req, res) => {
   // Apply middleware
   cors(req, res, () => {
     helmet(req, res, () => {
