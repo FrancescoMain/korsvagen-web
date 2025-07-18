@@ -1,66 +1,44 @@
-import { cors, helmet, morgan } from "./utils/middleware.js";
-import { db } from "./utils/db.js";
-
-// Error handler
-const handleError = (error, req, res) => {
-  console.error("Health Check Error:", error);
-
-  res.status(500).json({
-    success: false,
-    error: "Internal Server Error",
-    message: "Health check failed",
-    timestamp: new Date().toISOString(),
-    ...(process.env.NODE_ENV === "development" && { details: error.message }),
-  });
-};
-
-// Main handler function
+// Simple health check endpoint for Vercel
 export default async (req, res) => {
-  // Apply middleware
-  cors(req, res, () => {
-    helmet(req, res, () => {
-      morgan(req, res, async () => {
-        try {
-          // Only handle GET requests
-          if (req.method !== "GET") {
-            return res.status(405).json({
-              success: false,
-              error: "Method Not Allowed",
-              message: "Only GET requests are allowed for health check",
-            });
-          }
+  // Add CORS headers
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader(
+    "Access-Control-Allow-Methods",
+    "GET, POST, PUT, DELETE, OPTIONS"
+  );
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
 
-          // Check database connection
-          const dbStatus = await db.checkConnection();
+  // Handle preflight requests
+  if (req.method === "OPTIONS") {
+    res.status(200).end();
+    return;
+  }
 
-          // System information
-          const healthInfo = {
-            success: true,
-            status: "healthy",
-            timestamp: new Date().toISOString(),
-            service: "KORSVAGEN API",
-            version: "1.0.0",
-            environment: process.env.NODE_ENV || "development",
-            database: {
-              status: "connected",
-              ...dbStatus,
-            },
-            uptime: process.uptime(),
-            memory: {
-              used:
-                Math.round(process.memoryUsage().heapUsed / 1024 / 1024) +
-                " MB",
-              total:
-                Math.round(process.memoryUsage().heapTotal / 1024 / 1024) +
-                " MB",
-            },
-          };
-
-          res.status(200).json(healthInfo);
-        } catch (error) {
-          handleError(error, req, res);
-        }
-      });
+  // Only handle GET requests
+  if (req.method !== "GET") {
+    return res.status(405).json({
+      success: false,
+      error: "Method Not Allowed",
+      message: "Only GET requests are allowed for health check",
     });
-  });
+  }
+
+  try {
+    // Simple health check response
+    res.status(200).json({
+      success: true,
+      message: "API is running",
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV || "development",
+      version: "1.0.0",
+    });
+  } catch (error) {
+    console.error("Health Check Error:", error);
+    res.status(500).json({
+      success: false,
+      error: "Internal Server Error",
+      message: "Health check failed",
+      timestamp: new Date().toISOString(),
+    });
+  }
 };
