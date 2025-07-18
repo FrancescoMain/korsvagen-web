@@ -18,6 +18,7 @@ import {
   CareersPage,
   TeamPage,
   WorkInProgressPage,
+  PageEditorPage,
 } from "./pages";
 import ScrollToTop from "./components/common/ScrollToTop";
 import { AuthProvider } from "./components/Auth/AuthProvider";
@@ -30,6 +31,7 @@ import { PagesOverview } from "./pages/PagesOverview";
 import { MediaLibrary } from "./pages/MediaLibrary";
 import { Settings } from "./pages/Settings";
 import "./styles/dashboard.css";
+import "./styles/editor.css";
 
 function App() {
   return (
@@ -83,6 +85,24 @@ function App() {
               <Route path="media" element={<MediaLibrary />} />
               <Route path="settings" element={<Settings />} />
             </Route>
+
+            {/* Page Editor routes */}
+            <Route
+              path="/editor"
+              element={
+                <ProtectedRoute>
+                  <PageEditorPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/editor/:pageId"
+              element={
+                <ProtectedRoute>
+                  <PageEditorPage />
+                </ProtectedRoute>
+              }
+            />
 
             {/* Fallback routes */}
             <Route

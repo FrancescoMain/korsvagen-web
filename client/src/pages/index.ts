@@ -9,3 +9,4 @@ export { default as ContactPage } from "./ContactPage";
 export { default as CareersPage } from "./CareersPage";
 export { default as TeamPage } from "./TeamPage";
 export { default as WorkInProgressPage } from "../WorkInProgressPage";
+export { default as PageEditorPage } from "./PageEditorPage";
