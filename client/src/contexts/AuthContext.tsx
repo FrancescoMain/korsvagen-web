@@ -1,28 +1,68 @@
+/**
+ * KORSVAGEN WEB APPLICATION - AUTH CONTEXT
+ *
+ * Context di autenticazione centralizzato per gestire
+ * l'autenticazione degli amministratori nell'applicazione.
+ *
+ * Features:
+ * - Gestione stato utente e token
+ * - Login/Logout automatizzato
+ * - Refresh token automatico
+ * - Persistenza locale delle credenziali
+ * - Integrazione con toast notifications
+ *
+ * @author KORSVAGEN S.R.L.
+ * @version 1.0.0
+ */
+
 import React, {
   createContext,
   useContext,
   useState,
   useEffect,
   ReactNode,
+  useCallback,
 } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
 
+/**
+ * TIPI E INTERFACCE
+ */
+
 interface User {
-  _id: string;
+  id: string;
   username: string;
   email: string;
-  role: "admin" | "editor";
+  role: "admin" | "editor" | "super_admin";
+  profile_data?: {
+    firstName?: string;
+    lastName?: string;
+    preferences?: {
+      theme?: string;
+      language?: string;
+      notifications?: boolean;
+    };
+  };
+  last_login?: string;
 }
 
 interface AuthContextType {
+  // Stato
   user: User | null;
   token: string | null;
   loading: boolean;
   isAuthenticated: boolean;
+
+  // Metodi
   login: (credentials: LoginCredentials) => Promise<boolean>;
   logout: () => void;
   refreshToken: () => Promise<boolean>;
+  updateUser: (userData: Partial<User>) => void;
+
+  // Utilità
+  hasRole: (role: string | string[]) => boolean;
+  isLoading: boolean;
 }
 
 interface LoginCredentials {
@@ -32,10 +72,33 @@ interface LoginCredentials {
 }
 
 interface AuthResponse {
-  token: string;
-  refreshToken: string;
-  user: User;
+  success: boolean;
+  message: string;
+  data: {
+    user: User;
+    tokens: {
+      access: string;
+      refresh: string;
+    };
+  };
 }
+
+/**
+ * CONFIGURAZIONE
+ */
+
+const API_BASE_URL = process.env.REACT_APP_API_URL || "/api";
+
+// Configurazione Axios per autenticazione
+const authApi = axios.create({
+  baseURL: API_BASE_URL,
+  timeout: 10000,
+  withCredentials: true,
+});
+
+/**
+ * CONTEXT E PROVIDER
+ */
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -52,24 +115,177 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+  // Stati principali
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(
-    localStorage.getItem("token")
+    localStorage.getItem("korsvagen_auth_token")
   );
   const [refreshTokenValue, setRefreshTokenValue] = useState<string | null>(
-    localStorage.getItem("refreshToken")
+    localStorage.getItem("korsvagen_refresh_token")
   );
   const [loading, setLoading] = useState(true);
 
+  // Stati derivati
   const isAuthenticated = !!user && !!token;
+  const isLoading = loading;
 
-  // API base URL
-  const API_BASE_URL = process.env.REACT_APP_API_URL || "/api";
+  /**
+   * UTILITY FUNCTIONS
+   */
 
-  // Configure axios interceptors
+  // Salva token nel localStorage
+  const saveTokens = useCallback(
+    (accessToken: string, refreshToken: string) => {
+      localStorage.setItem("korsvagen_auth_token", accessToken);
+      localStorage.setItem("korsvagen_refresh_token", refreshToken);
+      setToken(accessToken);
+      setRefreshTokenValue(refreshToken);
+    },
+    []
+  );
+
+  // Rimuovi token dal localStorage
+  const clearTokens = useCallback(() => {
+    localStorage.removeItem("korsvagen_auth_token");
+    localStorage.removeItem("korsvagen_refresh_token");
+    setToken(null);
+    setRefreshTokenValue(null);
+  }, []);
+
+  // Controlla se l'utente ha un ruolo specifico
+  const hasRole = useCallback(
+    (role: string | string[]): boolean => {
+      if (!user) return false;
+
+      if (Array.isArray(role)) {
+        return role.includes(user.role);
+      }
+
+      return user.role === role;
+    },
+    [user]
+  );
+
+  /**
+   * AUTH METHODS
+   */
+
+  // Funzione di login
+  const login = useCallback(
+    async (credentials: LoginCredentials): Promise<boolean> => {
+      setLoading(true);
+
+      try {
+        const response = await authApi.post<AuthResponse>(
+          "/auth/login",
+          credentials
+        );
+
+        if (response.data.success) {
+          const { user: userData, tokens } = response.data.data;
+
+          // Salva dati utente e token
+          setUser(userData);
+          saveTokens(tokens.access, tokens.refresh);
+
+          toast.success(
+            response.data.message || "Login effettuato con successo!"
+          );
+
+          return true;
+        } else {
+          toast.error(response.data.message || "Errore durante il login");
+          return false;
+        }
+      } catch (error: any) {
+        const errorMessage =
+          error.response?.data?.message ||
+          error.message ||
+          "Errore durante il login";
+
+        toast.error(errorMessage);
+        console.error("Login error:", error);
+        return false;
+      } finally {
+        setLoading(false);
+      }
+    },
+    [saveTokens]
+  );
+
+  // Funzione di logout
+  const logout = useCallback(async () => {
+    setLoading(true);
+
+    try {
+      // Notifica il server del logout (opzionale, non bloccare se fallisce)
+      if (refreshTokenValue) {
+        try {
+          await authApi.post("/auth/logout", {
+            refreshToken: refreshTokenValue,
+          });
+        } catch (error) {
+          console.warn("Logout server notification failed:", error);
+        }
+      }
+    } catch (error) {
+      console.warn("Logout error:", error);
+    } finally {
+      // Pulisci sempre lo stato locale
+      setUser(null);
+      clearTokens();
+      setLoading(false);
+      toast.success("Logout effettuato con successo");
+    }
+  }, [refreshTokenValue, clearTokens]);
+
+  // Funzione di refresh token
+  const refreshToken = useCallback(async (): Promise<boolean> => {
+    if (!refreshTokenValue) {
+      return false;
+    }
+
+    try {
+      const response = await authApi.post<AuthResponse>("/auth/refresh", {
+        refreshToken: refreshTokenValue,
+      });
+
+      if (response.data.success) {
+        const { user: userData, tokens } = response.data.data;
+
+        setUser(userData);
+        setToken(tokens.access);
+        // Il refresh token rimane lo stesso
+        localStorage.setItem("korsvagen_auth_token", tokens.access);
+
+        return true;
+      } else {
+        // Refresh fallito, pulisci tutto
+        clearTokens();
+        setUser(null);
+        return false;
+      }
+    } catch (error) {
+      console.error("Token refresh failed:", error);
+      clearTokens();
+      setUser(null);
+      return false;
+    }
+  }, [refreshTokenValue, clearTokens]);
+
+  // Aggiorna dati utente
+  const updateUser = useCallback((userData: Partial<User>) => {
+    setUser((prevUser) => (prevUser ? { ...prevUser, ...userData } : null));
+  }, []);
+
+  /**
+   * EFFECTS
+   */
+
+  // Configurazione interceptors Axios
   useEffect(() => {
-    // Request interceptor to add token
-    const requestInterceptor = axios.interceptors.request.use(
+    // Request interceptor per aggiungere token
+    const requestInterceptor = authApi.interceptors.request.use(
       (config) => {
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
@@ -79,8 +295,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       (error) => Promise.reject(error)
     );
 
-    // Response interceptor to handle token refresh
-    const responseInterceptor = axios.interceptors.response.use(
+    // Response interceptor per gestire refresh automatico
+    const responseInterceptor = authApi.interceptors.response.use(
       (response) => response,
       async (error) => {
         const originalRequest = error.config;
@@ -88,148 +304,90 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         if (error.response?.status === 401 && !originalRequest._retry) {
           originalRequest._retry = true;
 
-          if (refreshTokenValue) {
-            const refreshSuccess = await refreshToken();
-            if (refreshSuccess) {
-              return axios(originalRequest);
-            }
+          const refreshSuccess = await refreshToken();
+          if (refreshSuccess) {
+            return authApi(originalRequest);
+          } else {
+            // Refresh fallito, redirect al login
+            logout();
+            return Promise.reject(error);
           }
-
-          logout();
-          toast.error("Session expired. Please login again.");
         }
 
         return Promise.reject(error);
       }
     );
 
+    // Cleanup
     return () => {
-      axios.interceptors.request.eject(requestInterceptor);
-      axios.interceptors.response.eject(responseInterceptor);
+      authApi.interceptors.request.eject(requestInterceptor);
+      authApi.interceptors.response.eject(responseInterceptor);
     };
-  }, [token, refreshTokenValue]);
+  }, [token, refreshToken, logout]);
 
-  // Check initial authentication status
+  // Inizializzazione: verifica token esistente
   useEffect(() => {
-    const initAuth = async () => {
-      if (token) {
-        try {
-          const response = await axios.get(`${API_BASE_URL}/auth/me`, {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          setUser(response.data.user);
-        } catch (error) {
-          // Token invalid, try refresh
-          if (refreshTokenValue) {
+    const initializeAuth = async () => {
+      setLoading(true);
+
+      try {
+        if (token && refreshTokenValue) {
+          // Prova a ottenere i dati utente correnti
+          try {
+            const response = await authApi.get("/auth/me");
+            if (response.data.success) {
+              setUser(response.data.data.user);
+            } else {
+              // Token non valido, prova refresh
+              const refreshSuccess = await refreshToken();
+              if (!refreshSuccess) {
+                clearTokens();
+                setUser(null);
+              }
+            }
+          } catch (error) {
+            // Se /me fallisce, prova refresh
             const refreshSuccess = await refreshToken();
             if (!refreshSuccess) {
-              logout();
+              clearTokens();
+              setUser(null);
             }
-          } else {
-            logout();
           }
         }
+      } catch (error) {
+        console.error("Auth initialization error:", error);
+        clearTokens();
+        setUser(null);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
-    initAuth();
-  }, []);
+    initializeAuth();
+  }, []); // Esegui solo al mount
 
-  const login = async (credentials: LoginCredentials): Promise<boolean> => {
-    try {
-      setLoading(true);
-      const response = await axios.post<AuthResponse>(
-        `${API_BASE_URL}/auth/login`,
-        credentials
-      );
-
-      const {
-        token: newToken,
-        refreshToken: newRefreshToken,
-        user: userData,
-      } = response.data;
-
-      setToken(newToken);
-      setRefreshTokenValue(newRefreshToken);
-      setUser(userData);
-
-      // Store tokens
-      localStorage.setItem("token", newToken);
-      localStorage.setItem("refreshToken", newRefreshToken);
-
-      if (credentials.rememberMe) {
-        localStorage.setItem("rememberMe", "true");
-      }
-
-      toast.success(`Welcome back, ${userData.username}!`);
-      return true;
-    } catch (error: any) {
-      const message = error.response?.data?.message || "Login failed";
-      toast.error(message);
-      return false;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const logout = () => {
-    setUser(null);
-    setToken(null);
-    setRefreshTokenValue(null);
-    localStorage.removeItem("token");
-    localStorage.removeItem("refreshToken");
-    localStorage.removeItem("rememberMe");
-
-    // Call logout endpoint to invalidate server session
-    if (token) {
-      axios.post(`${API_BASE_URL}/auth/logout`).catch(() => {
-        // Silent fail - we're logging out anyway
-      });
-    }
-
-    toast.success("Logged out successfully");
-  };
-
-  const refreshToken = async (): Promise<boolean> => {
-    if (!refreshTokenValue) return false;
-
-    try {
-      const response = await axios.post<AuthResponse>(
-        `${API_BASE_URL}/auth/refresh`,
-        {
-          refreshToken: refreshTokenValue,
-        }
-      );
-
-      const {
-        token: newToken,
-        refreshToken: newRefreshToken,
-        user: userData,
-      } = response.data;
-
-      setToken(newToken);
-      setRefreshTokenValue(newRefreshToken);
-      setUser(userData);
-
-      localStorage.setItem("token", newToken);
-      localStorage.setItem("refreshToken", newRefreshToken);
-
-      return true;
-    } catch (error) {
-      return false;
-    }
-  };
-
-  const value: AuthContextType = {
+  /**
+   * VALORE DEL CONTEXT
+   */
+  const contextValue: AuthContextType = {
+    // Stato
     user,
     token,
     loading,
     isAuthenticated,
+
+    // Metodi
     login,
     logout,
     refreshToken,
+    updateUser,
+
+    // Utilità
+    hasRole,
+    isLoading,
   };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>
+  );
 };

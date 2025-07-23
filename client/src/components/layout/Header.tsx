@@ -154,7 +154,7 @@ const LogoSection = styled.div`
 `;
 
 const LogoImage = styled.img`
-  height: 45px;
+  height: 40px;
   width: auto;
   object-fit: contain;
 

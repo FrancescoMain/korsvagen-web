@@ -40,6 +40,9 @@ import { logger } from "./utils/logger.js";
 
 // Importa i routes
 import healthRoutes from "./routes/health.js";
+import authRoutes from "./routes/auth.js";
+import dashboardRoutes from "./routes/dashboard.js";
+import contactRoutes from "./routes/contact.js";
 
 // Inizializza l'app Express
 const app = express();
@@ -69,12 +72,43 @@ app.use(
 
 // CORS: Configurazione per permettere richieste dal frontend
 const corsOptions = {
-  origin: process.env.CORS_ORIGIN?.split(",") || ["http://localhost:3000"],
+  origin: function (origin, callback) {
+    const allowedOrigins = process.env.CORS_ORIGIN?.split(",") || [
+      "http://localhost:3000",
+      "http://localhost:3002",
+    ];
+
+    // Permetti richieste senza origin (es. Postman, server-to-server) in development
+    if (!origin && process.env.NODE_ENV !== "production") {
+      return callback(null, true);
+    }
+
+    // Permetti tutti gli origins allowedOrigins
+    if (origin && allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      console.log(`🚫 CORS blocked origin: ${origin}`);
+      console.log(`📝 Allowed origins: ${allowedOrigins.join(", ")}`);
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization", "Cookie"],
+  allowedHeaders: [
+    "Content-Type",
+    "Authorization",
+    "Cookie",
+    "Origin",
+    "X-Requested-With",
+    "Accept",
+  ],
+  preflightContinue: false,
+  optionsSuccessStatus: 200,
 };
 app.use(cors(corsOptions));
+
+// Handler esplicito per richieste OPTIONS preflight
+app.options("*", cors(corsOptions));
 
 // Rate Limiting: Prevenzione attacchi DDoS
 const generalLimiter = rateLimit({
@@ -153,22 +187,27 @@ async function initializeServices() {
 /**
  * CONFIGURAZIONE ROUTES
  *
- * Per questa fase iniziale, includiamo solo gli endpoint
- * di health check per verificare il funzionamento del server
+ * Definisce tutti gli endpoint API disponibili per l'applicazione
  */
 
 // Health Check - per monitoraggio uptime e stato servizi
 app.use("/api/health", healthRoutes);
 
-// Placeholder per futuri endpoint
-// Gli altri endpoint saranno aggiunti nelle fasi successive:
-// - /api/auth (autenticazione)
+// Autenticazione - login, logout, refresh token
+app.use("/api/auth", authRoutes);
+
+// Dashboard - statistiche, messaggi, gestione contenuti
+app.use("/api/dashboard", dashboardRoutes);
+
+// Contatti - form di contatto del sito web
+app.use("/api/contact", contactRoutes);
+
+// Placeholder per futuri endpoint che saranno aggiunti nelle fasi successive:
 // - /api/users (gestione utenti)
 // - /api/media (upload Cloudinary)
 // - /api/content (contenuti CMS)
 // - /api/projects (portfolio)
 // - /api/news (blog/news)
-// - /api/contact (form contatti)
 
 /**
  * MIDDLEWARE DI GESTIONE ERRORI
