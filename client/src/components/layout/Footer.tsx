@@ -1,9 +1,29 @@
+/**
+ * KORSVAGEN WEB APPLICATION - FOOTER COMPONENT
+ *
+ * Componente footer aggiornato per utilizzare il SettingsContext
+ * invece dei dati hardcoded in contactData.ts.
+ * Supporta fallback ai dati statici durante il caricamento.
+ *
+ * @author KORSVAGEN S.R.L.
+ * @version 1.1.0 - Updated to use SettingsContext
+ */
+
 import React from "react";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
-import { contactData } from "../../data/contactData";
+import { useContactData } from "../../contexts/SettingsContext";
+import { contactData as fallbackData } from "../../data/contactData";
 
 const Footer: React.FC = () => {
+  // Utilizza il nuovo hook per ottenere i dati di contatto
+  // Commento: useContactData fornisce compatibilità con contactData.ts
+  const { contactData: dynamicContactData, loading } = useContactData();
+
+  // Utilizza i dati dinamici se disponibili, altrimenti fallback ai dati statici
+  // Commento: Garantisce che il footer funzioni sempre, anche durante il caricamento
+  const contactData = dynamicContactData || fallbackData;
+
   const quickLinks = [
     { path: "/", label: "Home" },
     { path: "/chi-siamo", label: "Chi Siamo" },

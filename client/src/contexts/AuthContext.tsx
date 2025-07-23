@@ -184,9 +184,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         if (response.data.success) {
           const { user: userData, tokens } = response.data.data;
 
+          console.log("🔐 Login riuscito, salvataggio token...");
+          console.log(
+            "🔑 Access token:",
+            tokens.access.substring(0, 20) + "..."
+          );
+          console.log(
+            "🔄 Refresh token:",
+            tokens.refresh.substring(0, 20) + "..."
+          );
+
           // Salva dati utente e token
           setUser(userData);
           saveTokens(tokens.access, tokens.refresh);
+
+          console.log("✅ Token salvati, stato aggiornato");
 
           toast.success(
             response.data.message || "Login effettuato con successo!"

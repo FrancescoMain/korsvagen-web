@@ -1,9 +1,28 @@
+/**
+ * KORSVAGEN WEB APPLICATION - CONTACT CTA COMPONENT
+ *
+ * Componente CTA di contatto aggiornato per utilizzare il SettingsContext
+ * invece dei dati hardcoded in contactData.ts.
+ *
+ * @author KORSVAGEN S.R.L.
+ * @version 1.1.0 - Updated to use SettingsContext
+ */
+
 import React from "react";
 import styled from "styled-components";
-import { contactData } from "../../data/contactData";
+import { useContactData } from "../../contexts/SettingsContext";
+import { contactData as fallbackData } from "../../data/contactData";
 import Link from "./Link";
 
 const ContactCTA: React.FC = () => {
+  // Utilizza il nuovo hook per ottenere i dati di contatto dinamici
+  // Commento: Hook personalizzato che mantiene compatibilità con contactData
+  const { contactData: dynamicContactData, loading } = useContactData();
+
+  // Utilizza i dati dinamici se disponibili, altrimenti fallback ai dati statici
+  // Commento: Garantisce che il CTA funzioni sempre, anche durante il caricamento
+  const contactData = dynamicContactData || fallbackData;
+
   return (
     <ContactContainer>
       <ContactContent>

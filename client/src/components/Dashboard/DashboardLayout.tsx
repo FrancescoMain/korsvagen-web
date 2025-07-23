@@ -5,13 +5,13 @@ import { Sidebar } from "./Sidebar";
 import { Header } from "./Header";
 import { storage } from "../../utils/storage";
 
-const LayoutContainer = styled.div<{ sidebarCollapsed: boolean }>`
+const LayoutContainer = styled.div<{ $sidebarCollapsed: boolean }>`
   display: grid;
   grid-template-areas:
     "sidebar header"
     "sidebar main";
-  grid-template-columns: ${({ sidebarCollapsed }) =>
-    sidebarCollapsed ? "60px 1fr" : "250px 1fr"};
+  grid-template-columns: ${({ $sidebarCollapsed }) =>
+    $sidebarCollapsed ? "80px 1fr" : "250px 1fr"};
   grid-template-rows: 60px 1fr;
   min-height: 100vh;
   transition: grid-template-columns 0.3s ease-in-out;
@@ -49,14 +49,14 @@ const MainArea = styled.main`
   }
 `;
 
-const MobileSidebarOverlay = styled.div<{ isOpen: boolean }>`
+const MobileSidebarOverlay = styled.div<{ $isOpen: boolean }>`
   display: none;
   position: fixed;
   inset: 0;
   background-color: rgba(0, 0, 0, 0.5);
   z-index: 40;
-  opacity: ${({ isOpen }) => (isOpen ? 1 : 0)};
-  visibility: ${({ isOpen }) => (isOpen ? "visible" : "hidden")};
+  opacity: ${({ $isOpen }) => ($isOpen ? 1 : 0)};
+  visibility: ${({ $isOpen }) => ($isOpen ? "visible" : "hidden")};
   transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
 
   @media (max-width: 768px) {
@@ -64,7 +64,7 @@ const MobileSidebarOverlay = styled.div<{ isOpen: boolean }>`
   }
 `;
 
-const MobileSidebarContainer = styled.div<{ isOpen: boolean }>`
+const MobileSidebarContainer = styled.div<{ $isOpen: boolean }>`
   display: none;
   position: fixed;
   top: 0;
@@ -72,7 +72,7 @@ const MobileSidebarContainer = styled.div<{ isOpen: boolean }>`
   bottom: 0;
   width: 250px;
   z-index: 50;
-  transform: translateX(${({ isOpen }) => (isOpen ? "0" : "-100%")});
+  transform: translateX(${({ $isOpen }) => ($isOpen ? "0" : "-100%")});
   transition: transform 0.3s ease-in-out;
 
   @media (max-width: 768px) {
@@ -101,7 +101,7 @@ export const DashboardLayout: React.FC = () => {
   };
 
   return (
-    <LayoutContainer sidebarCollapsed={sidebarCollapsed}>
+    <LayoutContainer $sidebarCollapsed={sidebarCollapsed}>
       <SidebarArea>
         <Sidebar collapsed={sidebarCollapsed} onToggle={toggleSidebar} />
       </SidebarArea>
@@ -119,10 +119,10 @@ export const DashboardLayout: React.FC = () => {
 
       {/* Mobile Sidebar */}
       <MobileSidebarOverlay
-        isOpen={mobileSidebarOpen}
+        $isOpen={mobileSidebarOpen}
         onClick={closeMobileSidebar}
       />
-      <MobileSidebarContainer isOpen={mobileSidebarOpen}>
+      <MobileSidebarContainer $isOpen={mobileSidebarOpen}>
         <Sidebar
           collapsed={false}
           onToggle={toggleSidebar}

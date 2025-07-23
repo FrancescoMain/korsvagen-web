@@ -3,6 +3,7 @@ import styled from "styled-components";
 import Header from "../components/layout/Header";
 import Footer from "../components/layout/Footer";
 import ContactCTA from "../components/common/ContactCTA";
+import { useSettings } from "../contexts/SettingsContext";
 
 const AboutContainer = styled.div`
   min-height: 100vh;
@@ -431,19 +432,19 @@ const StatsSection = styled.section`
 
   .stats-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 40px;
-    max-width: 1000px;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 30px;
+    max-width: 1200px;
     margin: 0 auto;
 
-    @media (max-width: 768px) {
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 30px;
+    @media (max-width: 1024px) {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 25px;
     }
 
     @media (max-width: 480px) {
       grid-template-columns: 1fr;
-      gap: 25px;
+      gap: 20px;
     }
   }
 
@@ -451,11 +452,19 @@ const StatsSection = styled.section`
     background: rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.2);
-    padding: 50px 30px;
+    padding: 40px 20px;
     text-align: center;
     transition: all 0.4s ease;
     position: relative;
     overflow: hidden;
+
+    @media (max-width: 1024px) {
+      padding: 45px 25px;
+    }
+
+    @media (max-width: 480px) {
+      padding: 40px 20px;
+    }
 
     &::before {
       content: "";
@@ -485,48 +494,48 @@ const StatsSection = styled.section`
     }
 
     .number {
-      font-size: 4rem;
+      font-size: 3.5rem;
       font-weight: 400;
       color: #ffffff;
-      margin-bottom: 20px;
+      margin-bottom: 15px;
       font-family: "Korsvagen Brand", "Times New Roman", serif;
       letter-spacing: 0.1em;
       text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8);
       transition: transform 0.4s ease;
 
+      @media (max-width: 1024px) {
+        font-size: 3.8rem;
+      }
+
       @media (max-width: 768px) {
-        font-size: 3.5rem;
+        font-size: 3.2rem;
       }
 
       @media (max-width: 480px) {
-        font-size: 3rem;
+        font-size: 2.8rem;
       }
     }
 
     .label {
       color: rgba(255, 255, 255, 0.9);
       font-weight: 300;
-      font-size: 1.1rem;
+      font-size: 1rem;
       font-family: "Inter", "Segoe UI", sans-serif;
       letter-spacing: 0.05em;
       text-transform: uppercase;
       line-height: 1.4;
 
+      @media (max-width: 1024px) {
+        font-size: 1.05rem;
+      }
+
       @media (max-width: 768px) {
-        font-size: 1rem;
+        font-size: 0.95rem;
       }
 
       @media (max-width: 480px) {
-        font-size: 0.95rem;
+        font-size: 0.9rem;
       }
-    }
-
-    @media (max-width: 768px) {
-      padding: 40px 25px;
-    }
-
-    @media (max-width: 480px) {
-      padding: 35px 20px;
     }
   }
 `;
@@ -923,6 +932,8 @@ const WhyChooseUsSection = styled.section`
 `;
 
 const AboutPage: React.FC = () => {
+  const { companyStats } = useSettings();
+
   return (
     <AboutContainer>
       <Header />
@@ -986,16 +997,26 @@ const AboutPage: React.FC = () => {
             </div>
             <div className="stats-grid">
               <div className="stat-card">
-                <div className="number">15+</div>
+                <div className="number">
+                  {companyStats?.years_experience || 15}+
+                </div>
                 <div className="label">Anni di Esperienza</div>
               </div>
               <div className="stat-card">
-                <div className="number">200+</div>
+                <div className="number">
+                  {companyStats?.projects_completed || 200}+
+                </div>
                 <div className="label">Progetti Realizzati</div>
               </div>
               <div className="stat-card">
-                <div className="number">150+</div>
-                <div className="label">Clienti Soddisfatti</div>
+                <div className="number">
+                  +{companyStats?.revenue_growth || 35}%
+                </div>
+                <div className="label">Incremento Fatturato</div>
+              </div>
+              <div className="stat-card">
+                <div className="number">{companyStats?.team_members || 25}</div>
+                <div className="label">Membri del Team</div>
               </div>
             </div>
           </div>

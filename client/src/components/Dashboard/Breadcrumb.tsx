@@ -12,10 +12,10 @@ const BreadcrumbContainer = styled.nav`
   color: var(--text-secondary);
 `;
 
-const BreadcrumbItem = styled.span<{ isActive?: boolean }>`
-  color: ${({ isActive }) =>
-    isActive ? "var(--text-primary)" : "var(--text-secondary)"};
-  font-weight: ${({ isActive }) => (isActive ? "500" : "400")};
+const BreadcrumbItem = styled.span<{ $isActive?: boolean }>`
+  color: ${({ $isActive }) =>
+    $isActive ? "var(--text-primary)" : "var(--text-secondary)"};
+  font-weight: ${({ $isActive }) => ($isActive ? "500" : "400")};
 `;
 
 const BreadcrumbLink = styled.button`
@@ -74,7 +74,7 @@ export const Breadcrumb: React.FC = () => {
         return (
           <React.Fragment key={pathname}>
             <Separator size={16} />
-            <BreadcrumbItem isActive={isLast}>
+            <BreadcrumbItem $isActive={isLast}>
               {getBreadcrumbName(pathname)}
             </BreadcrumbItem>
           </React.Fragment>

@@ -23,6 +23,7 @@ import {
 import ScrollToTop from "./components/common/ScrollToTop";
 import { AuthProvider } from "./components/Auth/AuthProvider";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import { SettingsProvider } from "./contexts/SettingsContext";
 import { ProtectedRoute } from "./components/Auth/ProtectedRoute";
 import { LoginPage } from "./pages/LoginPage";
 import { DashboardLayout } from "./components/Dashboard/DashboardLayout";
@@ -37,82 +38,87 @@ function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <Router>
-          <ScrollToTop />
-          <Toaster
-            position="top-right"
-            toastOptions={{
-              duration: 4000,
-              style: {
-                background: "#2a2a2a",
-                color: "#ffffff",
-                border: "1px solid #333",
-                borderRadius: "8px",
-              },
-            }}
-          />
-          <Routes>
-            {/* Public routes */}
-            <Route path="/" element={<HomePage />} />
-            <Route path="/chi-siamo" element={<AboutPage />} />
-            <Route path="/servizi" element={<ServicesPage />} />
-            <Route path="/progetti" element={<ProjectsPage />} />
-            <Route
-              path="/progetti/:projectId"
-              element={<ProjectDetailPage />}
+        <SettingsProvider>
+          <Router>
+            <ScrollToTop />
+            <Toaster
+              position="top-right"
+              toastOptions={{
+                duration: 4000,
+                style: {
+                  background: "#2a2a2a",
+                  color: "#ffffff",
+                  border: "1px solid #333",
+                  borderRadius: "8px",
+                },
+              }}
             />
-            <Route path="/news" element={<NewsPage />} />
-            <Route path="/news/:newsId" element={<NewsDetailPage />} />
-            <Route path="/il-nostro-team" element={<TeamPage />} />
-            <Route path="/contatti" element={<ContactPage />} />
-            <Route path="/lavora-con-noi" element={<CareersPage />} />
-            <Route path="/work-in-progress" element={<WorkInProgressPage />} />
+            <Routes>
+              {/* Public routes */}
+              <Route path="/" element={<HomePage />} />
+              <Route path="/chi-siamo" element={<AboutPage />} />
+              <Route path="/servizi" element={<ServicesPage />} />
+              <Route path="/progetti" element={<ProjectsPage />} />
+              <Route
+                path="/progetti/:projectId"
+                element={<ProjectDetailPage />}
+              />
+              <Route path="/news" element={<NewsPage />} />
+              <Route path="/news/:newsId" element={<NewsDetailPage />} />
+              <Route path="/il-nostro-team" element={<TeamPage />} />
+              <Route path="/contatti" element={<ContactPage />} />
+              <Route path="/lavora-con-noi" element={<CareersPage />} />
+              <Route
+                path="/work-in-progress"
+                element={<WorkInProgressPage />}
+              />
 
-            {/* Auth routes */}
-            <Route path="/login" element={<LoginPage />} />
+              {/* Auth routes */}
+              <Route path="/login" element={<LoginPage />} />
 
-            {/* Dashboard routes */}
-            <Route
-              path="/dashboard"
-              element={
-                <ProtectedRoute>
-                  <DashboardLayout />
-                </ProtectedRoute>
-              }
-            >
-              <Route index element={<DashboardHome />} />
-              <Route path="pages" element={<PagesOverview />} />
-              <Route path="pages/:pageId" element={<PagesOverview />} />
-              <Route path="media" element={<MediaLibrary />} />
-              <Route path="settings" element={<Settings />} />
-            </Route>
+              {/* Dashboard routes */}
+              <Route
+                path="/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <DashboardLayout />
+                  </ProtectedRoute>
+                }
+              >
+                <Route index element={<DashboardHome />} />
+                <Route path="pages" element={<PagesOverview />} />
+                <Route path="pages/:pageId" element={<PagesOverview />} />
+                <Route path="media" element={<MediaLibrary />} />
+                <Route path="settings" element={<Settings />} />
+              </Route>
 
-            {/* Page Editor routes */}
-            <Route
-              path="/editor"
-              element={
-                <ProtectedRoute>
-                  <PageEditorPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/editor/:pageId"
-              element={
-                <ProtectedRoute>
-                  <PageEditorPage />
-                </ProtectedRoute>
-              }
-            />
+              {/* Page Editor routes */}
+              <Route
+                path="/editor"
+                element={
+                  <ProtectedRoute>
+                    <PageEditorPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/editor/:pageId"
+                element={
+                  <ProtectedRoute>
+                    <PageEditorPage />
+                  </ProtectedRoute>
+                }
+              />
 
-            {/* Fallback routes */}
-            <Route
-              path="/admin"
-              element={<Navigate to="/dashboard" replace />}
-            />
-            <Route path="*" element={<HomePage />} />
-          </Routes>
-        </Router>
+              {/* Fallback routes */}
+              <Route
+                path="/admin"
+                element={<Navigate to="/dashboard" replace />}
+              />
+              <Route path="*" element={<HomePage />} />
+            </Routes>
+          </Router>
+        </SettingsProvider>
       </AuthProvider>
     </ThemeProvider>
   );

@@ -1,8 +1,20 @@
+/**
+ * KORSVAGEN WEB APPLICATION - CONTACT PAGE
+ *
+ * Pagina di contatto aggiornata per utilizzare il SettingsContext
+ * invece dei dati hardcoded in contactData.ts.
+ * Include gli orari di apertura dinamici e gestione loading states.
+ *
+ * @author KORSVAGEN S.R.L.
+ * @version 1.1.0 - Updated to use SettingsContext
+ */
+
 import React from "react";
 import styled from "styled-components";
 import Header from "../components/layout/Header";
 import Footer from "../components/layout/Footer";
-import { contactData } from "../data/contactData";
+import { useContactData, useSettings } from "../contexts/SettingsContext";
+import { contactData as fallbackData } from "../data/contactData";
 
 const ContactContainer = styled.div`
   min-height: 100vh;
@@ -554,6 +566,18 @@ const ContactContent = styled.div`
 `;
 
 const ContactPage: React.FC = () => {
+  // Utilizza il nuovo hook per ottenere i dati di contatto dinamici
+  // Commento: Hook personalizzato che fornisce compatibilità con contactData
+  const { contactData: dynamicContactData, loading } = useContactData();
+
+  // Ottiene gli orari di apertura dal context settings
+  // Commento: businessHours contiene gli orari dinamici dal database
+  const { businessHours } = useSettings();
+
+  // Utilizza i dati dinamici se disponibili, altrimenti fallback ai dati statici
+  // Commento: Garantisce che la pagina funzioni anche durante il caricamento
+  const contactData = dynamicContactData || fallbackData;
+
   const [formData, setFormData] = React.useState({
     nome: "",
     cognome: "",
@@ -768,18 +792,70 @@ const ContactPage: React.FC = () => {
 
               <div className="office-hours">
                 <h4>Orari di Apertura</h4>
-                <div className="hours-item">
-                  <span className="day">Lunedì - Venerdì</span>
-                  <span className="time">9:00 - 18:00</span>
-                </div>
-                <div className="hours-item">
-                  <span className="day">Sabato</span>
-                  <span className="time">9:00 - 13:00</span>
-                </div>
-                <div className="hours-item">
-                  <span className="day">Domenica</span>
-                  <span className="time">Chiuso</span>
-                </div>
+                {/* Commento: Gli orari vengono caricati dinamicamente dal database */}
+                {businessHours ? (
+                  // Mostra gli orari dinamici se disponibili
+                  <>
+                    {businessHours.monday !== "Chiuso" && (
+                      <div className="hours-item">
+                        <span className="day">Lunedì</span>
+                        <span className="time">{businessHours.monday}</span>
+                      </div>
+                    )}
+                    {businessHours.tuesday !== "Chiuso" && (
+                      <div className="hours-item">
+                        <span className="day">Martedì</span>
+                        <span className="time">{businessHours.tuesday}</span>
+                      </div>
+                    )}
+                    {businessHours.wednesday !== "Chiuso" && (
+                      <div className="hours-item">
+                        <span className="day">Mercoledì</span>
+                        <span className="time">{businessHours.wednesday}</span>
+                      </div>
+                    )}
+                    {businessHours.thursday !== "Chiuso" && (
+                      <div className="hours-item">
+                        <span className="day">Giovedì</span>
+                        <span className="time">{businessHours.thursday}</span>
+                      </div>
+                    )}
+                    {businessHours.friday !== "Chiuso" && (
+                      <div className="hours-item">
+                        <span className="day">Venerdì</span>
+                        <span className="time">{businessHours.friday}</span>
+                      </div>
+                    )}
+                    {businessHours.saturday !== "Chiuso" && (
+                      <div className="hours-item">
+                        <span className="day">Sabato</span>
+                        <span className="time">{businessHours.saturday}</span>
+                      </div>
+                    )}
+                    {businessHours.sunday !== "Chiuso" && (
+                      <div className="hours-item">
+                        <span className="day">Domenica</span>
+                        <span className="time">{businessHours.sunday}</span>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  // Fallback agli orari statici durante il caricamento
+                  <>
+                    <div className="hours-item">
+                      <span className="day">Lunedì - Venerdì</span>
+                      <span className="time">9:00 - 18:00</span>
+                    </div>
+                    <div className="hours-item">
+                      <span className="day">Sabato</span>
+                      <span className="time">9:00 - 13:00</span>
+                    </div>
+                    <div className="hours-item">
+                      <span className="day">Domenica</span>
+                      <span className="time">Chiuso</span>
+                    </div>
+                  </>
+                )}
               </div>
             </ContactInfo>
           </ContactGrid>

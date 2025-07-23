@@ -160,7 +160,7 @@ const UserRole = styled.span`
   text-transform: capitalize;
 `;
 
-const UserMenu = styled.div<{ isOpen: boolean }>`
+const UserMenu = styled.div<{ $isOpen: boolean }>`
   position: absolute;
   top: 100%;
   right: 0;
@@ -172,9 +172,9 @@ const UserMenu = styled.div<{ isOpen: boolean }>`
     0 4px 6px -2px rgba(0, 0, 0, 0.05);
   min-width: 200px;
   z-index: 10;
-  opacity: ${({ isOpen }) => (isOpen ? 1 : 0)};
-  visibility: ${({ isOpen }) => (isOpen ? "visible" : "hidden")};
-  transform: translateY(${({ isOpen }) => (isOpen ? "0" : "-10px")});
+  opacity: ${({ $isOpen }) => ($isOpen ? 1 : 0)};
+  visibility: ${({ $isOpen }) => ($isOpen ? "visible" : "hidden")};
+  transform: translateY(${({ $isOpen }) => ($isOpen ? "0" : "-10px")});
   transition: all 0.15s ease-in-out;
 `;
 
@@ -236,7 +236,8 @@ export const Header: React.FC<HeaderProps> = ({
     setUserMenuOpen(false);
   };
 
-  const toggleUserMenu = () => {
+  const toggleUserMenu = (event: React.MouseEvent) => {
+    event.stopPropagation();
     setUserMenuOpen(!userMenuOpen);
   };
 
@@ -282,7 +283,7 @@ export const Header: React.FC<HeaderProps> = ({
             <ChevronDown size={16} />
           </UserMenuTrigger>
 
-          <UserMenu isOpen={userMenuOpen}>
+          <UserMenu $isOpen={userMenuOpen}>
             <MenuItem>
               <User size={16} />
               Profile

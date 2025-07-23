@@ -21,7 +21,11 @@ import jwt from "jsonwebtoken";
 import rateLimit from "express-rate-limit";
 import { body, validationResult } from "express-validator";
 import { supabaseClient } from "../config/supabase.js";
-import { requireAuth } from "../utils/auth.js";
+import {
+  requireAuth,
+  generateAccessToken,
+  generateRefreshToken,
+} from "../utils/auth.js";
 import { logger } from "../utils/logger.js";
 
 const router = express.Router();
@@ -35,7 +39,7 @@ const router = express.Router();
 // Rate limiter per login - più restrittivo
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minuti
-  max: 5, // Massimo 5 tentativi per IP
+  max: parseInt(process.env.AUTH_RATE_LIMIT_MAX) || 5, // Usa env variable o 5 come fallback
   message: {
     error: "Troppi tentativi di login. Riprova tra 15 minuti.",
     code: "LOGIN_RATE_LIMIT_EXCEEDED",
@@ -79,29 +83,6 @@ const loginValidators = [
  * @param {string} type - Tipo di token ('access' | 'refresh')
  * @returns {string} JWT token
  */
-const generateToken = (user, type = "access") => {
-  const payload = {
-    sub: user.id,
-    username: user.username,
-    email: user.email,
-    role: user.role,
-    type,
-  };
-
-  const options = {
-    issuer: "korsvagen-web",
-    audience: "korsvagen-admin",
-  };
-
-  if (type === "access") {
-    options.expiresIn = process.env.JWT_EXPIRES_IN || "1h";
-  } else if (type === "refresh") {
-    options.expiresIn = process.env.JWT_REFRESH_EXPIRES_IN || "7d";
-  }
-
-  return jwt.sign(payload, process.env.JWT_SECRET, options);
-};
-
 /**
  * Salva sessione nel database
  * @param {string} userId - ID utente
@@ -263,8 +244,18 @@ router.post("/login", loginLimiter, loginValidators, async (req, res) => {
       .eq("id", user.id);
 
     // Genera token
-    const accessToken = generateToken(user, "access");
-    const refreshToken = generateToken(user, "refresh");
+    const accessToken = generateAccessToken({
+      userId: user.id,
+      username: user.username,
+      email: user.email,
+      role: user.role,
+    });
+    const refreshToken = generateRefreshToken({
+      userId: user.id,
+      username: user.username,
+      email: user.email,
+      role: user.role,
+    });
 
     // Salva sessione
     await saveSession(user.id, refreshToken, req, rememberMe);
@@ -383,7 +374,12 @@ router.post("/refresh", async (req, res) => {
     }
 
     // Genera nuovo access token
-    const newAccessToken = generateToken(user, "access");
+    const newAccessToken = generateAccessToken({
+      userId: user.id,
+      username: user.username,
+      email: user.email,
+      role: user.role,
+    });
 
     // Aggiorna last_used_at della sessione
     await supabaseClient

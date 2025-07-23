@@ -43,6 +43,7 @@ import healthRoutes from "./routes/health.js";
 import authRoutes from "./routes/auth.js";
 import dashboardRoutes from "./routes/dashboard.js";
 import contactRoutes from "./routes/contact.js";
+import settingsRoutes from "./routes/settings.js";
 
 // Inizializza l'app Express
 const app = express();
@@ -201,6 +202,9 @@ app.use("/api/dashboard", dashboardRoutes);
 
 // Contatti - form di contatto del sito web
 app.use("/api/contact", contactRoutes);
+
+// Settings - gestione impostazioni applicazione
+app.use("/api/settings", settingsRoutes);
 
 // Placeholder per futuri endpoint che saranno aggiunti nelle fasi successive:
 // - /api/users (gestione utenti)

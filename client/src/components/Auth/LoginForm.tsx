@@ -88,7 +88,7 @@ const Form = styled.form`
   gap: 1.5rem;
 `;
 
-const InputGroup = styled.div<{ hasError?: boolean }>`
+const InputGroup = styled.div<{ $hasError?: boolean }>`
   position: relative;
 
   label {
@@ -100,7 +100,7 @@ const InputGroup = styled.div<{ hasError?: boolean }>`
   }
 `;
 
-const InputWrapper = styled.div<{ hasError?: boolean }>`
+const InputWrapper = styled.div<{ $hasError?: boolean }>`
   position: relative;
   display: flex;
   align-items: center;
@@ -108,7 +108,7 @@ const InputWrapper = styled.div<{ hasError?: boolean }>`
   input {
     width: 100%;
     padding: 0.75rem 2.75rem 0.75rem 2.75rem;
-    border: 2px solid ${(props) => (props.hasError ? "#ef4444" : "#404040")};
+    border: 2px solid ${(props) => (props.$hasError ? "#ef4444" : "#404040")};
     border-radius: 8px;
     font-size: 0.875rem;
     background: #1a1a1a;
@@ -117,10 +117,10 @@ const InputWrapper = styled.div<{ hasError?: boolean }>`
 
     &:focus {
       outline: none;
-      border-color: ${(props) => (props.hasError ? "#ef4444" : "#3b82f6")};
+      border-color: ${(props) => (props.$hasError ? "#ef4444" : "#3b82f6")};
       box-shadow: 0 0 0 3px
         ${(props) =>
-          props.hasError
+          props.$hasError
             ? "rgba(239, 68, 68, 0.1)"
             : "rgba(59, 130, 246, 0.1)"};
     }
@@ -202,7 +202,7 @@ const CheckboxGroup = styled.div`
   }
 `;
 
-const SubmitButton = styled.button<{ loading?: boolean }>`
+const SubmitButton = styled.button<{ $loading?: boolean }>`
   width: 100%;
   padding: 0.875rem 1rem;
   background: #3b82f6;
@@ -211,8 +211,8 @@ const SubmitButton = styled.button<{ loading?: boolean }>`
   border-radius: 8px;
   font-size: 0.875rem;
   font-weight: 600;
-  cursor: ${(props) => (props.loading ? "not-allowed" : "pointer")};
-  opacity: ${(props) => (props.loading ? 0.7 : 1)};
+  cursor: ${(props) => (props.$loading ? "not-allowed" : "pointer")};
+  opacity: ${(props) => (props.$loading ? 0.7 : 1)};
   transition: all 0.2s ease;
   display: flex;
   align-items: center;
@@ -220,12 +220,12 @@ const SubmitButton = styled.button<{ loading?: boolean }>`
   gap: 0.5rem;
 
   &:hover {
-    background: ${(props) => (props.loading ? "#3b82f6" : "#2563eb")};
-    transform: ${(props) => (props.loading ? "none" : "translateY(-1px)")};
+    background: ${(props) => (props.$loading ? "#3b82f6" : "#2563eb")};
+    transform: ${(props) => (props.$loading ? "none" : "translateY(-1px)")};
   }
 
   &:active {
-    transform: ${(props) => (props.loading ? "none" : "translateY(0)")};
+    transform: ${(props) => (props.$loading ? "none" : "translateY(0)")};
   }
 
   svg {
@@ -361,9 +361,9 @@ export const LoginForm: React.FC = () => {
       )}
 
       <Form onSubmit={handleSubmit(onSubmit)}>
-        <InputGroup hasError={!!errors.username}>
+        <InputGroup $hasError={!!errors.username}>
           <label htmlFor="username">Username</label>
-          <InputWrapper hasError={!!errors.username}>
+          <InputWrapper $hasError={!!errors.username}>
             <InputIcon position="left">
               <User />
             </InputIcon>
@@ -383,9 +383,9 @@ export const LoginForm: React.FC = () => {
           )}
         </InputGroup>
 
-        <InputGroup hasError={!!errors.password}>
+        <InputGroup $hasError={!!errors.password}>
           <label htmlFor="password">Password</label>
-          <InputWrapper hasError={!!errors.password}>
+          <InputWrapper $hasError={!!errors.password}>
             <InputIcon position="left">
               <Lock />
             </InputIcon>
@@ -417,7 +417,7 @@ export const LoginForm: React.FC = () => {
           <label htmlFor="rememberMe">Ricordami</label>
         </CheckboxGroup>
 
-        <SubmitButton type="submit" loading={loading} disabled={loading}>
+        <SubmitButton type="submit" $loading={loading} disabled={loading}>
           {loading ? (
             <>
               <LogIn className="spin" />
