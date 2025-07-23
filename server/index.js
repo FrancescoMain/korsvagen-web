@@ -272,9 +272,10 @@ process.on("SIGINT", () => {
 });
 
 // Avvia il server solo se questo file viene eseguito direttamente
-const isMainModule = import.meta.url === `file://${process.argv[1]}` || 
-                     import.meta.url === `file:///${process.argv[1].replace(/\\/g, '/')}` ||
-                     process.argv[1].endsWith('index.js');
+const isMainModule =
+  import.meta.url === `file://${process.argv[1]}` ||
+  import.meta.url === `file:///${process.argv[1].replace(/\\/g, "/")}` ||
+  process.argv[1].endsWith("index.js");
 
 if (isMainModule) {
   startServer();
