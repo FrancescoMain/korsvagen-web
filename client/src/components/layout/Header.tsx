@@ -62,23 +62,6 @@ const Header: React.FC = () => {
             <span></span>
             <span></span>
           </MobileMenuToggle>
-
-          {isMenuOpen && <MobileOverlay onClick={() => setIsMenuOpen(false)} />}
-
-          <MobileMenu $isOpen={isMenuOpen}>
-            <div className="menu-content">
-              {menuItems.map((item) => (
-                <MobileMenuLink
-                  key={item.path}
-                  to={item.path}
-                  $isActive={location.pathname === item.path}
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  {item.label}
-                </MobileMenuLink>
-              ))}
-            </div>
-          </MobileMenu>
         </Navigation>
 
         <LogoSection>
@@ -93,10 +76,26 @@ const Header: React.FC = () => {
             }}
           >
             <LogoImage src="/LOGO KORSVAGEN.png" alt="Korsvagen Logo" />
-            <Tagline>Costruzioni & Progettazione</Tagline>
           </Link>
         </LogoSection>
       </HeaderContent>
+
+      {isMenuOpen && <MobileOverlay onClick={() => setIsMenuOpen(false)} />}
+
+      <MobileMenu $isOpen={isMenuOpen}>
+        <div className="menu-content">
+          {menuItems.map((item) => (
+            <MobileMenuLink
+              key={item.path}
+              to={item.path}
+              $isActive={location.pathname === item.path}
+              onClick={() => setIsMenuOpen(false)}
+            >
+              {item.label}
+            </MobileMenuLink>
+          ))}
+        </div>
+      </MobileMenu>
     </HeaderContainer>
   );
 };
@@ -122,6 +121,10 @@ const HeaderContent = styled.div`
   align-items: center;
   position: relative;
   height: 110px;
+
+  @media (max-width: 1280px) {
+    justify-content: center;
+  }
 
   @media (max-width: 768px) {
     padding: 0 1.5rem;
@@ -151,16 +154,16 @@ const LogoSection = styled.div`
 `;
 
 const LogoImage = styled.img`
-  height: 60px;
+  height: 45px;
   width: auto;
   object-fit: contain;
 
   @media (max-width: 768px) {
-    height: 50px;
+    height: 30px;
   }
 
   @media (max-width: 480px) {
-    height: 45px;
+    height: 28px;
   }
 `;
 
@@ -184,6 +187,13 @@ const Tagline = styled.span`
 
 const Navigation = styled.nav<{ $menuOpen: boolean }>`
   position: relative;
+
+  @media (max-width: 1280px) {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+  }
 `;
 
 const DesktopMenu = styled.div`
@@ -306,6 +316,9 @@ const MobileMenu = styled.div<{ $isOpen: boolean }>`
 
   @media (max-width: 1280px) {
     display: block;
+    /* Reset any positioning inherited from parent */
+    position: fixed;
+    transform: none;
   }
 
   .menu-content {
