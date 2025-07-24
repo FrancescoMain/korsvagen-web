@@ -1,11 +1,13 @@
 {
   "version": 2,
+  "buildCommand": "cd client && npm install --legacy-peer-deps && npm run build",
+  "outputDirectory": "client/build",
+  "installCommand": "echo 'Skipping root install'",
   "functions": {
     "server/index.js": {
       "runtime": "nodejs18.x"
     }
   },
-  "outputDirectory": "client/build",
   "routes": [
     {
       "src": "/api/(.*)",
