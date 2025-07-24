@@ -5,16 +5,24 @@
       "runtime": "nodejs18.x"
     }
   },
+  "builds": [
+    {
+      "src": "client/package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "build",
+        "installCommand": "npm install --legacy-peer-deps"
+      }
+    }
+  ],
   "routes": [
     {
       "src": "/api/(.*)",
       "dest": "/server/index.js"
-    }
-  ],
-  "rewrites": [
+    },
     {
-      "source": "/api/(.*)",
-      "destination": "/server/index.js"
+      "src": "/(.*)",
+      "dest": "/client/build/$1"
     }
   ]
 }
