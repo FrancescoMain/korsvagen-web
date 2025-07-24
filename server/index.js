@@ -335,5 +335,18 @@ if (isMainModule) {
   startServer();
 }
 
-// Esporta l'app per i test e per Vercel come funzione serverless
-export default app;
+// Esporta per Vercel come funzione serverless
+export default async function handler(req, res) {
+  // Inizializza i servizi la prima volta
+  if (!app.locals.initialized) {
+    try {
+      await initializeServices();
+      app.locals.initialized = true;
+    } catch (error) {
+      logger.error("Errore inizializzazione servizi:", error);
+    }
+  }
+  
+  // Passa la richiesta all'app Express
+  return app(req, res);
+};
