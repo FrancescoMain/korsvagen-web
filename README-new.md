@@ -17,14 +17,32 @@
 🔄 **In Progress:**
 
 1. 🚨 **CRITICAL**: API Routes not working on Vercel (405 Method Not Allowed)
+   - Modified vercel.json with specific route configuration
+   - Updated server export for serverless compatibility
+   - Testing API connectivity
 2. 📊 Database schema migration per revenue_growth field
 
 🔍 **Next Actions:**
 
-- **URGENT**: Fix Vercel API routing configuration
+- **URGENT**: Test API health endpoint on Vercel
+- Verify Vercel environment variables configuration
 - Test authentication flow after API fix
 - Database migration for statistics changes
 - Centralino Emergenze implementation
+
+## 🚨 CURRENT ISSUE - API Routes
+
+**Problem**: `/api/auth/login` returns 405 Method Not Allowed on Vercel
+
+**Attempted Solutions:**
+- ✅ Modified vercel.json with specific API routes instead of wildcard
+- ✅ Updated server/index.js for serverless compatibility
+- 🔄 Testing deployment with new configuration
+
+**Next Steps:**
+1. Test `/api/health` endpoint
+2. Check Vercel function logs
+3. Verify environment variables setup
 
 1. � Fix Settings API error (authentication required)
 2. 🖼️ Fix manifest icon errors  
