@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "vercel dev",
-    "build": "cd client && npm install --legacy-peer-deps && npm run build",
+    "build": "npm install --prefix client --legacy-peer-deps && npm run build --prefix client",
     "start": "vercel dev",
     "migrate": "node api/utils/migrations.js migrate",
     "migrate:status": "node api/utils/migrations.js status",
