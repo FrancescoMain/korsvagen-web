@@ -194,6 +194,17 @@ async function initializeServices() {
 // Health Check - per monitoraggio uptime e stato servizi
 app.use("/api/health", healthRoutes);
 
+// Test endpoint diretto per debug Vercel
+app.get("/api/test", (req, res) => {
+  res.json({
+    success: true,
+    message: "Test endpoint works!",
+    timestamp: new Date().toISOString(),
+    method: req.method,
+    path: req.path
+  });
+});
+
 // Autenticazione - login, logout, refresh token
 app.use("/api/auth", authRoutes);
 

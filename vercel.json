@@ -2,14 +2,14 @@
   "version": 2,
   "outputDirectory": "build",
   "functions": {
-    "api/**/*.js": {
+    "server/index.js": {
       "runtime": "nodejs18.x"
     }
   },
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "/api/$1"
+      "dest": "/server/index.js"
     },
     {
       "src": "/(.*)",
