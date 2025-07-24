@@ -13,6 +13,7 @@
 - [x] **🚀 VERCEL DEPLOYMENT SUCCESSFUL** - Site live at korsvagen-web.vercel.app
 - [x] Manifest icons fixed (no more console errors)
 - [x] Settings API conditional loading
+- [x] **Updated all icons to use logo IG** - Fixed manifest icon size errors
 
 🔄 **In Progress:**
 

@@ -1,32 +1,7 @@
 {
   "version": 2,
   "outputDirectory": "build",
-  "functions": {
-    "server/index.js": {
-      "runtime": "nodejs18.x"
-    }
-  },
   "routes": [
-    {
-      "src": "/api/auth/(.*)",
-      "dest": "/server/index.js"
-    },
-    {
-      "src": "/api/settings/(.*)",
-      "dest": "/server/index.js"
-    },
-    {
-      "src": "/api/dashboard/(.*)",
-      "dest": "/server/index.js"
-    },
-    {
-      "src": "/api/contact/(.*)",
-      "dest": "/server/index.js"
-    },
-    {
-      "src": "/api/health",
-      "dest": "/server/index.js"
-    },
     {
       "src": "/(.*)",
       "dest": "/build/$1"
