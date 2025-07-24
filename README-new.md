@@ -11,8 +11,20 @@
 - [x] React version conflicts resolved (React 18.3.1 forced with overrides)
 - [x] Vercel build output directory fixed (copy to root build folder)
 - [x] **🚀 VERCEL DEPLOYMENT SUCCESSFUL** - Site live at korsvagen-web.vercel.app
+- [x] Manifest icons fixed (no more console errors)
+- [x] Settings API conditional loading
 
 🔄 **In Progress:**
+
+1. 🚨 **CRITICAL**: API Routes not working on Vercel (405 Method Not Allowed)
+2. 📊 Database schema migration per revenue_growth field
+
+🔍 **Next Actions:**
+
+- **URGENT**: Fix Vercel API routing configuration
+- Test authentication flow after API fix
+- Database migration for statistics changes
+- Centralino Emergenze implementation
 
 1. � Fix Settings API error (authentication required)
 2. 🖼️ Fix manifest icon errors  

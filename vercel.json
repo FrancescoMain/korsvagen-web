@@ -8,7 +8,23 @@
   },
   "routes": [
     {
-      "src": "/api/(.*)",
+      "src": "/api/auth/(.*)",
+      "dest": "/server/index.js"
+    },
+    {
+      "src": "/api/settings/(.*)",
+      "dest": "/server/index.js"
+    },
+    {
+      "src": "/api/dashboard/(.*)",
+      "dest": "/server/index.js"
+    },
+    {
+      "src": "/api/contact/(.*)",
+      "dest": "/server/index.js"
+    },
+    {
+      "src": "/api/health",
       "dest": "/server/index.js"
     },
     {

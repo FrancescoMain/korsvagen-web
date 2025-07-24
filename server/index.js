@@ -324,5 +324,5 @@ if (isMainModule) {
   startServer();
 }
 
-// Esporta l'app per i test e per Vercel
+// Esporta l'app per i test e per Vercel come funzione serverless
 export default app;
