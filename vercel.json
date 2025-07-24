@@ -5,16 +5,9 @@
       "runtime": "nodejs18.x"
     }
   },
-  "builds": [
-    {
-      "src": "client/package.json",
-      "use": "@vercel/static-build",
-      "config": {
-        "distDir": "build",
-        "installCommand": "npm install --legacy-peer-deps"
-      }
-    }
-  ],
+  "buildCommand": "cd client && npm install --legacy-peer-deps && npm run build",
+  "outputDirectory": "client/build",
+  "installCommand": "echo 'Custom install handled in buildCommand'",
   "routes": [
     {
       "src": "/api/(.*)",
