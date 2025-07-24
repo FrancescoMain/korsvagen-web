@@ -3,19 +3,22 @@
   "name": "Korsvagen - Costruzioni & Progettazione",
   "icons": [
     {
-      "src": "LOGO KORSVAGEN.png",
-      "sizes": "64x64 32x32 24x24 16x16",
-      "type": "image/png"
+      "src": "favicon.png",
+      "sizes": "48x48",
+      "type": "image/png",
+      "purpose": "favicon"
     },
     {
-      "src": "LOGO KORSVAGEN.png",
+      "src": "logo-192x192.png",
       "type": "image/png",
-      "sizes": "192x192"
+      "sizes": "192x192",
+      "purpose": "any maskable"
     },
     {
-      "src": "LOGO KORSVAGEN.png",
+      "src": "logo-512x512.png",
       "type": "image/png",
-      "sizes": "512x512"
+      "sizes": "512x512",
+      "purpose": "any maskable"
     }
   ],
   "start_url": ".",

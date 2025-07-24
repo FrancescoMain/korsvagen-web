@@ -1,0 +1,336 @@
+import React, { useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import styled from "styled-components";
+import {
+  Home,
+  FileText,
+  Image,
+  Settings,
+  ChevronDown,
+  ChevronRight,
+  Menu,
+  X,
+} from "lucide-react";
+
+interface NavigationItem {
+  title: string;
+  icon: React.ReactNode;
+  path: string;
+  children?: NavigationItem[];
+}
+
+interface SidebarProps {
+  collapsed: boolean;
+  onToggle: () => void;
+  onNavigate?: () => void;
+}
+
+const navigationItems: NavigationItem[] = [
+  {
+    title: "Dashboard",
+    icon: <Home size={20} />,
+    path: "/dashboard",
+  },
+  {
+    title: "Pagine",
+    icon: <FileText size={20} />,
+    path: "/dashboard/pages",
+    children: [
+      {
+        title: "Homepage",
+        icon: <FileText size={16} />,
+        path: "/dashboard/pages/home",
+      },
+      {
+        title: "About",
+        icon: <FileText size={16} />,
+        path: "/dashboard/pages/about",
+      },
+      {
+        title: "Contact",
+        icon: <FileText size={16} />,
+        path: "/dashboard/pages/contact",
+      },
+    ],
+  },
+  {
+    title: "Media Library",
+    icon: <Image size={20} />,
+    path: "/dashboard/media",
+  },
+  {
+    title: "Impostazioni",
+    icon: <Settings size={20} />,
+    path: "/dashboard/settings",
+  },
+];
+
+const SidebarContainer = styled.div<{ $collapsed: boolean }>`
+  height: 100vh;
+  background-color: var(--bg-primary);
+  border-right: 1px solid #e5e7eb;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  width: ${({ $collapsed }) => ($collapsed ? "80px" : "250px")};
+  transition: width 0.3s ease-in-out;
+  overflow: visible;
+  min-width: 80px;
+`;
+
+const SidebarHeader = styled.div<{ $collapsed: boolean }>`
+  padding: 1rem;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: ${({ $collapsed }) =>
+    $collapsed ? "center" : "space-between"};
+  min-height: 60px;
+  position: relative;
+`;
+
+const Logo = styled.div<{ $collapsed: boolean }>`
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--primary);
+  white-space: nowrap;
+  opacity: ${({ $collapsed }) => ($collapsed ? 0 : 1)};
+  transition: opacity 0.3s ease-in-out;
+`;
+
+const ToggleButton = styled.button`
+  background: none;
+  border: none;
+  padding: 0.75rem;
+  cursor: pointer;
+  color: var(--text-secondary);
+  border-radius: 0.375rem;
+  transition: all 0.15s ease-in-out;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  background-color: var(--bg-secondary);
+  border: 1px solid #e5e7eb;
+
+  &:hover {
+    color: var(--text-primary);
+    background-color: var(--primary);
+    color: white;
+    transform: scale(1.05);
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+`;
+
+const Navigation = styled.nav`
+  flex: 1;
+  padding: 1rem 0;
+  overflow-y: auto;
+`;
+
+const NavItem = styled.div<{ $active?: boolean; $collapsed: boolean }>`
+  margin: 0 0.5rem;
+`;
+
+const NavLink = styled(Link)<{
+  $active?: boolean;
+  $collapsed: boolean;
+  $isChild?: boolean;
+}>`
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: ${({ $collapsed, $isChild }) =>
+    $collapsed
+      ? "0.75rem"
+      : $isChild
+      ? "0.5rem 1rem 0.5rem 2.5rem"
+      : "0.75rem 1rem"};
+  color: ${({ $active }) =>
+    $active ? "var(--primary)" : "var(--text-secondary)"};
+  text-decoration: none;
+  border-radius: 0.375rem;
+  transition: all 0.15s ease-in-out;
+  font-size: ${({ $isChild }) => ($isChild ? "0.875rem" : "0.875rem")};
+  justify-content: ${({ $collapsed }) =>
+    $collapsed ? "center" : "flex-start"};
+  background-color: ${({ $active }) =>
+    $active ? "rgba(37, 99, 235, 0.1)" : "transparent"};
+  position: relative;
+  margin: ${({ $collapsed }) => ($collapsed ? "0.25rem 0" : "0")};
+
+  &:hover {
+    background-color: ${({ $active }) =>
+      $active ? "rgba(37, 99, 235, 0.15)" : "var(--bg-secondary)"};
+    color: ${({ $active }) =>
+      $active ? "var(--primary)" : "var(--text-primary)"};
+    transform: ${({ $collapsed }) => ($collapsed ? "scale(1.05)" : "none")};
+  }
+
+  span {
+    opacity: ${({ $collapsed }) => ($collapsed ? 0 : 1)};
+    transition: opacity 0.3s ease-in-out;
+    white-space: nowrap;
+  }
+`;
+
+const NavButton = styled.button<{ $active?: boolean; $collapsed: boolean }>`
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: ${({ $collapsed }) => ($collapsed ? "0.75rem" : "0.75rem 1rem")};
+  color: ${({ $active }) =>
+    $active ? "var(--primary)" : "var(--text-secondary)"};
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+  border-radius: 0.375rem;
+  transition: all 0.15s ease-in-out;
+  font-size: 0.875rem;
+  cursor: pointer;
+  justify-content: ${({ $collapsed }) =>
+    $collapsed ? "center" : "space-between"};
+  margin: ${({ $collapsed }) => ($collapsed ? "0.25rem 0" : "0")};
+
+  &:hover {
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    transform: ${({ $collapsed }) => ($collapsed ? "scale(1.05)" : "none")};
+  }
+
+  .nav-content {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  span {
+    opacity: ${({ $collapsed }) => ($collapsed ? 0 : 1)};
+    transition: opacity 0.3s ease-in-out;
+    white-space: nowrap;
+  }
+`;
+
+const SubNav = styled.div<{ $isOpen: boolean; $collapsed: boolean }>`
+  max-height: ${({ $isOpen, $collapsed }) =>
+    $isOpen && !$collapsed ? "200px" : "0"};
+  overflow: hidden;
+  transition: max-height 0.3s ease-in-out;
+`;
+
+export const Sidebar: React.FC<SidebarProps> = ({
+  collapsed,
+  onToggle,
+  onNavigate,
+}) => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [expandedItems, setExpandedItems] = useState<string[]>([]);
+
+  const isActive = (path: string) => {
+    return location.pathname === path;
+  };
+
+  const isParentActive = (item: NavigationItem) => {
+    if (item.children) {
+      return item.children.some((child) => isActive(child.path));
+    }
+    return false;
+  };
+
+  const toggleExpanded = (title: string) => {
+    if (collapsed) return;
+
+    setExpandedItems((prev) =>
+      prev.includes(title)
+        ? prev.filter((item) => item !== title)
+        : [...prev, title]
+    );
+  };
+
+  const handleNavigation = (path: string) => {
+    navigate(path);
+    onNavigate?.();
+  };
+
+  const handleToggleClick = () => {
+    onToggle();
+  };
+
+  return (
+    <SidebarContainer $collapsed={collapsed}>
+      <SidebarHeader $collapsed={collapsed}>
+        {!collapsed && <Logo $collapsed={collapsed}>KORSVAGEN</Logo>}
+        <ToggleButton onClick={handleToggleClick}>
+          {collapsed ? <Menu size={20} /> : <X size={20} />}
+        </ToggleButton>
+      </SidebarHeader>
+
+      <Navigation>
+        {navigationItems.map((item) => {
+          const hasChildren = item.children && item.children.length > 0;
+          const isExpanded = expandedItems.includes(item.title);
+          const active = isActive(item.path) || isParentActive(item);
+
+          return (
+            <NavItem key={item.title} $active={active} $collapsed={collapsed}>
+              {hasChildren ? (
+                <>
+                  <NavButton
+                    $active={active}
+                    $collapsed={collapsed}
+                    onClick={() => toggleExpanded(item.title)}
+                  >
+                    <div className="nav-content">
+                      {item.icon}
+                      <span>{item.title}</span>
+                    </div>
+                    {!collapsed && (
+                      <span>
+                        {isExpanded ? (
+                          <ChevronDown size={16} />
+                        ) : (
+                          <ChevronRight size={16} />
+                        )}
+                      </span>
+                    )}
+                  </NavButton>
+                  <SubNav $isOpen={isExpanded} $collapsed={collapsed}>
+                    {item.children?.map((child) => (
+                      <NavLink
+                        key={child.path}
+                        to={child.path}
+                        $active={isActive(child.path)}
+                        $collapsed={collapsed}
+                        $isChild={true}
+                        onClick={() => handleNavigation(child.path)}
+                      >
+                        {child.icon}
+                        <span>{child.title}</span>
+                      </NavLink>
+                    ))}
+                  </SubNav>
+                </>
+              ) : (
+                <NavLink
+                  to={item.path}
+                  $active={active}
+                  $collapsed={collapsed}
+                  onClick={() => handleNavigation(item.path)}
+                >
+                  {item.icon}
+                  <span>{item.title}</span>
+                </NavLink>
+              )}
+            </NavItem>
+          );
+        })}
+      </Navigation>
+    </SidebarContainer>
+  );
+};
