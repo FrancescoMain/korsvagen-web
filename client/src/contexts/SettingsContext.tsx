@@ -423,8 +423,16 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
    * Effetto per il caricamento iniziale
    */
   useEffect(() => {
-    loadSettings();
-  }, [loadSettings]);
+    // Carica settings solo se autenticato o se siamo sulla homepage
+    const currentPath = window.location.pathname;
+    const isHomePage = currentPath === '/' || currentPath === '/home';
+    
+    if (isAuthenticated || isHomePage) {
+      loadSettings();
+    } else {
+      console.log("⏭️ Skipping settings load - not authenticated and not on homepage");
+    }
+  }, [loadSettings, isAuthenticated]);
 
   /**
    * Valore del context
