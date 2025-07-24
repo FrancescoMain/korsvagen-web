@@ -18,32 +18,30 @@
 🔄 **In Progress:**
 
 1. 🚨 **CRITICAL**: API Routes not working on Vercel (405 Method Not Allowed)
-   - Modified vercel.json with specific route configuration
-   - Updated server export for serverless compatibility
-   - Testing API connectivity
+   - ✅ Created Vercel native API structure in `/api` folder
+   - ✅ Implemented `/api/auth/login.js` as serverless function
+   - ✅ Simplified vercel.json for native API support
+   - 🔄 Testing new API deployment
 2. 📊 Database schema migration per revenue_growth field
 
 🔍 **Next Actions:**
 
-- **URGENT**: Test API health endpoint on Vercel
-- Verify Vercel environment variables configuration
-- Test authentication flow after API fix
+- **URGENT**: Test new API endpoints (/api/health, /api/auth/login)
+- Verify authentication flow with new API structure
 - Database migration for statistics changes
 - Centralino Emergenze implementation
 
-## 🚨 CURRENT ISSUE - API Routes
+## 🚨 API SOLUTION - Vercel Native Structure
 
-**Problem**: `/api/auth/login` returns 405 Method Not Allowed on Vercel
+**Problem**: Express.js server not compatible with Vercel serverless
 
-**Attempted Solutions:**
-- ✅ Modified vercel.json with specific API routes instead of wildcard
-- ✅ Updated server/index.js for serverless compatibility
-- 🔄 Testing deployment with new configuration
+**Solution**: Created native Vercel API structure:
+- ✅ `/api/health.js` - Health check endpoint
+- ✅ `/api/auth/login.js` - Login serverless function
+- ✅ Simplified vercel.json (removed custom routing)
+- ✅ CORS configured for each endpoint
 
-**Next Steps:**
-1. Test `/api/health` endpoint
-2. Check Vercel function logs
-3. Verify environment variables setup
+**Expected Result**: API endpoints should now work with proper HTTP methods
 
 1. � Fix Settings API error (authentication required)
 2. 🖼️ Fix manifest icon errors  

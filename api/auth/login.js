@@ -4,9 +4,9 @@
  * Endpoint di login compatibile con Vercel serverless functions
  */
 
-import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
-import { createClient } from "@supabase/supabase-js";
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const { createClient } = require("@supabase/supabase-js");
 
 // Inizializza Supabase client
 const supabase = createClient(
@@ -14,7 +14,7 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   // Configura CORS
   res.setHeader('Access-Control-Allow-Credentials', true);
   res.setHeader('Access-Control-Allow-Origin', '*');

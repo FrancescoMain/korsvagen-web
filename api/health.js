@@ -2,7 +2,7 @@
  * VERCEL SERVERLESS FUNCTION - HEALTH CHECK
  */
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   // Configura CORS
   res.setHeader('Access-Control-Allow-Credentials', true);
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -29,7 +29,8 @@ export default async function handler(req, res) {
       success: true,
       message: 'Server API is working',
       timestamp: new Date().toISOString(),
-      environment: process.env.NODE_ENV || 'development'
+      environment: process.env.NODE_ENV || 'development',
+      vercel: true
     });
   } catch (error) {
     console.error('Health check error:', error);
@@ -38,4 +39,4 @@ export default async function handler(req, res) {
       message: 'Server error'
     });
   }
-}
+};
