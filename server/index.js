@@ -346,7 +346,7 @@ export default async function handler(req, res) {
       logger.error("Errore inizializzazione servizi:", error);
     }
   }
-  
+
   // Passa la richiesta all'app Express
   return app(req, res);
-};
+}

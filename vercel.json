@@ -1,19 +1,4 @@
 {
   "version": 2,
-  "outputDirectory": "build",
-  "functions": {
-    "server/index.js": {
-      "runtime": "nodejs18.x"
-    }
-  },
-  "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "/server/index.js"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/build/$1"
-    }
-  ]
+  "outputDirectory": "build"
 }
