@@ -5,7 +5,7 @@
       "runtime": "nodejs18.x"
     }
   },
-  "buildCommand": "cd client && npm install --legacy-peer-deps && npm run build",
+  "buildCommand": "ls -la && pwd && cd client && npm install --legacy-peer-deps && npm run build",
   "outputDirectory": "client/build",
   "installCommand": "echo 'Custom install handled in buildCommand'",
   "routes": [
