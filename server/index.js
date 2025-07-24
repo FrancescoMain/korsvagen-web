@@ -82,8 +82,8 @@ const corsOptions = {
       "https://korsvagen.it",
     ];
 
-    // Permetti richieste senza origin (es. Postman, server-to-server) in development
-    if (!origin && process.env.NODE_ENV !== "production") {
+    // Permetti richieste senza origin (es. favicon, health checks, Postman)
+    if (!origin) {
       return callback(null, true);
     }
 
