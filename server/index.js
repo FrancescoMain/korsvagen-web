@@ -201,7 +201,7 @@ app.get("/api/test", (req, res) => {
     message: "Test endpoint works!",
     timestamp: new Date().toISOString(),
     method: req.method,
-    path: req.path
+    path: req.path,
   });
 });
 
