@@ -77,6 +77,9 @@ const corsOptions = {
     const allowedOrigins = process.env.CORS_ORIGIN?.split(",") || [
       "http://localhost:3000",
       "http://localhost:3002",
+      "https://korsvagen-web.vercel.app",
+      "https://www.korsvagen.it",
+      "https://korsvagen.it",
     ];
 
     // Permetti richieste senza origin (es. Postman, server-to-server) in development
