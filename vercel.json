@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "outputDirectory": "client/build",
+  "outputDirectory": "build",
   "functions": {
     "server/index.js": {
       "runtime": "nodejs18.x"
@@ -13,7 +13,7 @@
     },
     {
       "src": "/(.*)",
-      "dest": "/client/build/$1"
+      "dest": "/build/$1"
     }
   ]
 }
