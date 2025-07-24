@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "vercel dev",
-    "build": "echo 'No build step required for Vercel serverless functions'",
+    "build": "cd client && npm install --legacy-peer-deps && npm run build",
     "start": "vercel dev",
     "migrate": "node api/utils/migrations.js migrate",
     "migrate:status": "node api/utils/migrations.js status",
