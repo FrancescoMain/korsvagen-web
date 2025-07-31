@@ -207,7 +207,7 @@ router.get("/:pageId", requireAuth, requireRole(["admin", "editor"]), async (req
  * PUT /api/pages/:pageId
  * Aggiorna una pagina (admin only)
  */
-router.put("/:pageId", requireAuth, requireRole(["admin", "editor"]), validatePageUpdate, async (req, res) => {
+router.put("/:pageId", requireAuth, requireRole(["admin", "editor", "super_admin"]), validatePageUpdate, async (req, res) => {
   try {
     // Validazione input
     const errors = validationResult(req);
