@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { apiClient } from "../utils/api";
 
 interface PageSection {
   title?: string;
@@ -34,17 +35,12 @@ export const usePageData = (pageId: string): UsePageDataResult => {
       setError(null);
 
       try {
-        const response = await fetch(`/api/pages/public/${pageId}`);
+        const response = await apiClient.get(`/pages/public/${pageId}`);
         
-        if (response.ok) {
-          const result = await response.json();
-          if (result.success && result.data) {
-            setPageData(result.data);
-          } else {
-            throw new Error("Dati pagina non validi");
-          }
+        if (response.data.success && response.data.data) {
+          setPageData(response.data.data);
         } else {
-          throw new Error("Errore nel caricamento della pagina");
+          throw new Error("Dati pagina non validi");
         }
       } catch (err: any) {
         console.error(`Errore caricamento pagina ${pageId}:`, err);

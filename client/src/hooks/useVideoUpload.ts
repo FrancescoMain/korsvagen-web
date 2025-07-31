@@ -1,5 +1,6 @@
 import { useState } from "react";
 import toast from "react-hot-toast";
+import { apiClient } from "../utils/api";
 
 interface VideoUploadResult {
   public_id: string;
@@ -51,29 +52,20 @@ export const useVideoUpload = () => {
         });
       }, 200);
 
-      const response = await fetch("/api/media/upload/video", {
-        method: "POST",
-        body: formData,
-        credentials: "include",
+      const response = await apiClient.post("/media/upload/video", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
       });
 
       clearInterval(progressInterval);
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Errore durante l'upload del video");
-      }
-
-      const result = await response.json();
-
-      if (!result.success) {
-        throw new Error(result.message || "Upload fallito");
+      if (!response.data.success) {
+        throw new Error(response.data.message || "Upload fallito");
       }
 
       setProgress(100);
       toast.success("Video caricato con successo!");
       
-      return result.data;
+      return response.data.data;
     } catch (error: any) {
       console.error("Errore upload video:", error);
       toast.error(error.message || "Errore durante l'upload del video");
@@ -88,20 +80,10 @@ export const useVideoUpload = () => {
     try {
       const encodedPublicId = encodeURIComponent(publicId);
       
-      const response = await fetch(`/api/media/${encodedPublicId}?resourceType=video`, {
-        method: "DELETE",
-        credentials: "include",
-      });
+      const response = await apiClient.delete(`/media/${encodedPublicId}?resourceType=video`);
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Errore durante l'eliminazione del video");
-      }
-
-      const result = await response.json();
-
-      if (!result.success) {
-        throw new Error(result.message || "Eliminazione fallita");
+      if (!response.data.success) {
+        throw new Error(response.data.message || "Eliminazione fallita");
       }
 
       toast.success("Video eliminato con successo!");

@@ -7,6 +7,7 @@ import { Input } from "../ui/Input";
 import { LoadingSpinner } from "../ui/LoadingSpinner";
 import { Breadcrumb } from "../Dashboard/Breadcrumb";
 import { useVideoUpload } from "../../hooks/useVideoUpload";
+import { apiClient } from "../../utils/api";
 
 interface PageData {
   id: string;
@@ -206,26 +207,21 @@ export const SimplePageEditor: React.FC = () => {
       setLoading(true);
       
       try {
-        const response = await fetch(`/api/pages/${pageId || "home"}`, {
-          credentials: "include",
-        });
+        const response = await apiClient.get(`/pages/${pageId || "home"}`);
 
-        if (response.ok) {
-          const result = await response.json();
-          if (result.success && result.data) {
-            // Converte i dati del backend al formato del frontend
-            const pageData: PageData = {
-              id: result.data.page_id,
-              heroTitle: result.data.hero_title || "",
-              heroSubtitle: result.data.hero_subtitle || "",
-              heroVideo: result.data.hero_video || "",
-              heroImage: result.data.hero_image || "",
-              sections: result.data.sections || {},
-              metaTitle: result.data.meta_title || "",
-              metaDescription: result.data.meta_description || "",
-            };
-            setPageData(pageData);
-          }
+        if (response.data.success && response.data.data) {
+          // Converte i dati del backend al formato del frontend
+          const pageData: PageData = {
+            id: response.data.data.page_id,
+            heroTitle: response.data.data.hero_title || "",
+            heroSubtitle: response.data.data.hero_subtitle || "",
+            heroVideo: response.data.data.hero_video || "",
+            heroImage: response.data.data.hero_image || "",
+            sections: response.data.data.sections || {},
+            metaTitle: response.data.data.meta_title || "",
+            metaDescription: response.data.data.meta_description || "",
+          };
+          setPageData(pageData);
         } else {
           throw new Error("Errore nel caricamento della pagina");
         }
@@ -309,26 +305,14 @@ export const SimplePageEditor: React.FC = () => {
         metaDescription: pageData.metaDescription,
       };
 
-      const response = await fetch(`/api/pages/${pageData.id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify(saveData),
-      });
+      const response = await apiClient.put(`/pages/${pageData.id}`, saveData);
 
-      if (response.ok) {
-        const result = await response.json();
-        if (result.success) {
-          // Mostra messaggio di successo
-          const toast = await import("react-hot-toast");
-          toast.default.success("Pagina salvata con successo!");
-        } else {
-          throw new Error(result.message || "Errore durante il salvataggio");
-        }
+      if (response.data.success) {
+        // Mostra messaggio di successo
+        const toast = await import("react-hot-toast");
+        toast.default.success("Pagina salvata con successo!");
       } else {
-        throw new Error("Errore durante il salvataggio");
+        throw new Error(response.data.message || "Errore durante il salvataggio");
       }
     } catch (error: any) {
       console.error("Errore salvataggio:", error);
