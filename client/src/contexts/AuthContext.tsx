@@ -89,10 +89,6 @@ interface AuthResponse {
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || "/api";
 
-// Debug: Log dell'URL API utilizzato per auth
-console.log("🔐 Auth API URL in uso:", API_BASE_URL);
-console.log("🔐 REACT_APP_API_URL:", process.env.REACT_APP_API_URL);
-
 // Configurazione Axios per autenticazione
 const authApi = axios.create({
   baseURL: API_BASE_URL,
@@ -128,6 +124,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     localStorage.getItem("korsvagen_refresh_token")
   );
   const [loading, setLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [refreshFailedPermanently, setRefreshFailedPermanently] = useState(false);
 
   // Stati derivati
   const isAuthenticated = !!user && !!token;
@@ -150,10 +148,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // Rimuovi token dal localStorage
   const clearTokens = useCallback(() => {
+    console.log("🧹 Pulizia token e stato auth");
     localStorage.removeItem("korsvagen_auth_token");
     localStorage.removeItem("korsvagen_refresh_token");
     setToken(null);
     setRefreshTokenValue(null);
+    setUser(null);
+    setIsRefreshing(false);
+    setRefreshFailedPermanently(false);
   }, []);
 
   // Controlla se l'utente ha un ruolo specifico
@@ -201,6 +203,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           // Salva dati utente e token
           setUser(userData);
           saveTokens(tokens.access, tokens.refresh);
+          setRefreshFailedPermanently(false); // Reset flag dopo login riuscito
 
           console.log("✅ Token salvati, stato aggiornato");
 
@@ -257,9 +260,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // Funzione di refresh token
   const refreshToken = useCallback(async (): Promise<boolean> => {
-    if (!refreshTokenValue) {
+    if (!refreshTokenValue || isRefreshing || refreshFailedPermanently) {
+      console.log("⏹️ Refresh bloccato:", { 
+        hasToken: !!refreshTokenValue, 
+        isRefreshing, 
+        refreshFailedPermanently 
+      });
       return false;
     }
+
+    setIsRefreshing(true);
+    console.log("🔄 Tentativo refresh token...");
 
     try {
       const response = await authApi.post<AuthResponse>("/auth/refresh", {
@@ -274,20 +285,29 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         // Il refresh token rimane lo stesso
         localStorage.setItem("korsvagen_auth_token", tokens.access);
 
+        console.log("✅ Refresh token completato con successo");
         return true;
       } else {
-        // Refresh fallito, pulisci tutto
+        console.log("❌ Refresh token fallito - response not success");
+        setRefreshFailedPermanently(true);
         clearTokens();
-        setUser(null);
         return false;
       }
-    } catch (error) {
-      console.error("Token refresh failed:", error);
+    } catch (error: any) {
+      console.error("❌ Token refresh failed:", error);
+      
+      // Se è un 401, il refresh token è definitivamente invalido
+      if (error.response?.status === 401) {
+        console.log("🚫 Refresh token definitivamente invalido - blocco tentativi futuri");
+        setRefreshFailedPermanently(true);
+      }
+      
       clearTokens();
-      setUser(null);
       return false;
+    } finally {
+      setIsRefreshing(false);
     }
-  }, [refreshTokenValue, clearTokens]);
+  }, [refreshTokenValue, clearTokens, isRefreshing, refreshFailedPermanently]);
 
   // Aggiorna dati utente
   const updateUser = useCallback((userData: Partial<User>) => {
@@ -317,14 +337,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       async (error) => {
         const originalRequest = error.config;
 
-        if (error.response?.status === 401 && !originalRequest._retry) {
+        if (error.response?.status === 401 && !originalRequest._retry && !isRefreshing && !refreshFailedPermanently) {
           originalRequest._retry = true;
 
+          console.log("📡 Interceptor: ricevuto 401, tentativo refresh...");
           const refreshSuccess = await refreshToken();
           if (refreshSuccess) {
+            console.log("📡 Interceptor: refresh riuscito, riprovo richiesta originale");
             return authApi(originalRequest);
           } else {
             // Refresh fallito, redirect al login
+            console.log("📡 Interceptor: refresh fallito, eseguo logout");
             logout();
             return Promise.reject(error);
           }
@@ -339,7 +362,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       authApi.interceptors.request.eject(requestInterceptor);
       authApi.interceptors.response.eject(responseInterceptor);
     };
-  }, [token, refreshToken, logout]);
+  }, [token, refreshToken, logout, isRefreshing, refreshFailedPermanently]);
 
   // Inizializzazione: verifica token esistente
   useEffect(() => {

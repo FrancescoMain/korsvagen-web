@@ -145,10 +145,6 @@ interface SettingsApiResponse {
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || "/api";
 
-// Debug: Log dell'URL API utilizzato
-console.log("🔧 API URL in uso:", API_BASE_URL);
-console.log("🔧 REACT_APP_API_URL:", process.env.REACT_APP_API_URL);
-
 // Configurazione Axios per settings
 const settingsApi = axios.create({
   baseURL: API_BASE_URL,
