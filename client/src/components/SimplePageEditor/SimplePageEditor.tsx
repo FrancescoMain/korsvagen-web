@@ -99,6 +99,23 @@ const Label = styled.label`
   margin-bottom: 0.5rem;
 `;
 
+const TextArea = styled.textarea`
+  width: 100%;
+  min-height: 120px;
+  padding: 0.75rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  resize: vertical;
+  transition: border-color 0.2s;
+
+  &:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+`;
+
 
 const VideoUploadArea = styled.div`
   border: 2px dashed #e5e7eb;
