@@ -71,16 +71,43 @@ router.get("/public", async (req, res) => {
   try {
     logger.info("Recupero settings pubblici richiesto");
 
-    // Query per recuperare tutti i settings pubblici
-    const { data: settings, error } = await supabaseClient
+    // Query per recuperare tutti i settings pubblici con timeout
+    const queryPromise = supabaseClient
       .from("app_settings")
       .select("key, value, category")
       .eq("is_public", true)
       .order("category", { ascending: true });
 
+    // Timeout di 5 secondi per evitare hang
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error("Database query timeout")), 5000)
+    );
+
+    const { data: settings, error } = await Promise.race([queryPromise, timeoutPromise]);
+
     if (error) {
       logger.error("Errore recupero settings pubblici:", error);
-      throw error;
+      
+      // Fallback con dati di default se il database non risponde
+      logger.warn("🔄 Utilizzo dati di fallback per settings pubblici");
+      return res.json({
+        success: true,
+        data: {
+          categorized: {
+            general: {
+              site_title: "KORSVAGEN S.R.L.",
+              contact_email: "korsvagensrl@gmail.com"
+            }
+          },
+          flat: {
+            site_title: "KORSVAGEN S.R.L.",
+            contact_email: "korsvagensrl@gmail.com"
+          },
+          count: 2,
+          last_updated: new Date().toISOString(),
+          fallback: true
+        }
+      });
     }
 
     // Raggruppa i settings per categoria per una migliore organizzazione

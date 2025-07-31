@@ -49,6 +49,9 @@ import settingsRoutes from "./routes/settings.js";
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+// Configurazione per Vercel - Trust proxy
+app.set('trust proxy', 1);
+
 /**
  * CONFIGURAZIONE MIDDLEWARE GLOBALI
  *
