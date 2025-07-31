@@ -57,13 +57,15 @@ export const usePageData = (pageId: string): UsePageDataResult => {
             sections: {
               services: {
                 title: "I Nostri Servizi",
-                subtitle: "Soluzioni innovative per ogni esigenza",
-                content: "Offriamo servizi completi nel settore delle costruzioni con esperienza trentennale e tecnologie all'avanguardia."
+                subtitle: "Soluzioni innovative per ogni fase del tuo progetto. Dalla progettazione alla realizzazione, con competenza e tecnologie all'avanguardia."
               },
-              about: {
-                title: "Chi Siamo", 
-                subtitle: "La nostra storia",
-                content: "Con oltre 30 anni di esperienza nel settore delle costruzioni, KORSVAGEN è sinonimo di qualità e affidabilità."
+              projects: {
+                title: "I Nostri Progetti",
+                subtitle: "Scopri alcuni dei nostri progetti realizzati, esempi concreti di eccellenza architettonica e innovazione tecnologica."
+              },
+              news: {
+                title: "Ultime News",
+                subtitle: "Resta aggiornato sulle ultime novità e tendenze dal mondo dell'architettura e costruzioni."
               }
             },
             meta_title: "KORSVAGEN - Costruzioni di qualità",

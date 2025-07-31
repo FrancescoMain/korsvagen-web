@@ -1982,10 +1982,9 @@ const HomePage: React.FC = () => {
 
         <ProjectsGallery>
           <div className="projects-header">
-            <h2>I Nostri Progetti</h2>
+            <h2>{pageData?.sections?.projects?.title || "I Nostri Progetti"}</h2>
             <p className="subtitle">
-              Scopri alcuni dei nostri progetti realizzati, esempi concreti di
-              eccellenza architettonica e innovazione tecnologica.
+              {pageData?.sections?.projects?.subtitle || "Scopri alcuni dei nostri progetti realizzati, esempi concreti di eccellenza architettonica e innovazione tecnologica."}
             </p>
           </div>
 
@@ -2048,10 +2047,9 @@ const HomePage: React.FC = () => {
 
         <NewsSection>
           <NewsContainer>
-            <NewsSectionTitle>Ultime News</NewsSectionTitle>
+            <NewsSectionTitle>{pageData?.sections?.news?.title || "Ultime News"}</NewsSectionTitle>
             <NewsSectionSubtitle>
-              Resta aggiornato sulle ultime novità e tendenze dal mondo
-              dell'architettura e costruzioni.
+              {pageData?.sections?.news?.subtitle || "Resta aggiornato sulle ultime novità e tendenze dal mondo dell'architettura e costruzioni."}
             </NewsSectionSubtitle>
 
             <NewsGallery>

@@ -99,22 +99,6 @@ const Label = styled.label`
   margin-bottom: 0.5rem;
 `;
 
-const TextArea = styled.textarea`
-  width: 100%;
-  min-height: 120px;
-  padding: 0.75rem;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
-  font-size: 0.875rem;
-  resize: vertical;
-  transition: border-color 0.2s;
-
-  &:focus {
-    outline: none;
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-  }
-`;
 
 const VideoUploadArea = styled.div`
   border: 2px dashed #e5e7eb;
@@ -234,7 +218,20 @@ export const SimplePageEditor: React.FC = () => {
           heroSubtitle: pageId === "about" ? "Oltre 30 anni di eccellenza" : pageId === "contact" ? "Siamo qui per aiutarti" : "Costruzioni di qualità dal 1985",
           heroVideo: "",
           heroImage: "",
-          sections: {},
+          sections: pageId === "home" ? {
+            services: {
+              title: "I Nostri Servizi",
+              subtitle: "Soluzioni innovative per ogni fase del tuo progetto. Dalla progettazione alla realizzazione, con competenza e tecnologie all'avanguardia."
+            },
+            projects: {
+              title: "I Nostri Progetti", 
+              subtitle: "Scopri alcuni dei nostri progetti realizzati, esempi concreti di eccellenza architettonica e innovazione tecnologica."
+            },
+            news: {
+              title: "Ultime News",
+              subtitle: "Resta aggiornato sulle ultime novità e tendenze dal mondo dell'architettura e costruzioni."
+            }
+          } : {},
           metaTitle: "",
           metaDescription: "",
         };
@@ -296,8 +293,6 @@ export const SimplePageEditor: React.FC = () => {
 
     try {
       const saveData = {
-        heroTitle: pageData.heroTitle,
-        heroSubtitle: pageData.heroSubtitle,
         heroVideo: pageData.heroVideo,
         heroImage: pageData.heroImage,
         sections: pageData.sections,
@@ -362,28 +357,8 @@ export const SimplePageEditor: React.FC = () => {
       <Form onSubmit={handleSave}>
 
         <Section>
-          <SectionTitle>Hero Section</SectionTitle>
+          <SectionTitle>Hero Video</SectionTitle>
           
-          <FormGroup>
-            <Label htmlFor="heroTitle">Titolo Hero</Label>
-            <Input
-              id="heroTitle"
-              value={pageData.heroTitle || ""}
-              onChange={(e) => handleInputChange("heroTitle", e.target.value)}
-              placeholder="Titolo principale della hero section"
-            />
-          </FormGroup>
-
-          <FormGroup>
-            <Label htmlFor="heroSubtitle">Sottotitolo Hero</Label>
-            <Input
-              id="heroSubtitle"
-              value={pageData.heroSubtitle || ""}
-              onChange={(e) => handleInputChange("heroSubtitle", e.target.value)}
-              placeholder="Sottotitolo della hero section"
-            />
-          </FormGroup>
-
           <FormGroup>
             <Label>Video Hero</Label>
             <VideoUploadArea 
@@ -445,106 +420,89 @@ export const SimplePageEditor: React.FC = () => {
           </FormGroup>
         </Section>
 
-        <Section>
+<Section>
           <SectionTitle>Sezioni Contenuto</SectionTitle>
           
-          {Object.keys(pageData.sections).length === 0 ? (
-            <div style={{ textAlign: "center", padding: "2rem", background: "#f9fafb", borderRadius: "8px", border: "1px solid #e5e7eb" }}>
-              <p style={{ color: "var(--text-secondary)", margin: "0 0 1rem" }}>
-                Nessuna sezione configurata per questa pagina.
-              </p>
-              <Button 
-                type="button" 
-                variant="secondary"
-                onClick={() => {
-                  const sectionId = pageData.id === "home" ? "services" : pageData.id === "about" ? "story" : "info";
-                  const newSections = {
-                    ...pageData.sections,
-                    [sectionId]: {
-                      title: pageData.id === "home" ? "I Nostri Servizi" : pageData.id === "about" ? "La Nostra Storia" : "Informazioni di Contatto",
-                      subtitle: pageData.id === "home" ? "Soluzioni innovative per ogni esigenza" : pageData.id === "about" ? "Dal 1985 al vostro servizio" : "I nostri recapiti",
-                      content: "Inserisci qui il contenuto della sezione..."
-                    }
-                  };
-                  setPageData({ ...pageData, sections: newSections });
-                }}
-              >
-                Aggiungi Prima Sezione
-              </Button>
+          {/* Sezione Servizi */}
+          <div style={{ marginBottom: "2rem", padding: "1rem", border: "1px solid #e5e7eb", borderRadius: "8px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
+              <h3 style={{ fontSize: "1rem", fontWeight: "600", color: "var(--text-primary)", margin: 0 }}>
+                I Nostri Servizi
+              </h3>
             </div>
-          ) : (
-            Object.entries(pageData.sections).map(([sectionId, section]) => (
-              <div key={sectionId} style={{ marginBottom: "2rem", padding: "1rem", border: "1px solid #e5e7eb", borderRadius: "8px" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
-                  <h3 style={{ fontSize: "1rem", fontWeight: "600", color: "var(--text-primary)", margin: 0 }}>
-                    Sezione: {sectionId}
-                  </h3>
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    onClick={() => {
-                      const newSections = { ...pageData.sections };
-                      delete newSections[sectionId];
-                      setPageData({ ...pageData, sections: newSections });
-                    }}
-                    style={{ padding: "0.25rem 0.5rem", fontSize: "0.75rem" }}
-                  >
-                    Rimuovi
-                  </Button>
-                </div>
-                
-                <FormGroup>
-                  <Label>Titolo Sezione</Label>
-                  <Input
-                    value={section.title || ""}
-                    onChange={(e) => handleSectionChange(sectionId, "title", e.target.value)}
-                    placeholder="Titolo della sezione"
-                  />
-                </FormGroup>
+            
+            <FormGroup>
+              <Label>Titolo Sezione</Label>
+              <Input
+                value={pageData.sections?.services?.title || ""}
+                onChange={(e) => handleSectionChange("services", "title", e.target.value)}
+                placeholder="I Nostri Servizi"
+              />
+            </FormGroup>
 
-                <FormGroup>
-                  <Label>Sottotitolo Sezione</Label>
-                  <Input
-                    value={section.subtitle || ""}
-                    onChange={(e) => handleSectionChange(sectionId, "subtitle", e.target.value)}
-                    placeholder="Sottotitolo della sezione"
-                  />
-                </FormGroup>
+            <FormGroup>
+              <Label>Sottotitolo Sezione</Label>
+              <Input
+                value={pageData.sections?.services?.subtitle || ""}
+                onChange={(e) => handleSectionChange("services", "subtitle", e.target.value)}
+                placeholder="Soluzioni innovative per ogni esigenza"
+              />
+            </FormGroup>
+          </div>
 
-                <FormGroup>
-                  <Label>Contenuto</Label>
-                  <TextArea
-                    value={section.content || ""}
-                    onChange={(e) => handleSectionChange(sectionId, "content", e.target.value)}
-                    placeholder="Contenuto della sezione"
-                  />
-                </FormGroup>
-              </div>
-            ))
-          )}
-          
-          {Object.keys(pageData.sections).length > 0 && (
-            <div style={{ textAlign: "center", marginTop: "1rem" }}>
-              <Button 
-                type="button" 
-                variant="secondary"
-                onClick={() => {
-                  const sectionId = `section_${Date.now()}`;
-                  const newSections = {
-                    ...pageData.sections,
-                    [sectionId]: {
-                      title: "Nuova Sezione",
-                      subtitle: "Sottotitolo sezione",
-                      content: "Contenuto della sezione..."
-                    }
-                  };
-                  setPageData({ ...pageData, sections: newSections });
-                }}
-              >
-                Aggiungi Altra Sezione
-              </Button>
+          {/* Sezione Progetti */}
+          <div style={{ marginBottom: "2rem", padding: "1rem", border: "1px solid #e5e7eb", borderRadius: "8px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
+              <h3 style={{ fontSize: "1rem", fontWeight: "600", color: "var(--text-primary)", margin: 0 }}>
+                I Nostri Progetti
+              </h3>
             </div>
-          )}
+            
+            <FormGroup>
+              <Label>Titolo Sezione</Label>
+              <Input
+                value={pageData.sections?.projects?.title || ""}
+                onChange={(e) => handleSectionChange("projects", "title", e.target.value)}
+                placeholder="I Nostri Progetti"
+              />
+            </FormGroup>
+
+            <FormGroup>
+              <Label>Sottotitolo Sezione</Label>
+              <Input
+                value={pageData.sections?.projects?.subtitle || ""}
+                onChange={(e) => handleSectionChange("projects", "subtitle", e.target.value)}
+                placeholder="Scopri alcuni dei nostri progetti realizzati"
+              />
+            </FormGroup>
+          </div>
+
+          {/* Sezione News */}
+          <div style={{ marginBottom: "2rem", padding: "1rem", border: "1px solid #e5e7eb", borderRadius: "8px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
+              <h3 style={{ fontSize: "1rem", fontWeight: "600", color: "var(--text-primary)", margin: 0 }}>
+                Ultime News
+              </h3>
+            </div>
+            
+            <FormGroup>
+              <Label>Titolo Sezione</Label>
+              <Input
+                value={pageData.sections?.news?.title || ""}
+                onChange={(e) => handleSectionChange("news", "title", e.target.value)}
+                placeholder="Ultime News"
+              />
+            </FormGroup>
+
+            <FormGroup>
+              <Label>Sottotitolo Sezione</Label>
+              <Input
+                value={pageData.sections?.news?.subtitle || ""}
+                onChange={(e) => handleSectionChange("news", "subtitle", e.target.value)}
+                placeholder="Resta aggiornato sulle ultime novità"
+              />
+            </FormGroup>
+          </div>
         </Section>
 
         <Section>
