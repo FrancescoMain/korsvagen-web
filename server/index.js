@@ -44,6 +44,7 @@ import authRoutes from "./routes/auth.js";
 import dashboardRoutes from "./routes/dashboard.js";
 import contactRoutes from "./routes/contact.js";
 import settingsRoutes from "./routes/settings.js";
+import mediaRoutes from "./routes/media.js";
 
 // Inizializza l'app Express
 const app = express();
@@ -223,9 +224,11 @@ app.use("/api/contact", contactRoutes);
 // Settings - gestione impostazioni applicazione
 app.use("/api/settings", settingsRoutes);
 
+// Media - upload e gestione media tramite Cloudinary
+app.use("/api/media", mediaRoutes);
+
 // Placeholder per futuri endpoint che saranno aggiunti nelle fasi successive:
 // - /api/users (gestione utenti)
-// - /api/media (upload Cloudinary)
 // - /api/content (contenuti CMS)
 // - /api/projects (portfolio)
 // - /api/news (blog/news)

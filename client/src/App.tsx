@@ -31,8 +31,8 @@ import { DashboardHome } from "./pages/DashboardHome";
 import { PagesOverview } from "./pages/PagesOverview";
 import { MediaLibrary } from "./pages/MediaLibrary";
 import { Settings } from "./pages/Settings";
+import { ReviewsManagement } from "./pages/ReviewsManagement";
 import "./styles/dashboard.css";
-import "./styles/editor.css";
 
 function App() {
   return (
@@ -87,28 +87,12 @@ function App() {
               >
                 <Route index element={<DashboardHome />} />
                 <Route path="pages" element={<PagesOverview />} />
-                <Route path="pages/:pageId" element={<PagesOverview />} />
+                <Route path="pages/:pageId" element={<PageEditorPage />} />
                 <Route path="media" element={<MediaLibrary />} />
+                <Route path="reviews" element={<ReviewsManagement />} />
                 <Route path="settings" element={<Settings />} />
               </Route>
 
-              {/* Page Editor routes */}
-              <Route
-                path="/editor"
-                element={
-                  <ProtectedRoute>
-                    <PageEditorPage />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/editor/:pageId"
-                element={
-                  <ProtectedRoute>
-                    <PageEditorPage />
-                  </ProtectedRoute>
-                }
-              />
 
               {/* Fallback routes */}
               <Route

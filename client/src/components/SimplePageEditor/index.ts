@@ -1,0 +1,1 @@
+export { SimplePageEditor } from "./SimplePageEditor";

@@ -2,7 +2,7 @@ import React from "react";
 import styled, { keyframes } from "styled-components";
 
 interface LoadingSpinnerProps {
-  size?: "sm" | "md" | "lg";
+  size?: "small" | "sm" | "md" | "lg";
   color?: string;
 }
 
@@ -20,6 +20,7 @@ const SpinnerWrapper = styled.div<{ size: string; color?: string }>`
 
   ${({ size }) => {
     switch (size) {
+      case "small":
       case "sm":
         return `
           width: 1rem;

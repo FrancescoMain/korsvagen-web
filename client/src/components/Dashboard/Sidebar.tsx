@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import {
@@ -6,17 +6,15 @@ import {
   FileText,
   Image,
   Settings,
-  ChevronDown,
-  ChevronRight,
   Menu,
   X,
+  MessageSquare,
 } from "lucide-react";
 
 interface NavigationItem {
   title: string;
   icon: React.ReactNode;
   path: string;
-  children?: NavigationItem[];
 }
 
 interface SidebarProps {
@@ -32,26 +30,24 @@ const navigationItems: NavigationItem[] = [
     path: "/dashboard",
   },
   {
-    title: "Pagine",
+    title: "Homepage",
     icon: <FileText size={20} />,
-    path: "/dashboard/pages",
-    children: [
-      {
-        title: "Homepage",
-        icon: <FileText size={16} />,
-        path: "/dashboard/pages/home",
-      },
-      {
-        title: "About",
-        icon: <FileText size={16} />,
-        path: "/dashboard/pages/about",
-      },
-      {
-        title: "Contact",
-        icon: <FileText size={16} />,
-        path: "/dashboard/pages/contact",
-      },
-    ],
+    path: "/dashboard/pages/home",
+  },
+  {
+    title: "About",
+    icon: <FileText size={20} />,
+    path: "/dashboard/pages/about",
+  },
+  {
+    title: "Contact",
+    icon: <FileText size={20} />,
+    path: "/dashboard/pages/contact",
+  },
+  {
+    title: "Recensioni",
+    icon: <MessageSquare size={20} />,
+    path: "/dashboard/reviews",
   },
   {
     title: "Media Library",
@@ -178,50 +174,6 @@ const NavLink = styled(Link)<{
   }
 `;
 
-const NavButton = styled.button<{ $active?: boolean; $collapsed: boolean }>`
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: ${({ $collapsed }) => ($collapsed ? "0.75rem" : "0.75rem 1rem")};
-  color: ${({ $active }) =>
-    $active ? "var(--primary)" : "var(--text-secondary)"};
-  background: none;
-  border: none;
-  width: 100%;
-  text-align: left;
-  border-radius: 0.375rem;
-  transition: all 0.15s ease-in-out;
-  font-size: 0.875rem;
-  cursor: pointer;
-  justify-content: ${({ $collapsed }) =>
-    $collapsed ? "center" : "space-between"};
-  margin: ${({ $collapsed }) => ($collapsed ? "0.25rem 0" : "0")};
-
-  &:hover {
-    background-color: var(--bg-secondary);
-    color: var(--text-primary);
-    transform: ${({ $collapsed }) => ($collapsed ? "scale(1.05)" : "none")};
-  }
-
-  .nav-content {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-  }
-
-  span {
-    opacity: ${({ $collapsed }) => ($collapsed ? 0 : 1)};
-    transition: opacity 0.3s ease-in-out;
-    white-space: nowrap;
-  }
-`;
-
-const SubNav = styled.div<{ $isOpen: boolean; $collapsed: boolean }>`
-  max-height: ${({ $isOpen, $collapsed }) =>
-    $isOpen && !$collapsed ? "200px" : "0"};
-  overflow: hidden;
-  transition: max-height 0.3s ease-in-out;
-`;
 
 export const Sidebar: React.FC<SidebarProps> = ({
   collapsed,
@@ -230,27 +182,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const [expandedItems, setExpandedItems] = useState<string[]>([]);
 
   const isActive = (path: string) => {
     return location.pathname === path;
-  };
-
-  const isParentActive = (item: NavigationItem) => {
-    if (item.children) {
-      return item.children.some((child) => isActive(child.path));
-    }
-    return false;
-  };
-
-  const toggleExpanded = (title: string) => {
-    if (collapsed) return;
-
-    setExpandedItems((prev) =>
-      prev.includes(title)
-        ? prev.filter((item) => item !== title)
-        : [...prev, title]
-    );
   };
 
   const handleNavigation = (path: string) => {
@@ -273,60 +207,19 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
       <Navigation>
         {navigationItems.map((item) => {
-          const hasChildren = item.children && item.children.length > 0;
-          const isExpanded = expandedItems.includes(item.title);
-          const active = isActive(item.path) || isParentActive(item);
+          const active = isActive(item.path);
 
           return (
             <NavItem key={item.title} $active={active} $collapsed={collapsed}>
-              {hasChildren ? (
-                <>
-                  <NavButton
-                    $active={active}
-                    $collapsed={collapsed}
-                    onClick={() => toggleExpanded(item.title)}
-                  >
-                    <div className="nav-content">
-                      {item.icon}
-                      <span>{item.title}</span>
-                    </div>
-                    {!collapsed && (
-                      <span>
-                        {isExpanded ? (
-                          <ChevronDown size={16} />
-                        ) : (
-                          <ChevronRight size={16} />
-                        )}
-                      </span>
-                    )}
-                  </NavButton>
-                  <SubNav $isOpen={isExpanded} $collapsed={collapsed}>
-                    {item.children?.map((child) => (
-                      <NavLink
-                        key={child.path}
-                        to={child.path}
-                        $active={isActive(child.path)}
-                        $collapsed={collapsed}
-                        $isChild={true}
-                        onClick={() => handleNavigation(child.path)}
-                      >
-                        {child.icon}
-                        <span>{child.title}</span>
-                      </NavLink>
-                    ))}
-                  </SubNav>
-                </>
-              ) : (
-                <NavLink
-                  to={item.path}
-                  $active={active}
-                  $collapsed={collapsed}
-                  onClick={() => handleNavigation(item.path)}
-                >
-                  {item.icon}
-                  <span>{item.title}</span>
-                </NavLink>
-              )}
+              <NavLink
+                to={item.path}
+                $active={active}
+                $collapsed={collapsed}
+                onClick={() => handleNavigation(item.path)}
+              >
+                {item.icon}
+                <span>{item.title}</span>
+              </NavLink>
             </NavItem>
           );
         })}

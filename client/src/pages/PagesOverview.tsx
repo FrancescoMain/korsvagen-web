@@ -2,7 +2,7 @@ import React from "react";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
 import { Breadcrumb } from "../components/Dashboard/Breadcrumb";
-import { Plus, Edit, Eye } from "lucide-react";
+import { Edit, Eye } from "lucide-react";
 
 const Container = styled.div`
   max-width: 1200px;
@@ -10,9 +10,6 @@ const Container = styled.div`
 `;
 
 const Header = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   margin-bottom: 24px;
 `;
 
@@ -21,25 +18,6 @@ const Title = styled.h1`
   font-weight: 700;
   color: var(--text-primary);
   margin: 0;
-`;
-
-const NewPageButton = styled.button`
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 24px;
-  background: #4caf50;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background 0.2s;
-
-  &:hover {
-    background: #45a049;
-  }
 `;
 
 const PagesGrid = styled.div`
@@ -167,12 +145,8 @@ export const PagesOverview: React.FC = () => {
     },
   ];
 
-  const handleNewPage = () => {
-    navigate("/editor");
-  };
-
   const handleEditPage = (pageId: string) => {
-    navigate(`/editor/${pageId}`);
+    navigate(`/dashboard/pages/${pageId}`);
   };
 
   const handleViewPage = (slug: string) => {
@@ -185,10 +159,6 @@ export const PagesOverview: React.FC = () => {
 
       <Header>
         <Title>Gestione Pagine</Title>
-        <NewPageButton onClick={handleNewPage}>
-          <Plus size={20} />
-          Nuova Pagina
-        </NewPageButton>
       </Header>
 
       <PagesGrid>
