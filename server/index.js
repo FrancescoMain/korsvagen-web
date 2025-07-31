@@ -45,6 +45,7 @@ import dashboardRoutes from "./routes/dashboard.js";
 import contactRoutes from "./routes/contact.js";
 import settingsRoutes from "./routes/settings.js";
 import mediaRoutes from "./routes/media.js";
+import pagesRoutes from "./routes/pages.js";
 
 // Inizializza l'app Express
 const app = express();
@@ -226,6 +227,9 @@ app.use("/api/settings", settingsRoutes);
 
 // Media - upload e gestione media tramite Cloudinary
 app.use("/api/media", mediaRoutes);
+
+// Pages - gestione contenuto pagine
+app.use("/api/pages", pagesRoutes);
 
 // Placeholder per futuri endpoint che saranno aggiunti nelle fasi successive:
 // - /api/users (gestione utenti)

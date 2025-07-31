@@ -10,15 +10,12 @@ import { useVideoUpload } from "../../hooks/useVideoUpload";
 
 interface PageData {
   id: string;
-  title: string;
-  subtitle?: string;
   heroTitle?: string;
   heroSubtitle?: string;
   heroVideo?: string;
   heroImage?: string;
   metaTitle?: string;
   metaDescription?: string;
-  status: "published" | "draft";
   sections: {
     [key: string]: {
       title?: string;
@@ -186,20 +183,6 @@ const RemoveVideoButton = styled.button`
   cursor: pointer;
 `;
 
-const StatusSelect = styled.select`
-  width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
-  font-size: 0.875rem;
-  background: white;
-
-  &:focus {
-    outline: none;
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-  }
-`;
 
 const Actions = styled.div`
   display: flex;
@@ -222,76 +205,47 @@ export const SimplePageEditor: React.FC = () => {
     const loadPageData = async () => {
       setLoading(true);
       
-      // Mock data based on pageId
-      const mockData: { [key: string]: PageData } = {
-        home: {
-          id: "home",
-          title: "Homepage",
-          subtitle: "La pagina principale del sito",
-          heroTitle: "KORSVAGEN",
-          heroSubtitle: "Costruzioni di qualità dal 1985",
-          heroVideo: "",
-          heroImage: "",
-          metaTitle: "KORSVAGEN - Costruzioni di qualità",
-          metaDescription: "Azienda leader nelle costruzioni con oltre 30 anni di esperienza",
-          status: "published",
-          sections: {
-            services: {
-              title: "I Nostri Servizi",
-              subtitle: "Soluzioni innovative per ogni esigenza",
-              content: "Offriamo servizi completi nel settore delle costruzioni..."
-            },
-            about: {
-              title: "Chi Siamo",
-              subtitle: "La nostra storia",
-              content: "Con oltre 30 anni di esperienza nel settore..."
-            }
-          }
-        },
-        about: {
-          id: "about",
-          title: "Chi Siamo",
-          subtitle: "La nostra storia e i nostri valori",
-          heroTitle: "La Nostra Storia",
-          heroSubtitle: "Oltre 30 anni di eccellenza nelle costruzioni",
-          heroVideo: "",
-          heroImage: "",
-          metaTitle: "Chi Siamo - KORSVAGEN",
-          metaDescription: "Scopri la storia di KORSVAGEN e i nostri valori",
-          status: "published",
-          sections: {
-            story: {
-              title: "La Nostra Storia",
-              subtitle: "Dal 1985 al vostro servizio",
-              content: "La nostra azienda è stata fondata nel 1985..."
-            }
-          }
-        },
-        contact: {
-          id: "contact",
-          title: "Contatti",
-          subtitle: "Come raggiungerci",
-          heroTitle: "Contattaci",
-          heroSubtitle: "Siamo qui per aiutarti",
-          heroVideo: "",
-          heroImage: "",
-          metaTitle: "Contatti - KORSVAGEN",
-          metaDescription: "Contatta KORSVAGEN per informazioni e preventivi",
-          status: "published",
-          sections: {
-            info: {
-              title: "Informazioni di Contatto",
-              subtitle: "I nostri recapiti",
-              content: "Puoi contattarci tramite telefono, email o visitando i nostri uffici..."
-            }
-          }
-        }
-      };
+      try {
+        const response = await fetch(`/api/pages/${pageId || "home"}`, {
+          credentials: "include",
+        });
 
-      setTimeout(() => {
-        setPageData(mockData[pageId || "home"] || mockData.home);
+        if (response.ok) {
+          const result = await response.json();
+          if (result.success && result.data) {
+            // Converte i dati del backend al formato del frontend
+            const pageData: PageData = {
+              id: result.data.page_id,
+              heroTitle: result.data.hero_title || "",
+              heroSubtitle: result.data.hero_subtitle || "",
+              heroVideo: result.data.hero_video || "",
+              heroImage: result.data.hero_image || "",
+              sections: result.data.sections || {},
+              metaTitle: result.data.meta_title || "",
+              metaDescription: result.data.meta_description || "",
+            };
+            setPageData(pageData);
+          }
+        } else {
+          throw new Error("Errore nel caricamento della pagina");
+        }
+      } catch (error) {
+        console.error("Errore caricamento pagina:", error);
+        // Fallback ai dati di default
+        const defaultData: PageData = {
+          id: pageId || "home",
+          heroTitle: pageId === "about" ? "La Nostra Storia" : pageId === "contact" ? "Contattaci" : "KORSVAGEN",
+          heroSubtitle: pageId === "about" ? "Oltre 30 anni di eccellenza" : pageId === "contact" ? "Siamo qui per aiutarti" : "Costruzioni di qualità dal 1985",
+          heroVideo: "",
+          heroImage: "",
+          sections: {},
+          metaTitle: "",
+          metaDescription: "",
+        };
+        setPageData(defaultData);
+      } finally {
         setLoading(false);
-      }, 500);
+      }
     };
 
     loadPageData();
@@ -340,14 +294,49 @@ export const SimplePageEditor: React.FC = () => {
 
   const handleSave = async (event: React.FormEvent) => {
     event.preventDefault();
+    if (!pageData) return;
+    
     setSaving(true);
 
-    // Mock save operation
-    setTimeout(() => {
-      console.log("Saving page data:", pageData);
+    try {
+      const saveData = {
+        heroTitle: pageData.heroTitle,
+        heroSubtitle: pageData.heroSubtitle,
+        heroVideo: pageData.heroVideo,
+        heroImage: pageData.heroImage,
+        sections: pageData.sections,
+        metaTitle: pageData.metaTitle,
+        metaDescription: pageData.metaDescription,
+      };
+
+      const response = await fetch(`/api/pages/${pageData.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify(saveData),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        if (result.success) {
+          // Mostra messaggio di successo
+          const toast = await import("react-hot-toast");
+          toast.default.success("Pagina salvata con successo!");
+        } else {
+          throw new Error(result.message || "Errore durante il salvataggio");
+        }
+      } else {
+        throw new Error("Errore durante il salvataggio");
+      }
+    } catch (error: any) {
+      console.error("Errore salvataggio:", error);
+      const toast = await import("react-hot-toast");
+      toast.default.error(error.message || "Errore durante il salvataggio");
+    } finally {
       setSaving(false);
-      // Could show success toast here
-    }, 1000);
+    }
   };
 
   const handleBack = () => {
@@ -383,45 +372,10 @@ export const SimplePageEditor: React.FC = () => {
           <ArrowLeft size={16} />
           Torna alle Pagine
         </BackButton>
-        <Title>Modifica: {pageData.title}</Title>
+        <Title>Modifica: {pageData.id === "home" ? "Homepage" : pageData.id === "about" ? "Chi Siamo" : "Contatti"}</Title>
       </Header>
 
       <Form onSubmit={handleSave}>
-        <Section>
-          <SectionTitle>Informazioni Generali</SectionTitle>
-          
-          <FormGroup>
-            <Label htmlFor="title">Titolo Pagina</Label>
-            <Input
-              id="title"
-              value={pageData.title}
-              onChange={(e) => handleInputChange("title", e.target.value)}
-              placeholder="Inserisci il titolo della pagina"
-            />
-          </FormGroup>
-
-          <FormGroup>
-            <Label htmlFor="subtitle">Sottotitolo</Label>
-            <Input
-              id="subtitle"
-              value={pageData.subtitle || ""}
-              onChange={(e) => handleInputChange("subtitle", e.target.value)}
-              placeholder="Sottotitolo della pagina (opzionale)"
-            />
-          </FormGroup>
-
-          <FormGroup>
-            <Label htmlFor="status">Stato</Label>
-            <StatusSelect
-              id="status"
-              value={pageData.status}
-              onChange={(e) => handleInputChange("status", e.target.value)}
-            >
-              <option value="draft">Bozza</option>
-              <option value="published">Pubblicata</option>
-            </StatusSelect>
-          </FormGroup>
-        </Section>
 
         <Section>
           <SectionTitle>Hero Section</SectionTitle>
