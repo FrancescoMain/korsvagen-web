@@ -37,8 +37,20 @@ const validatePageUpdate = [
     .withMessage("Hero subtitle troppo lungo"),
   body("heroVideo")
     .optional()
-    .isURL()
+    .custom((value) => {
+      if (!value || value === "") return true; // Allow empty strings
+      // Basic URL validation for non-empty values
+      return /^https?:\/\/.+/.test(value);
+    })
     .withMessage("URL video non valido"),
+  body("heroImage")
+    .optional()
+    .custom((value) => {
+      if (!value || value === "") return true; // Allow empty strings
+      // Basic URL validation for non-empty values
+      return /^https?:\/\/.+/.test(value);
+    })
+    .withMessage("URL immagine non valido"),
   body("sections")
     .optional()
     .isObject()
