@@ -1,6 +1,6 @@
 import React from "react";
 import styled from "styled-components";
-import InstagramWall from "./components/common/InstagramWall-embed";
+import InstagramWall from "./components/common/InstagramWall";
 
 const WorkInProgressPage: React.FC = () => {
   return (
