@@ -56,8 +56,8 @@ export const usePageData = (pageId: string): UsePageDataResult => {
             page_id: "home",
             hero_title: "KORSVAGEN",
             hero_subtitle: "Costruzioni di qualità dal 1985",
-            hero_video: null,
-            hero_image: null,
+            hero_video: undefined,
+            hero_image: undefined,
             sections: {
               services: {
                 title: "I Nostri Servizi",
@@ -77,8 +77,8 @@ export const usePageData = (pageId: string): UsePageDataResult => {
             page_id: "about",
             hero_title: "La Nostra Storia",
             hero_subtitle: "Oltre 30 anni di eccellenza nelle costruzioni",
-            hero_video: null,
-            hero_image: null,
+            hero_video: undefined,
+            hero_image: undefined,
             sections: {
               story: {
                 title: "La Nostra Storia",
@@ -93,8 +93,8 @@ export const usePageData = (pageId: string): UsePageDataResult => {
             page_id: "contact",
             hero_title: "Contattaci",
             hero_subtitle: "Siamo qui per aiutarti",
-            hero_video: null,
-            hero_image: null,
+            hero_video: undefined,
+            hero_image: undefined,
             sections: {
               info: {
                 title: "Informazioni di Contatto",
