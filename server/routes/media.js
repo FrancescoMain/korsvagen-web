@@ -15,7 +15,7 @@
 
 import express from "express";
 import multer from "multer";
-import { authenticate, authorize } from "../utils/auth.js";
+import { requireAuth, requireRole } from "../utils/auth.js";
 import {
   uploadToCloudinary,
   deleteFromCloudinary,
@@ -58,8 +58,8 @@ const upload = multer({
  */
 router.post(
   "/upload",
-  authenticate,
-  authorize(["admin", "editor"]),
+  requireAuth,
+  requireRole(["admin", "editor"]),
   upload.single("file"),
   async (req, res) => {
     try {
@@ -103,8 +103,8 @@ router.post(
  */
 router.post(
   "/upload/video",
-  authenticate,
-  authorize(["admin", "editor"]),
+  requireAuth,
+  requireRole(["admin", "editor"]),
   upload.single("video"), 
   async (req, res) => {
     try {
@@ -157,8 +157,8 @@ router.post(
  */
 router.delete(
   "/:publicId",
-  authenticate,
-  authorize(["admin", "editor"]),
+  requireAuth,
+  requireRole(["admin", "editor"]),
   async (req, res) => {
     try {
       const { publicId } = req.params;
@@ -200,8 +200,8 @@ router.delete(
  */
 router.get(
   "/library",
-  authenticate,
-  authorize(["admin", "editor"]),
+  requireAuth,
+  requireRole(["admin", "editor"]),
   async (req, res) => {
     try {
       const { page = 1, limit = 20, type = "all" } = req.query;
