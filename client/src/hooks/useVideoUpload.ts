@@ -54,6 +54,7 @@ export const useVideoUpload = () => {
 
       const response = await apiClient.post("/media/upload/video", formData, {
         headers: { "Content-Type": "multipart/form-data" },
+        timeout: 300000, // 5 minutes timeout for video upload
       });
 
       clearInterval(progressInterval);

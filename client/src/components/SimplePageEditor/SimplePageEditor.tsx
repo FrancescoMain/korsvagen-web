@@ -99,22 +99,6 @@ const Label = styled.label`
   margin-bottom: 0.5rem;
 `;
 
-const TextArea = styled.textarea`
-  width: 100%;
-  min-height: 120px;
-  padding: 0.75rem;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
-  font-size: 0.875rem;
-  resize: vertical;
-  transition: border-color 0.2s;
-
-  &:focus {
-    outline: none;
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-  }
-`;
 
 
 const VideoUploadArea = styled.div`
@@ -313,8 +297,6 @@ export const SimplePageEditor: React.FC = () => {
         heroVideo: pageData.heroVideo,
         heroImage: pageData.heroImage,
         sections: pageData.sections,
-        metaTitle: pageData.metaTitle,
-        metaDescription: pageData.metaDescription,
       };
 
       const response = await apiClient.put(`/pages/${pageData.id}`, saveData);
@@ -520,31 +502,6 @@ export const SimplePageEditor: React.FC = () => {
               />
             </FormGroup>
           </div>
-        </Section>
-
-        <Section>
-          <SectionTitle>SEO</SectionTitle>
-          
-          <FormGroup>
-            <Label htmlFor="metaTitle">Meta Title</Label>
-            <Input
-              id="metaTitle"
-              value={pageData.metaTitle || ""}
-              onChange={(e) => handleInputChange("metaTitle", e.target.value)}
-              placeholder="Titolo per i motori di ricerca"
-            />
-          </FormGroup>
-
-          <FormGroup>
-            <Label htmlFor="metaDescription">Meta Description</Label>
-            <TextArea
-              id="metaDescription"
-              value={pageData.metaDescription || ""}
-              onChange={(e) => handleInputChange("metaDescription", e.target.value)}
-              placeholder="Descrizione per i motori di ricerca"
-              style={{ minHeight: "80px" }}
-            />
-          </FormGroup>
         </Section>
 
         <Actions>
