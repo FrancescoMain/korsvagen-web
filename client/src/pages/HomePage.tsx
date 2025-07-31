@@ -4,6 +4,7 @@ import Header from "../components/layout/Header";
 import Footer from "../components/layout/Footer";
 import ContactCTA from "../components/common/ContactCTA";
 import Link from "../components/common/Link";
+import { usePageData } from "../hooks/usePageData";
 
 const HomeContainer = styled.div`
   min-height: 100vh;
@@ -1653,6 +1654,9 @@ const HomePage: React.FC = () => {
   const [currentSlide, setCurrentSlide] = React.useState(0);
   const [currentProjectSlide, setCurrentProjectSlide] = React.useState(2); // Terzo elemento selezionato di default (design a specchi)
   const [currentReviewSlide, setCurrentReviewSlide] = React.useState(0);
+  
+  // Load page data from backend with fallback
+  const { pageData, loading, error } = usePageData("home");
 
   // Touch handling for mobile navigation
   const [touchStart, setTouchStart] = React.useState<number | null>(null);
@@ -1883,12 +1887,18 @@ const HomePage: React.FC = () => {
       <Header />
       <MainContent>
         <HeroSection>
-          <video className="hero-video" autoPlay muted loop playsInline>
-            <source src="/korsvagen-hero.mp4" type="video/mp4" />
-          </video>
+          {pageData?.hero_video ? (
+            <video className="hero-video" autoPlay muted loop playsInline>
+              <source src={pageData.hero_video} type="video/mp4" />
+            </video>
+          ) : (
+            <video className="hero-video" autoPlay muted loop playsInline>
+              <source src="/korsvagen-hero.mp4" type="video/mp4" />
+            </video>
+          )}
           <div className="hero-content">
             <div className="hero-top">
-              <h1>KORSVAGEN</h1>
+              <h1>{pageData?.hero_title || "KORSVAGEN"}</h1>
               <div className="slogan-container">
                 <p className="slogan-top">YOU DREAM</p>
                 <p className="slogan-bottom">WE BUILD</p>
@@ -1904,11 +1914,9 @@ const HomePage: React.FC = () => {
 
         <ServicesGallery>
           <div className="services-header">
-            <h2>I Nostri Servizi</h2>
+            <h2>{pageData?.sections?.services?.title || "I Nostri Servizi"}</h2>
             <p className="subtitle">
-              Soluzioni innovative per ogni fase del tuo progetto. Dalla
-              progettazione alla realizzazione, con competenza e tecnologie
-              all'avanguardia.
+              {pageData?.sections?.services?.subtitle || "Soluzioni innovative per ogni fase del tuo progetto. Dalla progettazione alla realizzazione, con competenza e tecnologie all'avanguardia."}
             </p>
           </div>
 
