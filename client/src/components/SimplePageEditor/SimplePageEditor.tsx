@@ -464,40 +464,103 @@ export const SimplePageEditor: React.FC = () => {
         <Section>
           <SectionTitle>Sezioni Contenuto</SectionTitle>
           
-          {Object.entries(pageData.sections).map(([sectionId, section]) => (
-            <div key={sectionId} style={{ marginBottom: "2rem", padding: "1rem", border: "1px solid #e5e7eb", borderRadius: "8px" }}>
-              <h3 style={{ fontSize: "1rem", fontWeight: "600", marginBottom: "1rem", color: "var(--text-primary)" }}>
-                Sezione: {sectionId}
-              </h3>
-              
-              <FormGroup>
-                <Label>Titolo Sezione</Label>
-                <Input
-                  value={section.title || ""}
-                  onChange={(e) => handleSectionChange(sectionId, "title", e.target.value)}
-                  placeholder="Titolo della sezione"
-                />
-              </FormGroup>
-
-              <FormGroup>
-                <Label>Sottotitolo Sezione</Label>
-                <Input
-                  value={section.subtitle || ""}
-                  onChange={(e) => handleSectionChange(sectionId, "subtitle", e.target.value)}
-                  placeholder="Sottotitolo della sezione"
-                />
-              </FormGroup>
-
-              <FormGroup>
-                <Label>Contenuto</Label>
-                <TextArea
-                  value={section.content || ""}
-                  onChange={(e) => handleSectionChange(sectionId, "content", e.target.value)}
-                  placeholder="Contenuto della sezione"
-                />
-              </FormGroup>
+          {Object.keys(pageData.sections).length === 0 ? (
+            <div style={{ textAlign: "center", padding: "2rem", background: "#f9fafb", borderRadius: "8px", border: "1px solid #e5e7eb" }}>
+              <p style={{ color: "var(--text-secondary)", margin: "0 0 1rem" }}>
+                Nessuna sezione configurata per questa pagina.
+              </p>
+              <Button 
+                type="button" 
+                variant="secondary"
+                onClick={() => {
+                  const sectionId = pageData.id === "home" ? "services" : pageData.id === "about" ? "story" : "info";
+                  const newSections = {
+                    ...pageData.sections,
+                    [sectionId]: {
+                      title: pageData.id === "home" ? "I Nostri Servizi" : pageData.id === "about" ? "La Nostra Storia" : "Informazioni di Contatto",
+                      subtitle: pageData.id === "home" ? "Soluzioni innovative per ogni esigenza" : pageData.id === "about" ? "Dal 1985 al vostro servizio" : "I nostri recapiti",
+                      content: "Inserisci qui il contenuto della sezione..."
+                    }
+                  };
+                  setPageData({ ...pageData, sections: newSections });
+                }}
+              >
+                Aggiungi Prima Sezione
+              </Button>
             </div>
-          ))}
+          ) : (
+            Object.entries(pageData.sections).map(([sectionId, section]) => (
+              <div key={sectionId} style={{ marginBottom: "2rem", padding: "1rem", border: "1px solid #e5e7eb", borderRadius: "8px" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
+                  <h3 style={{ fontSize: "1rem", fontWeight: "600", color: "var(--text-primary)", margin: 0 }}>
+                    Sezione: {sectionId}
+                  </h3>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={() => {
+                      const newSections = { ...pageData.sections };
+                      delete newSections[sectionId];
+                      setPageData({ ...pageData, sections: newSections });
+                    }}
+                    style={{ padding: "0.25rem 0.5rem", fontSize: "0.75rem" }}
+                  >
+                    Rimuovi
+                  </Button>
+                </div>
+                
+                <FormGroup>
+                  <Label>Titolo Sezione</Label>
+                  <Input
+                    value={section.title || ""}
+                    onChange={(e) => handleSectionChange(sectionId, "title", e.target.value)}
+                    placeholder="Titolo della sezione"
+                  />
+                </FormGroup>
+
+                <FormGroup>
+                  <Label>Sottotitolo Sezione</Label>
+                  <Input
+                    value={section.subtitle || ""}
+                    onChange={(e) => handleSectionChange(sectionId, "subtitle", e.target.value)}
+                    placeholder="Sottotitolo della sezione"
+                  />
+                </FormGroup>
+
+                <FormGroup>
+                  <Label>Contenuto</Label>
+                  <TextArea
+                    value={section.content || ""}
+                    onChange={(e) => handleSectionChange(sectionId, "content", e.target.value)}
+                    placeholder="Contenuto della sezione"
+                  />
+                </FormGroup>
+              </div>
+            ))
+          )}
+          
+          {Object.keys(pageData.sections).length > 0 && (
+            <div style={{ textAlign: "center", marginTop: "1rem" }}>
+              <Button 
+                type="button" 
+                variant="secondary"
+                onClick={() => {
+                  const sectionId = `section_${Date.now()}`;
+                  const newSections = {
+                    ...pageData.sections,
+                    [sectionId]: {
+                      title: "Nuova Sezione",
+                      subtitle: "Sottotitolo sezione",
+                      content: "Contenuto della sezione..."
+                    }
+                  };
+                  setPageData({ ...pageData, sections: newSections });
+                }}
+              >
+                Aggiungi Altra Sezione
+              </Button>
+            </div>
+          )}
         </Section>
 
         <Section>
