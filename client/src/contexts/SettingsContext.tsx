@@ -145,6 +145,10 @@ interface SettingsApiResponse {
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || "/api";
 
+// Debug: Log dell'URL API utilizzato
+console.log("🔧 API URL in uso:", API_BASE_URL);
+console.log("🔧 REACT_APP_API_URL:", process.env.REACT_APP_API_URL);
+
 // Configurazione Axios per settings
 const settingsApi = axios.create({
   baseURL: API_BASE_URL,
@@ -296,9 +300,12 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
       console.error("❌ Errore caricamento settings:", errorMessage);
       setError(errorMessage);
 
-      // Mostra toast di errore solo se non siamo in modalità sviluppo
-      if (process.env.NODE_ENV !== "development") {
+      // Mostra toast di errore solo se non è un errore di connessione in sviluppo
+      const isConnectionError = err.code === 'ECONNREFUSED' || err.code === 'ERR_NETWORK';
+      if (process.env.NODE_ENV !== "development" && !isConnectionError) {
         toast.error("Errore nel caricamento delle configurazioni");
+      } else if (process.env.NODE_ENV === "development" && isConnectionError) {
+        console.warn("🔌 Backend non disponibile - utilizzo dati di fallback");
       }
 
       // Fallback ai dati di default (compatibilità con contactData.ts)
