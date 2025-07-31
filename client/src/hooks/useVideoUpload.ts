@@ -33,15 +33,15 @@ export const useVideoUpload = () => {
         throw new Error("Il file deve essere un video");
       }
 
-      // Limite di dimensione: 100MB
-      if (file.size > 100 * 1024 * 1024) {
-        throw new Error("Il video è troppo grande. Dimensione massima: 100MB");
+      // Limite di dimensione: 4MB (limite Vercel serverless)
+      if (file.size > 4 * 1024 * 1024) {
+        throw new Error("Il video è troppo grande. Dimensione massima: 4MB");
       }
 
       const formData = new FormData();
       formData.append("video", file);
 
-      // Simula il progresso (in attesa del vero upload)
+      // Simula il progresso
       const progressInterval = setInterval(() => {
         setProgress((prev) => {
           if (prev >= 90) {
@@ -54,7 +54,7 @@ export const useVideoUpload = () => {
 
       const response = await apiClient.post("/media/upload/video", formData, {
         headers: { "Content-Type": "multipart/form-data" },
-        timeout: 300000, // 5 minutes timeout for video upload
+        timeout: 30000, // 30 secondi timeout
       });
 
       clearInterval(progressInterval);
