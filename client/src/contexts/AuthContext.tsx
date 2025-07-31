@@ -384,12 +384,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                 setUser(null);
               }
             }
-          } catch (error) {
-            // Se /me fallisce, prova refresh
-            const refreshSuccess = await refreshToken();
-            if (!refreshSuccess) {
+          } catch (error: any) {
+            // Se /me non esiste (404), salta il refresh e pulisci i token
+            if (error.response?.status === 404) {
+              console.log("📡 Endpoint /auth/me non trovato - pulizia token");
               clearTokens();
               setUser(null);
+            } else {
+              // Se /me fallisce per altri motivi, prova refresh
+              const refreshSuccess = await refreshToken();
+              if (!refreshSuccess) {
+                clearTokens();
+                setUser(null);
+              }
             }
           }
         }
