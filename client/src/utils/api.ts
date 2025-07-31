@@ -19,8 +19,19 @@ apiClient.interceptors.request.use(
     // Get token from localStorage using the correct key
     const token = localStorage.getItem("korsvagen_auth_token");
     
+    console.log("API Request Interceptor:", {
+      url: config.url,
+      method: config.method,
+      hasToken: !!token,
+      tokenPreview: token ? `${token.substring(0, 20)}...` : null,
+      authHeader: token ? `Bearer ${token.substring(0, 20)}...` : null
+    });
+    
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+      console.log("Authorization header set:", config.headers.Authorization ? "YES" : "NO");
+    } else {
+      console.log("No token found in localStorage");
     }
     return config;
   },
@@ -31,7 +42,15 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
+    console.log("API Response Error:", {
+      status: error.response?.status,
+      url: error.config?.url,
+      method: error.config?.method,
+      message: error.response?.data?.message || error.message
+    });
+    
     if (error.response?.status === 401) {
+      console.log("401 Unauthorized - Token may be expired or invalid");
       // Token expired - dispatch custom event
       window.dispatchEvent(new CustomEvent("auth:token-expired"));
     }
