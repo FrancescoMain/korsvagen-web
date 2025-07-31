@@ -10,7 +10,34 @@ export const apiClient = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
+  withCredentials: true, // Include cookies for authentication
 });
+
+// Add request interceptor to include auth token
+apiClient.interceptors.request.use(
+  (config) => {
+    // Get token from localStorage using the correct key
+    const token = localStorage.getItem("korsvagen_auth_token");
+    
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+// Add response interceptor for error handling
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      // Token expired - dispatch custom event
+      window.dispatchEvent(new CustomEvent("auth:token-expired"));
+    }
+    return Promise.reject(error);
+  }
+);
 
 // API endpoints
 export const endpoints = {
