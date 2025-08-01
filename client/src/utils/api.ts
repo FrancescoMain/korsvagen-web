@@ -19,6 +19,14 @@ apiClient.interceptors.request.use(
     // Get token from localStorage using the correct key
     const token = localStorage.getItem("korsvagen_auth_token");
     
+    // Debug temporaneo
+    console.log("API Request DEBUG:", {
+      url: config.url,
+      method: config.method,
+      hasToken: !!token,
+      tokenPreview: token ? token.substring(0, 20) + "..." : null
+    });
+    
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
