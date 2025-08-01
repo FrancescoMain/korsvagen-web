@@ -177,7 +177,7 @@ router.get("/public/:pageId", async (req, res) => {
  * GET /api/pages/:pageId
  * Recupera dati completi di una pagina (admin only)
  */
-router.get("/:pageId", requireAuth, requireRole(["admin", "editor"]), async (req, res) => {
+router.get("/:pageId", requireAuth, requireRole(["admin", "editor", "super_admin"]), async (req, res) => {
   try {
     const { pageId } = req.params;
     
