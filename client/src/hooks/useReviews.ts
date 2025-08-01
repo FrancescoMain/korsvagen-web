@@ -1,98 +1,240 @@
-import { useState, useEffect } from "react";
+/**
+ * HOOK useReviews - Gestione recensioni clienti
+ *
+ * Hook personalizzato per gestire le operazioni CRUD
+ * delle recensioni attraverso l'API backend.
+ *
+ * Features:
+ * - Caricamento recensioni pubbliche e admin
+ * - Creazione, modifica ed eliminazione recensioni
+ * - Stati di loading e errore
+ * - Rivalidazione automatica dopo operazioni
+ *
+ * @author KORSVAGEN S.R.L.
+ */
 
-interface Review {
+import { useState, useEffect, useCallback } from "react";
+import { apiClient } from "../utils/api";
+import toast from "react-hot-toast";
+
+// Tipi TypeScript
+export interface Review {
   id: string;
-  name: string;
-  role?: string;
-  content: string;
+  author_name: string;
+  author_company?: string;
+  review_text: string;
   rating: number;
-  visible: boolean;
-  createdAt: string;
-  updatedAt: string;
+  is_active?: boolean;
+  display_order?: number;
+  created_at?: string;
+  updated_at?: string;
 }
 
-interface UseReviewsResult {
+export interface ReviewFormData {
+  author_name: string;
+  author_company?: string;
+  review_text: string;
+  rating: number;
+  is_active?: boolean;
+  display_order?: number;
+}
+
+interface UseReviewsReturn {
+  // Stati
   reviews: Review[];
+  publicReviews: Review[];
   loading: boolean;
   error: string | null;
+
+  // Metodi pubblici
+  fetchPublicReviews: () => Promise<void>;
+
+  // Metodi admin
+  fetchReviews: () => Promise<void>;
+  createReview: (reviewData: ReviewFormData) => Promise<boolean>;
+  updateReview: (id: string, reviewData: Partial<ReviewFormData>) => Promise<boolean>;
+  deleteReview: (id: string) => Promise<boolean>;
+
+  // Utilità
+  refreshReviews: () => Promise<void>;
 }
 
-export const useReviews = (): UseReviewsResult => {
+export const useReviews = (): UseReviewsReturn => {
+  // Stati
   const [reviews, setReviews] = useState<Review[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [publicReviews, setPublicReviews] = useState<Review[]>([]);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchReviews = async () => {
-      setLoading(true);
-      setError(null);
+  /**
+   * Carica recensioni pubbliche per la homepage
+   */
+  const fetchPublicReviews = useCallback(async () => {
+    setLoading(true);
+    setError(null);
 
-      try {
-        // Per ora usiamo dati mock, ma l'endpoint potrebbe essere /api/reviews/public
-        // const response = await fetch("/api/reviews/public");
-        
-        // Mock reviews con dati realistici
-        const defaultReviews: Review[] = [
-          {
-            id: "1",
-            name: "Mario Rossi",
-            role: "Proprietario di Casa",
-            content: "Servizio eccellente! KORSVAGEN ha trasformato la nostra casa in un sogno. Professionalità e attenzione ai dettagli incredibili.",
-            rating: 5,
-            visible: true,
-            createdAt: "2024-01-15T10:00:00Z",
-            updatedAt: "2024-01-15T10:00:00Z",
-          },
-          {
-            id: "2", 
-            name: "Giulia Bianchi",
-            role: "Architetto",
-            content: "Collaborazione fantastica. La loro competenza nelle costruzioni ha permesso di realizzare progetti complessi con risultati straordinari.",
-            rating: 5,
-            visible: true,
-            createdAt: "2024-01-10T15:30:00Z",
-            updatedAt: "2024-01-10T15:30:00Z",
-          },
-          {
-            id: "3",
-            name: "Andrea Verdi", 
-            role: "Imprenditore",
-            content: "KORSVAGEN ha costruito la sede della mia azienda. Tempi rispettati, qualità eccellente. Consigliatissimi!",
-            rating: 4,
-            visible: true,
-            createdAt: "2024-01-08T09:15:00Z",
-            updatedAt: "2024-01-08T09:15:00Z",
-          },
-          {
-            id: "4",
-            name: "Laura Neri",
-            role: "Direzione Lavori",
-            content: "Esperienza pluriennale e grande affidabilità. Un partner solido per qualsiasi progetto di costruzione.",
-            rating: 5,
-            visible: true,
-            createdAt: "2024-01-05T14:20:00Z", 
-            updatedAt: "2024-01-05T14:20:00Z",
-          }
-        ];
-
-        // Simula un piccolo delay per realismo
-        await new Promise(resolve => setTimeout(resolve, 300));
-        
-        // Filtra solo le recensioni visibili per la homepage
-        const visibleReviews = defaultReviews.filter(review => review.visible);
-        setReviews(visibleReviews);
-        
-      } catch (err: any) {
-        console.error("Errore caricamento recensioni:", err);
-        setError(err.message);
-        setReviews([]); // Array vuoto in caso di errore
-      } finally {
-        setLoading(false);
+    try {
+      const response = await apiClient.get("/reviews/public");
+      
+      if (response.data.success) {
+        setPublicReviews(response.data.data || []);
+      } else {
+        throw new Error(response.data.message || "Errore caricamento recensioni");
       }
-    };
-
-    fetchReviews();
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.message || err.message || "Errore caricamento recensioni";
+      setError(errorMessage);
+      console.error("Errore fetchPublicReviews:", err);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  return { reviews, loading, error };
+  /**
+   * Carica tutte le recensioni (admin only)
+   */
+  const fetchReviews = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await apiClient.get("/reviews");
+      
+      if (response.data.success) {
+        setReviews(response.data.data || []);
+      } else {
+        throw new Error(response.data.message || "Errore caricamento recensioni");
+      }
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.message || err.message || "Errore caricamento recensioni";
+      setError(errorMessage);
+      console.error("Errore fetchReviews:", err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  /**
+   * Crea una nuova recensione
+   */
+  const createReview = useCallback(async (reviewData: ReviewFormData): Promise<boolean> => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await apiClient.post("/reviews", reviewData);
+      
+      if (response.data.success) {
+        toast.success("Recensione creata con successo!");
+        // Ricarica le recensioni
+        await fetchReviews();
+        return true;
+      } else {
+        throw new Error(response.data.message || "Errore creazione recensione");
+      }
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.message || err.message || "Errore creazione recensione";
+      setError(errorMessage);
+      toast.error(errorMessage);
+      console.error("Errore createReview:", err);
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  }, [fetchReviews]);
+
+  /**
+   * Aggiorna una recensione esistente
+   */
+  const updateReview = useCallback(async (id: string, reviewData: Partial<ReviewFormData>): Promise<boolean> => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await apiClient.put(`/reviews/${id}`, reviewData);
+      
+      if (response.data.success) {
+        toast.success("Recensione aggiornata con successo!");
+        // Ricarica le recensioni
+        await fetchReviews();
+        return true;
+      } else {
+        throw new Error(response.data.message || "Errore aggiornamento recensione");
+      }
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.message || err.message || "Errore aggiornamento recensione";
+      setError(errorMessage);
+      toast.error(errorMessage);
+      console.error("Errore updateReview:", err);
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  }, [fetchReviews]);
+
+  /**
+   * Elimina una recensione
+   */
+  const deleteReview = useCallback(async (id: string): Promise<boolean> => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await apiClient.delete(`/reviews/${id}`);
+      
+      if (response.data.success) {
+        toast.success("Recensione eliminata con successo!");
+        // Ricarica le recensioni
+        await fetchReviews();
+        return true;
+      } else {
+        throw new Error(response.data.message || "Errore eliminazione recensione");
+      }
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.message || err.message || "Errore eliminazione recensione";
+      setError(errorMessage);
+      toast.error(errorMessage);
+      console.error("Errore deleteReview:", err);
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  }, [fetchReviews]);
+
+  /**
+   * Ricarica tutte le recensioni
+   */
+  const refreshReviews = useCallback(async () => {
+    await Promise.all([
+      fetchReviews(),
+      fetchPublicReviews()
+    ]);
+  }, [fetchReviews, fetchPublicReviews]);
+
+  /**
+   * Carica recensioni pubbliche al mount del componente
+   */
+  useEffect(() => {
+    fetchPublicReviews();
+  }, [fetchPublicReviews]);
+
+  return {
+    // Stati
+    reviews,
+    publicReviews,
+    loading,
+    error,
+
+    // Metodi pubblici
+    fetchPublicReviews,
+
+    // Metodi admin
+    fetchReviews,
+    createReview,
+    updateReview,
+    deleteReview,
+
+    // Utilità
+    refreshReviews,
+  };
 };

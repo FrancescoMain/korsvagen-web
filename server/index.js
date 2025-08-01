@@ -46,6 +46,7 @@ import contactRoutes from "./routes/contact.js";
 import settingsRoutes from "./routes/settings.js";
 import mediaRoutes from "./routes/media.js";
 import pagesRoutes from "./routes/pages.js";
+import reviewsRoutes from "./routes/reviews.js";
 
 // Inizializza l'app Express
 const app = express();
@@ -230,6 +231,9 @@ app.use("/api/media", mediaRoutes);
 
 // Pages - gestione contenuto pagine
 app.use("/api/pages", pagesRoutes);
+
+// Reviews - gestione recensioni clienti
+app.use("/api/reviews", reviewsRoutes);
 
 // Placeholder per futuri endpoint che saranno aggiunti nelle fasi successive:
 // - /api/users (gestione utenti)

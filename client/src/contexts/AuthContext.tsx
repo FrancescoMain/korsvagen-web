@@ -25,6 +25,7 @@ import React, {
 } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
+import { apiClient } from "../utils/api";
 
 /**
  * TIPI E INTERFACCE
@@ -87,14 +88,6 @@ interface AuthResponse {
  * CONFIGURAZIONE
  */
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || "/api";
-
-// Configurazione Axios per autenticazione
-const authApi = axios.create({
-  baseURL: API_BASE_URL,
-  timeout: 10000,
-  withCredentials: true,
-});
 
 /**
  * CONTEXT E PROVIDER
@@ -182,7 +175,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setLoading(true);
 
       try {
-        const response = await authApi.post<AuthResponse>(
+        const response = await apiClient.post<AuthResponse>(
           "/auth/login",
           credentials
         );
@@ -240,7 +233,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       // Notifica il server del logout (opzionale, non bloccare se fallisce)
       if (refreshTokenValue) {
         try {
-          await authApi.post("/auth/logout", {
+          await apiClient.post("/auth/logout", {
             refreshToken: refreshTokenValue,
           });
         } catch (error) {
@@ -273,7 +266,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     console.log("🔄 Tentativo refresh token...");
 
     try {
-      const response = await authApi.post<AuthResponse>("/auth/refresh", {
+      const response = await apiClient.post<AuthResponse>("/auth/refresh", {
         refreshToken: refreshTokenValue,
       });
 
@@ -318,51 +311,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
    * EFFECTS
    */
 
-  // Configurazione interceptors Axios
-  useEffect(() => {
-    // Request interceptor per aggiungere token
-    const requestInterceptor = authApi.interceptors.request.use(
-      (config) => {
-        if (token) {
-          config.headers.Authorization = `Bearer ${token}`;
-        }
-        return config;
-      },
-      (error) => Promise.reject(error)
-    );
-
-    // Response interceptor per gestire refresh automatico
-    const responseInterceptor = authApi.interceptors.response.use(
-      (response) => response,
-      async (error) => {
-        const originalRequest = error.config;
-
-        if (error.response?.status === 401 && !originalRequest._retry && !isRefreshing && !refreshFailedPermanently) {
-          originalRequest._retry = true;
-
-          console.log("📡 Interceptor: ricevuto 401, tentativo refresh...");
-          const refreshSuccess = await refreshToken();
-          if (refreshSuccess) {
-            console.log("📡 Interceptor: refresh riuscito, riprovo richiesta originale");
-            return authApi(originalRequest);
-          } else {
-            // Refresh fallito, redirect al login
-            console.log("📡 Interceptor: refresh fallito, eseguo logout");
-            logout();
-            return Promise.reject(error);
-          }
-        }
-
-        return Promise.reject(error);
-      }
-    );
-
-    // Cleanup
-    return () => {
-      authApi.interceptors.request.eject(requestInterceptor);
-      authApi.interceptors.response.eject(responseInterceptor);
-    };
-  }, [token, refreshToken, logout, isRefreshing, refreshFailedPermanently]);
+  // Gli interceptors sono gestiti centralmente da apiClient
 
   // Inizializzazione: verifica token esistente
   useEffect(() => {
@@ -373,7 +322,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         if (token && refreshTokenValue) {
           // Prova a ottenere i dati utente correnti
           try {
-            const response = await authApi.get("/auth/me");
+            const response = await apiClient.get("/auth/me");
             if (response.data.success) {
               setUser(response.data.data.user);
             } else {

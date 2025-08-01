@@ -5,6 +5,7 @@ import Footer from "../components/layout/Footer";
 import ContactCTA from "../components/common/ContactCTA";
 import Link from "../components/common/Link";
 import { usePageData } from "../hooks/usePageData";
+import { useReviews } from "../hooks/useReviews";
 
 const HomeContainer = styled.div`
   min-height: 100vh;
@@ -1657,6 +1658,9 @@ const HomePage: React.FC = () => {
   
   // Load page data from backend with fallback
   const { pageData, loading, error } = usePageData("home");
+  
+  // Load reviews from database
+  const { publicReviews, loading: reviewsLoading } = useReviews();
 
   // Touch handling for mobile navigation
   const [touchStart, setTouchStart] = React.useState<number | null>(null);
@@ -1787,7 +1791,13 @@ const HomePage: React.FC = () => {
     },
   ];
 
-  const reviews = [
+  // Use dynamic reviews from database with fallback to static data
+  const reviews = publicReviews.length > 0 ? publicReviews.map(review => ({
+    text: review.review_text,
+    author: review.author_name,
+    company: review.author_company || "Cliente",
+    stars: review.rating,
+  })) : [
     {
       text: "Eccezionale! Korsvagen ha realizzato la casa dei nostri sogni con professionalità e attenzione ai dettagli incredibili.",
       author: "Mario Rossi",
