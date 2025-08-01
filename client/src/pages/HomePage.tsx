@@ -1887,15 +1887,9 @@ const HomePage: React.FC = () => {
       <Header />
       <MainContent>
         <HeroSection>
-          {pageData?.hero_video ? (
-            <video className="hero-video" autoPlay muted loop playsInline>
-              <source src={pageData.hero_video} type="video/mp4" />
-            </video>
-          ) : (
-            <video className="hero-video" autoPlay muted loop playsInline>
-              <source src="/korsvagen-hero.mp4" type="video/mp4" />
-            </video>
-          )}
+          <video className="hero-video" autoPlay muted loop playsInline>
+            <source src="/korsvagen-hero.mp4" type="video/mp4" />
+          </video>
           <div className="hero-content">
             <div className="hero-top">
               <h1>{pageData?.hero_title || "KORSVAGEN"}</h1>

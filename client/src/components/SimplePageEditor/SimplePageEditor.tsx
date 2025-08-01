@@ -1,19 +1,17 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import styled from "styled-components";
-import { ArrowLeft, Save, Upload, X } from "lucide-react";
+import { ArrowLeft, Save } from "lucide-react";
 import { Button } from "../ui/Button";
 import { Input } from "../ui/Input";
 import { LoadingSpinner } from "../ui/LoadingSpinner";
 import { Breadcrumb } from "../Dashboard/Breadcrumb";
-import { useVideoUpload } from "../../hooks/useVideoUpload";
 import { apiClient } from "../../utils/api";
 
 interface PageData {
   id: string;
   heroTitle?: string;
   heroSubtitle?: string;
-  heroVideo?: string;
   heroImage?: string;
   metaTitle?: string;
   metaDescription?: string;
@@ -101,73 +99,6 @@ const Label = styled.label`
 
 
 
-const VideoUploadArea = styled.div`
-  border: 2px dashed #e5e7eb;
-  border-radius: 8px;
-  padding: 2rem;
-  text-align: center;
-  transition: border-color 0.2s;
-  cursor: pointer;
-  position: relative;
-
-  &:hover {
-    border-color: var(--primary);
-  }
-
-  &.has-video {
-    border-color: var(--primary);
-    background: rgba(59, 130, 246, 0.05);
-  }
-
-  &.uploading {
-    border-color: var(--primary);
-    background: rgba(59, 130, 246, 0.1);
-    cursor: not-allowed;
-  }
-`;
-
-const ProgressBar = styled.div<{ progress: number }>`
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: rgba(59, 130, 246, 0.2);
-  border-radius: 0 0 8px 8px;
-
-  &::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 100%;
-    width: ${({ progress }) => progress}%;
-    background: var(--primary);
-    transition: width 0.3s ease;
-    border-radius: 0 0 8px 8px;
-  }
-`;
-
-const VideoPreview = styled.div`
-  position: relative;
-  margin-top: 1rem;
-`;
-
-const RemoveVideoButton = styled.button`
-  position: absolute;
-  top: 0.5rem;
-  right: 0.5rem;
-  background: rgba(0, 0, 0, 0.7);
-  color: white;
-  border: none;
-  border-radius: 50%;
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-`;
 
 
 const Actions = styled.div`
@@ -185,7 +116,6 @@ export const SimplePageEditor: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [pageData, setPageData] = useState<PageData | null>(null);
-  const { uploadVideo, deleteVideo, uploading, progress } = useVideoUpload();
 
   useEffect(() => {
     const loadPageData = async () => {
@@ -200,7 +130,6 @@ export const SimplePageEditor: React.FC = () => {
             id: response.data.data.page_id,
             heroTitle: response.data.data.hero_title || "",
             heroSubtitle: response.data.data.hero_subtitle || "",
-            heroVideo: response.data.data.hero_video || "",
             heroImage: response.data.data.hero_image || "",
             sections: response.data.data.sections || {},
             metaTitle: response.data.data.meta_title || "",
@@ -217,7 +146,6 @@ export const SimplePageEditor: React.FC = () => {
           id: pageId || "home",
           heroTitle: pageId === "about" ? "La Nostra Storia" : pageId === "contact" ? "Contattaci" : "KORSVAGEN",
           heroSubtitle: pageId === "about" ? "Oltre 30 anni di eccellenza" : pageId === "contact" ? "Siamo qui per aiutarti" : "Costruzioni di qualità dal 1985",
-          heroVideo: "",
           heroImage: "",
           sections: pageId === "home" ? {
             services: {
@@ -269,22 +197,6 @@ export const SimplePageEditor: React.FC = () => {
     });
   };
 
-  const handleVideoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    const result = await uploadVideo(file);
-    if (result) {
-      handleInputChange("heroVideo", result.secure_url);
-    }
-    
-    // Reset the input value so the same file can be selected again
-    event.target.value = "";
-  };
-
-  const handleRemoveVideo = () => {
-    handleInputChange("heroVideo", "");
-  };
 
   const handleSave = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -294,7 +206,6 @@ export const SimplePageEditor: React.FC = () => {
 
     try {
       const saveData = {
-        heroVideo: pageData.heroVideo,
         heroImage: pageData.heroImage,
         sections: pageData.sections,
       };
@@ -355,69 +266,6 @@ export const SimplePageEditor: React.FC = () => {
 
       <Form onSubmit={handleSave}>
 
-        <Section>
-          <SectionTitle>Hero Video</SectionTitle>
-          
-          <FormGroup>
-            <Label>Video Hero</Label>
-            <VideoUploadArea 
-              className={
-                uploading 
-                  ? "uploading" 
-                  : pageData.heroVideo 
-                    ? "has-video" 
-                    : ""
-              }
-            >
-              {uploading ? (
-                <>
-                  <LoadingSpinner />
-                  <p style={{ margin: "1rem 0 0", color: "#6b7280" }}>
-                    Caricamento video... {progress}%
-                  </p>
-                  <ProgressBar progress={progress} />
-                </>
-              ) : pageData.heroVideo ? (
-                <VideoPreview>
-                  <video
-                    src={pageData.heroVideo}
-                    controls
-                    style={{ width: "100%", maxHeight: "200px" }}
-                  />
-                  <RemoveVideoButton onClick={handleRemoveVideo}>
-                    <X size={16} />
-                  </RemoveVideoButton>
-                </VideoPreview>
-              ) : (
-                <>
-                  <Upload size={48} color="#9ca3af" />
-                  <p style={{ margin: "1rem 0 0", color: "#6b7280" }}>
-                    Clicca per caricare un video o trascinalo qui
-                  </p>
-                  <input
-                    type="file"
-                    accept="video/*"
-                    onChange={handleVideoUpload}
-                    style={{ display: "none" }}
-                    id="video-upload"
-                    disabled={uploading}
-                  />
-                  <label
-                    htmlFor="video-upload"
-                    style={{
-                      position: "absolute",
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      bottom: 0,
-                      cursor: uploading ? "not-allowed" : "pointer"
-                    }}
-                  />
-                </>
-              )}
-            </VideoUploadArea>
-          </FormGroup>
-        </Section>
 
 <Section>
           <SectionTitle>Sezioni Contenuto</SectionTitle>
