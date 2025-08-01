@@ -47,6 +47,8 @@ import settingsRoutes from "./routes/settings.js";
 import mediaRoutes from "./routes/media.js";
 import pagesRoutes from "./routes/pages.js";
 import reviewsRoutes from "./routes/reviews.js";
+import certificationsRoutes from "./routes/certifications.js";
+import aboutContentRoutes from "./routes/about-content.js";
 
 // Inizializza l'app Express
 const app = express();
@@ -234,6 +236,12 @@ app.use("/api/pages", pagesRoutes);
 
 // Reviews - gestione recensioni clienti
 app.use("/api/reviews", reviewsRoutes);
+
+// Certificazioni e qualifiche
+app.use("/api/certifications", certificationsRoutes);
+
+// Contenuti pagina About
+app.use("/api/about-content", aboutContentRoutes);
 
 // Placeholder per futuri endpoint che saranno aggiunti nelle fasi successive:
 // - /api/users (gestione utenti)

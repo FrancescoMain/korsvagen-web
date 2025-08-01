@@ -12,7 +12,8 @@
       "Bash(dir:*)",
       "Bash(find:*)",
       "Bash(npx tsc:*)",
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "Bash(npm run migrate:status:*)"
     ],
     "deny": []
   }

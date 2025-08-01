@@ -32,6 +32,7 @@ import { PagesOverview } from "./pages/PagesOverview";
 import { MediaLibrary } from "./pages/MediaLibrary";
 import { Settings } from "./pages/Settings";
 import { ReviewsManagement } from "./pages/ReviewsManagement";
+import AboutManagement from "./pages/AboutManagement";
 import "./styles/dashboard.css";
 
 function App() {
@@ -90,6 +91,7 @@ function App() {
                 <Route path="pages/:pageId" element={<PageEditorPage />} />
                 <Route path="media" element={<MediaLibrary />} />
                 <Route path="reviews" element={<ReviewsManagement />} />
+                <Route path="about" element={<AboutManagement />} />
                 <Route path="settings" element={<Settings />} />
               </Route>
 
