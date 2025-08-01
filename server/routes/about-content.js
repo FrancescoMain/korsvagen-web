@@ -116,9 +116,9 @@ router.get("/public", async (req, res) => {
     const { data: content, error } = await supabaseClient
       .from("about_content")
       .select("*")
-      .single();
+      .maybeSingle();
 
-    if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
+    if (error) {
       logger.error("Errore database recupero contenuti About pubblici:", error);
       return res.status(500).json({
         success: false,
@@ -195,9 +195,9 @@ router.get("/", requireAuth, requireRole(["admin", "editor", "super_admin"]), as
         created_by_user:admin_users!about_content_created_by_fkey(username),
         updated_by_user:admin_users!about_content_updated_by_fkey(username)
       `)
-      .single();
+      .maybeSingle();
 
-    if (error && error.code !== 'PGRST116') {
+    if (error) {
       logger.error("Errore database recupero contenuti About admin:", error);
       return res.status(500).json({
         success: false,
@@ -242,10 +242,19 @@ router.put("/", requireAuth, requireRole(["admin", "editor", "super_admin"]), va
     logger.info(`Admin ${req.user.email} aggiorna contenuti About`);
 
     // Verifica se esiste già un record
-    const { data: existingContent } = await supabaseClient
+    const { data: existingContent, error: checkError } = await supabaseClient
       .from("about_content")
       .select("id")
-      .single();
+      .maybeSingle(); // Usa maybeSingle() invece di single() per gestire il caso di zero record
+
+    if (checkError) {
+      logger.error("Errore controllo esistenza contenuti About:", checkError);
+      return res.status(500).json({
+        success: false,
+        message: "Errore interno del server",
+        code: "DATABASE_ERROR"
+      });
+    }
 
     const updateData = {
       ...req.body,

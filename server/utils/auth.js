@@ -231,14 +231,6 @@ export function verifyToken(token, isRefreshToken = false) {
  */
 export function requireAuth(req, res, next) {
   try {
-    // Debug temporaneo
-    logger.info("requireAuth DEBUG", {
-      headers: req.headers.authorization ? "present" : "missing",
-      cookies: req.cookies?.accessToken ? "present" : "missing",
-      method: req.method,
-      path: req.path
-    });
-
     // Estrai token dall'header Authorization o dai cookies
     let token = req.headers.authorization?.replace("Bearer ", "");
 
@@ -247,11 +239,6 @@ export function requireAuth(req, res, next) {
     }
 
     if (!token) {
-      logger.warn("Token mancante", {
-        headers: req.headers.authorization,
-        cookies: Object.keys(req.cookies || {}),
-        ip: req.ip
-      });
       return res.status(401).json({
         success: false,
         error: "Token di accesso richiesto",
