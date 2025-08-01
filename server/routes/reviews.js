@@ -154,8 +154,8 @@ router.get("/", requireAuth, requireRole(["admin", "editor", "super_admin"]), as
         display_order,
         created_at,
         updated_at,
-        admin_users!reviews_created_by_fkey(username),
-        admin_users!reviews_updated_by_fkey(username)
+        created_by_user:admin_users!reviews_created_by_fkey(username),
+        updated_by_user:admin_users!reviews_updated_by_fkey(username)
       `)
       .order("display_order", { ascending: true })
       .range(offset, offset + limit - 1);
