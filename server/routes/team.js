@@ -916,9 +916,9 @@ router.put("/reorder", requireAuth, requireRole(["admin", "editor", "super_admin
       const results = await Promise.all(updates);
 
       // Verifica errori
-      const errors = results.filter(result => result.error);
-      if (errors.length > 0) {
-        logger.error("Errori durante riordinamento:", errors);
+      const updateErrors = results.filter(result => result.error);
+      if (updateErrors.length > 0) {
+        logger.error("Errori durante riordinamento:", updateErrors);
         return res.status(500).json({
           success: false,
           message: "Errore durante il riordinamento",
