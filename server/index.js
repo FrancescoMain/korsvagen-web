@@ -99,9 +99,20 @@ const corsOptions = {
     // Permetti tutti gli origins allowedOrigins
     if (origin && allowedOrigins.includes(origin)) {
       callback(null, true);
-    } else {
-      console.log(`🚫 CORS blocked origin: ${origin}`);
-      console.log(`📝 Allowed origins: ${allowedOrigins.join(", ")}`);
+    } 
+    // Permetti preview URLs di Vercel (pattern: https://korsvagen-*.vercel.app)
+    else if (origin && /^https:\/\/korsvagen.*\.vercel\.app$/.test(origin)) {
+      logger.info(`✅ CORS allowing Vercel preview URL: ${origin}`);
+      callback(null, true);
+    }
+    // Permetti deployment URLs di Vercel con progetti (pattern: https://korsvagen-*-korsvagens-projects-*.vercel.app)
+    else if (origin && /^https:\/\/korsvagen.*-korsvagens-projects.*\.vercel\.app$/.test(origin)) {
+      logger.info(`✅ CORS allowing Vercel project URL: ${origin}`);
+      callback(null, true);
+    }
+    else {
+      logger.info(`🚫 CORS blocked origin: ${origin}`);
+      logger.info(`📝 Allowed origins: ${allowedOrigins.join(", ")}`);
       callback(new Error("Not allowed by CORS"));
     }
   },
