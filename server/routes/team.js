@@ -876,37 +876,66 @@ router.get("/:id/cv",
       logger.info(`Download CV per ${member.name}: ${fileName}`);
       
       try {
-        logger.info(`Tentativo fetch da URL: ${member.cv_file_url}`);
+        // Usa l'API di Cloudinary per ottenere il file con autenticazione
+        const urlParts = member.cv_file_url.split('/');
+        const fileWithExt = urlParts[urlParts.length - 1];
+        const publicId = `team-cvs/${fileWithExt}`;
         
-        // Scarica il file da Cloudinary e serve attraverso il nostro server
-        const response = await fetch(member.cv_file_url);
+        logger.info(`Tentativo download con API Cloudinary, public_id: ${publicId}`);
         
-        logger.info(`Response status: ${response.status}`);
-        logger.info(`Response headers: ${JSON.stringify([...response.headers.entries()])}`);
-        
-        if (!response.ok) {
-          throw new Error(`Errore fetch da Cloudinary: ${response.status} - ${response.statusText}`);
-        }
+        // Usa cloudinary.api per ottenere il file con autenticazione
+        const fileBuffer = await new Promise((resolve, reject) => {
+          const stream = cloudinary.api.resource(publicId, {
+            resource_type: "raw"
+          }, (error, result) => {
+            if (error) {
+              reject(error);
+              return;
+            }
+            
+            // Scarica il file usando l'URL firmato
+            fetch(result.secure_url)
+              .then(response => response.arrayBuffer())
+              .then(buffer => resolve(Buffer.from(buffer)))
+              .catch(reject);
+          });
+        });
         
         // Imposta header per download forzato
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
         res.setHeader('Cache-Control', 'no-cache');
-        res.setHeader('Content-Length', response.headers.get('content-length') || '0');
+        res.setHeader('Content-Length', fileBuffer.length.toString());
         
-        // Pipe il contenuto del file direttamente al client
-        const fileBuffer = await response.arrayBuffer();
-        res.send(Buffer.from(fileBuffer));
+        // Invia il file
+        res.send(fileBuffer);
         
-        logger.info(`CV scaricato con successo: ${fileName}`);
+        logger.info(`CV scaricato con successo via API: ${fileName}`);
         
       } catch (fetchError) {
-        logger.error(`Errore completo download da Cloudinary:`, fetchError);
-        logger.error(`URL problematico: ${member.cv_file_url}`);
+        logger.error(`Errore download con API Cloudinary:`, fetchError);
         
-        // Fallback: se il fetch fallisce, torna al redirect semplice
-        logger.info("Fallback: redirect diretto a Cloudinary");
-        res.redirect(member.cv_file_url);
+        // Genera URL firmato per accesso diretto
+        try {
+          const urlParts = member.cv_file_url.split('/');
+          const fileWithExt = urlParts[urlParts.length - 1];
+          const publicId = `team-cvs/${fileWithExt}`;
+          
+          // Genera URL firmato che bypassa le ACL
+          const signedUrl = cloudinary.utils.private_download_url(publicId, "pdf", {
+            resource_type: "raw",
+            attachment: true,
+            expires_at: Math.floor(Date.now() / 1000) + 3600 // 1 ora
+          });
+          
+          logger.info(`Fallback: redirect a URL firmato`);
+          res.redirect(signedUrl);
+          
+        } catch (signError) {
+          logger.error(`Errore generazione URL firmato:`, signError);
+          logger.info("Ultimo fallback: redirect diretto");
+          res.redirect(member.cv_file_url);
+        }
       }
 
     } catch (error) {
