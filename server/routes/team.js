@@ -875,13 +875,34 @@ router.get("/:id/cv",
       
       logger.info(`Download CV per ${member.name}: ${fileName}`);
       
-      // Imposta header per download forzato
-      res.setHeader('Content-Type', 'application/pdf');
-      res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
-      res.setHeader('Cache-Control', 'no-cache');
-      
-      // Redirect all'URL Cloudinary - il browser scaricherà invece di aprire
-      res.redirect(member.cv_file_url);
+      try {
+        // Scarica il file da Cloudinary e serve attraverso il nostro server
+        const response = await fetch(member.cv_file_url);
+        
+        if (!response.ok) {
+          throw new Error(`Errore fetch da Cloudinary: ${response.status}`);
+        }
+        
+        // Imposta header per download forzato
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+        res.setHeader('Cache-Control', 'no-cache');
+        res.setHeader('Content-Length', response.headers.get('content-length') || '0');
+        
+        // Pipe il contenuto del file direttamente al client
+        const fileBuffer = await response.arrayBuffer();
+        res.send(Buffer.from(fileBuffer));
+        
+        logger.info(`CV scaricato con successo: ${fileName}`);
+        
+      } catch (fetchError) {
+        logger.error(`Errore download da Cloudinary: ${fetchError.message}`);
+        return res.status(500).json({
+          success: false,
+          message: "Errore nel download del CV",
+          code: "CV_FETCH_ERROR"
+        });
+      }
 
     } catch (error) {
       logger.error("Errore download CV:", error);
