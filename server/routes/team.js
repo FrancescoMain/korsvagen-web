@@ -875,64 +875,45 @@ router.get("/:id/cv",
       
       logger.info(`Download CV per ${member.name}: ${fileName}`);
       
+      // Genera direttamente URL firmato per download con nome personalizzato
+      const urlParts = member.cv_file_url.split('/');
+      const fileWithExt = urlParts[urlParts.length - 1];
+      const publicId = `team-cvs/${fileWithExt}`;
+      
+      logger.info(`Generando URL firmato per public_id: ${publicId}`);
+      
       try {
-        // Usa l'API di Cloudinary per ottenere il file con autenticazione
-        const urlParts = member.cv_file_url.split('/');
-        const fileWithExt = urlParts[urlParts.length - 1];
-        const publicId = `team-cvs/${fileWithExt}`;
-        
-        logger.info(`Tentativo download con API Cloudinary, public_id: ${publicId}`);
-        
-        // Usa cloudinary.api per ottenere il file con autenticazione
-        const fileBuffer = await new Promise((resolve, reject) => {
-          const stream = cloudinary.api.resource(publicId, {
-            resource_type: "raw"
-          }, (error, result) => {
-            if (error) {
-              reject(error);
-              return;
-            }
-            
-            // Scarica il file usando l'URL firmato
-            fetch(result.secure_url)
-              .then(response => response.arrayBuffer())
-              .then(buffer => resolve(Buffer.from(buffer)))
-              .catch(reject);
-          });
+        // Genera URL firmato che bypassa le ACL e forza download
+        const signedUrl = cloudinary.utils.private_download_url(publicId, "pdf", {
+          resource_type: "raw",
+          attachment: true,
+          expires_at: Math.floor(Date.now() / 1000) + 3600 // 1 ora
         });
         
-        // Imposta header per download forzato
-        res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
-        res.setHeader('Cache-Control', 'no-cache');
-        res.setHeader('Content-Length', fileBuffer.length.toString());
+        logger.info(`URL firmato generato: ${signedUrl.substring(0, 100)}...`);
+        logger.info(`Redirect per download CV: ${fileName}`);
         
-        // Invia il file
-        res.send(fileBuffer);
+        // Redirect all'URL firmato - forzerà il download
+        res.redirect(signedUrl);
         
-        logger.info(`CV scaricato con successo via API: ${fileName}`);
+      } catch (signError) {
+        logger.error(`Errore generazione URL firmato:`, signError);
         
-      } catch (fetchError) {
-        logger.error(`Errore download con API Cloudinary:`, fetchError);
-        
-        // Genera URL firmato per accesso diretto
+        // Ultimo fallback: prova con signed URL semplice
         try {
-          const urlParts = member.cv_file_url.split('/');
-          const fileWithExt = urlParts[urlParts.length - 1];
-          const publicId = `team-cvs/${fileWithExt}`;
+          const timestamp = Math.round(Date.now() / 1000) + 3600;
+          const signature = cloudinary.utils.api_sign_request({
+            public_id: publicId,
+            timestamp: timestamp
+          }, cloudinary.config().api_secret);
           
-          // Genera URL firmato che bypassa le ACL
-          const signedUrl = cloudinary.utils.private_download_url(publicId, "pdf", {
-            resource_type: "raw",
-            attachment: true,
-            expires_at: Math.floor(Date.now() / 1000) + 3600 // 1 ora
-          });
+          const fallbackUrl = `https://res.cloudinary.com/${cloudinary.config().cloud_name}/raw/upload/s--${signature}--/v${timestamp}/${publicId}`;
           
-          logger.info(`Fallback: redirect a URL firmato`);
-          res.redirect(signedUrl);
+          logger.info("Fallback: URL firmato manuale");
+          res.redirect(fallbackUrl);
           
-        } catch (signError) {
-          logger.error(`Errore generazione URL firmato:`, signError);
+        } catch (manualSignError) {
+          logger.error(`Errore URL firmato manuale:`, manualSignError);
           logger.info("Ultimo fallback: redirect diretto");
           res.redirect(member.cv_file_url);
         }
