@@ -103,6 +103,63 @@ const validateReorder = [
 ];
 
 /**
+ * GET /api/team/debug
+ * Debug endpoint per verificare lo stato del database (solo per development)
+ */
+router.get("/debug", requireAuth, requireRole(["admin", "super_admin"]), async (req, res) => {
+  try {
+    if (process.env.NODE_ENV === 'production') {
+      return res.status(403).json({
+        success: false,
+        message: "Endpoint di debug non disponibile in produzione"
+      });
+    }
+
+    logger.info(`Admin ${req.user.email} richiede debug info`);
+
+    // Controlla esistenza tabelle
+    const { data: tables, error: tablesError } = await supabaseClient
+      .rpc('get_table_info', {});
+
+    // Se RPC non esiste, usa query diretta
+    const { data: members, error: membersError } = await supabaseClient
+      .from("team_members")
+      .select("id, name, role, is_active, created_at")
+      .limit(10);
+
+    const { data: skills, error: skillsError } = await supabaseClient
+      .from("team_member_skills")
+      .select("*")
+      .limit(10);
+
+    res.json({
+      success: true,
+      debug_info: {
+        members: {
+          count: members?.length || 0,
+          data: members || [],
+          error: membersError
+        },
+        skills: {
+          count: skills?.length || 0,
+          data: skills || [],
+          error: skillsError
+        },
+        tables_error: tablesError
+      }
+    });
+
+  } catch (error) {
+    logger.error("Errore debug endpoint:", error);
+    res.status(500).json({
+      success: false,
+      message: "Errore debug",
+      error: error.message
+    });
+  }
+});
+
+/**
  * GET /api/team/public
  * Recupera tutti i membri attivi per la pagina pubblica
  */
@@ -608,18 +665,27 @@ router.post("/:id/cv", requireAuth, requireRole(["admin", "editor", "super_admin
         .single();
 
       if (checkError) {
+        logger.error("Errore controllo esistenza membro per CV upload:", checkError);
         if (checkError.code === "PGRST116") {
           return res.status(404).json({
             success: false,
-            message: "Membro del team non trovato",
+            message: "Membro del team non trovato. Assicurati che il membro esista prima di caricare il CV.",
             code: "MEMBER_NOT_FOUND"
           });
         }
-        logger.error("Errore controllo esistenza membro:", checkError);
         return res.status(500).json({
           success: false,
-          message: "Errore interno del server",
+          message: "Errore interno del server durante la verifica del membro",
           code: "DATABASE_ERROR"
+        });
+      }
+
+      if (!member) {
+        logger.error("Membro non trovato (null result) per CV upload:", id);
+        return res.status(404).json({
+          success: false,
+          message: "Membro del team non trovato",
+          code: "MEMBER_NOT_FOUND"
         });
       }
 

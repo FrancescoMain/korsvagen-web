@@ -292,7 +292,16 @@ export const useTeam = (): UseTeamReturn => {
     } catch (err: any) {
       const errorMessage = err.response?.data?.message || err.message || "Errore caricamento CV";
       setError(errorMessage);
-      toast.error(errorMessage);
+      
+      // Gestisci diversi tipi di errore
+      if (err.response?.status === 404) {
+        toast.error("Membro del team non trovato. Ricarica la pagina e riprova.");
+      } else if (err.response?.status === 400) {
+        toast.error("File non valido. Assicurati di caricare un PDF valido.");
+      } else {
+        toast.error(errorMessage);
+      }
+      
       console.error("Errore uploadCV:", err);
       return false;
     } finally {
