@@ -876,11 +876,16 @@ router.get("/:id/cv",
       logger.info(`Download CV per ${member.name}: ${fileName}`);
       
       try {
+        logger.info(`Tentativo fetch da URL: ${member.cv_file_url}`);
+        
         // Scarica il file da Cloudinary e serve attraverso il nostro server
         const response = await fetch(member.cv_file_url);
         
+        logger.info(`Response status: ${response.status}`);
+        logger.info(`Response headers: ${JSON.stringify([...response.headers.entries()])}`);
+        
         if (!response.ok) {
-          throw new Error(`Errore fetch da Cloudinary: ${response.status}`);
+          throw new Error(`Errore fetch da Cloudinary: ${response.status} - ${response.statusText}`);
         }
         
         // Imposta header per download forzato
@@ -896,12 +901,12 @@ router.get("/:id/cv",
         logger.info(`CV scaricato con successo: ${fileName}`);
         
       } catch (fetchError) {
-        logger.error(`Errore download da Cloudinary: ${fetchError.message}`);
-        return res.status(500).json({
-          success: false,
-          message: "Errore nel download del CV",
-          code: "CV_FETCH_ERROR"
-        });
+        logger.error(`Errore completo download da Cloudinary:`, fetchError);
+        logger.error(`URL problematico: ${member.cv_file_url}`);
+        
+        // Fallback: se il fetch fallisce, torna al redirect semplice
+        logger.info("Fallback: redirect diretto a Cloudinary");
+        res.redirect(member.cv_file_url);
       }
 
     } catch (error) {
