@@ -869,10 +869,25 @@ router.get("/:id/cv",
         });
       }
 
-      // Redirect al CV su Cloudinary
-      logger.info(`CV scaricato per ${member.name}`);
+      // Genera URL Cloudinary con parametri per apertura nel browser
+      const urlParts = member.cv_file_url.split('/');
+      const fileWithExt = urlParts[urlParts.length - 1];
+      const publicId = `team-cvs/${fileWithExt.split('.')[0]}`;
       
-      res.redirect(member.cv_file_url);
+      // Genera URL con flags per apertura nel browser invece di download
+      const viewUrl = cloudinary.url(publicId, {
+        resource_type: "raw",
+        secure: true,
+        flags: "attachment:false", // Non forzare download
+        format: "pdf"
+      });
+      
+      logger.info(`CV visualizzato per ${member.name}: ${viewUrl}`);
+      
+      // Invece di redirect, settiamo headers per apertura nel browser
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', 'inline'); // inline invece di attachment
+      res.redirect(viewUrl);
 
     } catch (error) {
       logger.error("Errore download CV:", error);
