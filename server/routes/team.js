@@ -724,16 +724,25 @@ router.post("/:id/cv", requireAuth, requireRole(["admin", "editor", "super_admin
       const timestamp = Date.now();
       const filename = `${member.name.toLowerCase().replace(/\s+/g, '-')}-${timestamp}`;
       
+      logger.info(`Iniziando upload CV: ${filename}, dimensione: ${req.file.size} bytes`);
+      
       const uploadResult = await new Promise((resolve, reject) => {
         cloudinary.uploader.upload_stream(
           {
             resource_type: "raw",
             public_id: `team-cvs/${filename}`,
-            format: "pdf"
+            use_filename: false,
+            unique_filename: true
           },
           (error, result) => {
-            if (error) reject(error);
-            else resolve(result);
+            if (error) {
+              logger.error("Errore upload Cloudinary:", error);
+              reject(error);
+            } else {
+              logger.info(`CV caricato con successo: ${result.secure_url}`);
+              logger.info(`Cloudinary public_id: ${result.public_id}`);
+              resolve(result);
+            }
           }
         ).end(req.file.buffer);
       });
