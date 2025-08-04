@@ -607,8 +607,13 @@ router.delete("/:id", requireAuth, requireRole(["admin", "super_admin"]),
       // Elimina CV da Cloudinary se presente
       if (member.cv_file_url) {
         try {
-          const publicId = member.cv_file_url.split('/').pop().split('.')[0];
-          await cloudinary.uploader.destroy(`team-cvs/${publicId}`, {
+          // Estrai il public_id dall'URL Cloudinary
+          const urlParts = member.cv_file_url.split('/');
+          const fileWithExt = urlParts[urlParts.length - 1];
+          const publicId = `team-cvs/${fileWithExt.split('.')[0]}`;
+          
+          logger.info(`Eliminando CV membro con public_id: ${publicId}`);
+          await cloudinary.uploader.destroy(publicId, {
             resource_type: "raw"
           });
           logger.info("CV eliminato da Cloudinary");
@@ -710,8 +715,13 @@ router.post("/:id/cv", requireAuth, requireRole(["admin", "editor", "super_admin
       // Elimina CV esistente da Cloudinary se presente
       if (member.cv_file_url) {
         try {
-          const publicId = member.cv_file_url.split('/').pop().split('.')[0];
-          await cloudinary.uploader.destroy(`team-cvs/${publicId}`, {
+          // Estrai il public_id dall'URL Cloudinary
+          const urlParts = member.cv_file_url.split('/');
+          const fileWithExt = urlParts[urlParts.length - 1];
+          const publicId = `team-cvs/${fileWithExt.split('.')[0]}`;
+          
+          logger.info(`Eliminando CV precedente con public_id: ${publicId}`);
+          await cloudinary.uploader.destroy(publicId, {
             resource_type: "raw"
           });
           logger.info("CV precedente eliminato da Cloudinary");
@@ -732,15 +742,20 @@ router.post("/:id/cv", requireAuth, requireRole(["admin", "editor", "super_admin
             resource_type: "raw",
             public_id: `team-cvs/${filename}`,
             use_filename: false,
-            unique_filename: true
+            unique_filename: false, // Usa il nome che specifichiamo
+            access_mode: "public", // Assicura accesso pubblico
+            type: "upload" // Tipo upload standard
           },
           (error, result) => {
             if (error) {
               logger.error("Errore upload Cloudinary:", error);
+              logger.error("Dettagli errore Cloudinary:", JSON.stringify(error, null, 2));
               reject(error);
             } else {
               logger.info(`CV caricato con successo: ${result.secure_url}`);
               logger.info(`Cloudinary public_id: ${result.public_id}`);
+              logger.info(`Cloudinary format: ${result.format}`);
+              logger.info(`Cloudinary resource_type: ${result.resource_type}`);
               resolve(result);
             }
           }
@@ -923,11 +938,16 @@ router.delete("/:id/cv", requireAuth, requireRole(["admin", "editor", "super_adm
 
       // Elimina da Cloudinary
       try {
-        const publicId = member.cv_file_url.split('/').pop().split('.')[0];
-        await cloudinary.uploader.destroy(`team-cvs/${publicId}`, {
+        // Estrai il public_id dall'URL Cloudinary
+        const urlParts = member.cv_file_url.split('/');
+        const fileWithExt = urlParts[urlParts.length - 1];
+        const publicId = `team-cvs/${fileWithExt.split('.')[0]}`;
+        
+        logger.info(`Eliminando CV con public_id: ${publicId}`);
+        const deleteResult = await cloudinary.uploader.destroy(publicId, {
           resource_type: "raw"
         });
-        logger.info("CV eliminato da Cloudinary");
+        logger.info(`CV eliminato da Cloudinary, risultato: ${deleteResult.result}`);
       } catch (cloudinaryError) {
         logger.error("Errore eliminazione CV da Cloudinary:", cloudinaryError);
         return res.status(500).json({
