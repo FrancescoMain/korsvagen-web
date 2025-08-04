@@ -443,28 +443,32 @@ router.put("/:id", requireAuth, requireRole(["admin", "editor", "super_admin"]),
       
       logger.info(`Admin ${req.user.email} aggiorna membro team ${id}`);
 
-      // Verifica esistenza membro
-      const { data: existingMember, error: checkError } = await supabaseClient
+      // Verifica esistenza membro (senza .single() per evitare PGRST116)
+      const { data: existingMembers, error: checkError } = await supabaseClient
         .from("team_members")
-        .select("id")
-        .eq("id", id)
-        .single();
+        .select("id, name")
+        .eq("id", id);
 
       if (checkError) {
-        if (checkError.code === "PGRST116") {
-          return res.status(404).json({
-            success: false,
-            message: "Membro del team non trovato",
-            code: "MEMBER_NOT_FOUND"
-          });
-        }
         logger.error("Errore controllo esistenza membro:", checkError);
         return res.status(500).json({
           success: false,
-          message: "Errore interno del server",
+          message: "Errore interno del server durante controllo esistenza",
           code: "DATABASE_ERROR"
         });
       }
+
+      if (!existingMembers || existingMembers.length === 0) {
+        logger.error(`Membro team non trovato per aggiornamento: ${id}`);
+        return res.status(404).json({
+          success: false,
+          message: "Membro del team non trovato",
+          code: "MEMBER_NOT_FOUND"
+        });
+      }
+
+      const existingMember = existingMembers[0];
+      logger.info(`Aggiornamento membro: ${existingMember.name}`);
 
       // Aggiorna membro
       const updateData = {
@@ -668,22 +672,14 @@ router.post("/:id/cv", requireAuth, requireRole(["admin", "editor", "super_admin
       const { id } = req.params;
       logger.info(`Admin ${req.user.email} carica CV per membro ${id}`);
 
-      // Verifica esistenza membro
-      const { data: member, error: checkError } = await supabaseClient
+      // Verifica esistenza membro (senza .single() per evitare PGRST116)
+      const { data: members, error: checkError } = await supabaseClient
         .from("team_members")
         .select("name, cv_file_url")
-        .eq("id", id)
-        .single();
+        .eq("id", id);
 
       if (checkError) {
         logger.error("Errore controllo esistenza membro per CV upload:", checkError);
-        if (checkError.code === "PGRST116") {
-          return res.status(404).json({
-            success: false,
-            message: "Membro del team non trovato. Assicurati che il membro esista prima di caricare il CV.",
-            code: "MEMBER_NOT_FOUND"
-          });
-        }
         return res.status(500).json({
           success: false,
           message: "Errore interno del server durante la verifica del membro",
@@ -691,14 +687,17 @@ router.post("/:id/cv", requireAuth, requireRole(["admin", "editor", "super_admin
         });
       }
 
-      if (!member) {
-        logger.error("Membro non trovato (null result) per CV upload:", id);
+      if (!members || members.length === 0) {
+        logger.error("Membro non trovato per CV upload:", id);
         return res.status(404).json({
           success: false,
-          message: "Membro del team non trovato",
+          message: "Membro del team non trovato. Assicurati che il membro esista prima di caricare il CV.",
           code: "MEMBER_NOT_FOUND"
         });
       }
+
+      const member = members[0];
+      logger.info(`CV upload per membro: ${member.name}`);
 
       // Elimina CV esistente da Cloudinary se presente
       if (member.cv_file_url) {
