@@ -103,57 +103,68 @@ const validateReorder = [
 ];
 
 /**
- * GET /api/team/debug
- * Debug endpoint per verificare lo stato del database (solo per development)
+ * GET /api/team/status
+ * Verifica lo stato del database team (pubblico per debugging)
  */
-router.get("/debug", requireAuth, requireRole(["admin", "super_admin"]), async (req, res) => {
+router.get("/status", async (req, res) => {
   try {
-    if (process.env.NODE_ENV === 'production') {
-      return res.status(403).json({
-        success: false,
-        message: "Endpoint di debug non disponibile in produzione"
-      });
+    logger.info("Verifica stato database team");
+
+    // Test connessione base
+    let membersTest, skillsTest, membersCount = 0, skillsCount = 0;
+    
+    try {
+      const { data: members, error: membersError } = await supabaseClient
+        .from("team_members") 
+        .select("id, name, role, is_active")
+        .limit(5);
+      
+      membersTest = { data: members, error: membersError };
+      membersCount = members?.length || 0;
+    } catch (err) {
+      membersTest = { data: null, error: err.message };
     }
 
-    logger.info(`Admin ${req.user.email} richiede debug info`);
+    try {
+      const { data: skills, error: skillsError } = await supabaseClient
+        .from("team_member_skills")
+        .select("team_member_id, skill_name")
+        .limit(5);
+      
+      skillsTest = { data: skills, error: skillsError };
+      skillsCount = skills?.length || 0;
+    } catch (err) {
+      skillsTest = { data: null, error: err.message };
+    }
 
-    // Controlla esistenza tabelle
-    const { data: tables, error: tablesError } = await supabaseClient
-      .rpc('get_table_info', {});
-
-    // Se RPC non esiste, usa query diretta
-    const { data: members, error: membersError } = await supabaseClient
-      .from("team_members")
-      .select("id, name, role, is_active, created_at")
-      .limit(10);
-
-    const { data: skills, error: skillsError } = await supabaseClient
-      .from("team_member_skills")
-      .select("*")
-      .limit(10);
+    const status = {
+      database_connected: true,
+      tables: {
+        team_members: {
+          exists: !membersTest.error || membersTest.error.code !== '42P01',
+          count: membersCount,
+          error: membersTest.error?.message || null,
+          sample_data: membersTest.data?.slice(0, 2) || []
+        },
+        team_member_skills: {
+          exists: !skillsTest.error || skillsTest.error.code !== '42P01', 
+          count: skillsCount,
+          error: skillsTest.error?.message || null
+        }
+      },
+      timestamp: new Date().toISOString()
+    };
 
     res.json({
       success: true,
-      debug_info: {
-        members: {
-          count: members?.length || 0,
-          data: members || [],
-          error: membersError
-        },
-        skills: {
-          count: skills?.length || 0,
-          data: skills || [],
-          error: skillsError
-        },
-        tables_error: tablesError
-      }
+      status: status
     });
 
   } catch (error) {
-    logger.error("Errore debug endpoint:", error);
+    logger.error("Errore verifica stato database:", error);
     res.status(500).json({
       success: false,
-      message: "Errore debug",
+      message: "Errore verifica database",
       error: error.message
     });
   }

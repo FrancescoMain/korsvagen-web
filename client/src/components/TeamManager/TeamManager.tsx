@@ -261,6 +261,14 @@ const TeamManager: React.FC<TeamManagerProps> = () => {
     fetchMembers();
   }, [fetchMembers]);
 
+  // Verifica stato database se non ci sono membri
+  useEffect(() => {
+    if (!loading && members.length === 0 && !error) {
+      // Se non ci sono membri e non ci sono errori, potrebbe essere un database vuoto
+      console.warn("⚠️ Nessun membro trovato nel database. Verifica che lo schema SQL sia stato eseguito.");
+    }
+  }, [loading, members.length, error]);
+
   // Membri filtrati
   const filteredMembers = members.filter(member => {
     const matchesSearch = member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -450,10 +458,24 @@ const TeamManager: React.FC<TeamManagerProps> = () => {
             }
           </p>
           {!searchTerm && filterStatus === "all" && (
-            <ActionButton variant="primary" onClick={handleCreateMember}>
-              <Plus size={16} />
-              Aggiungi Primo Membro
-            </ActionButton>
+            <>
+              <ActionButton variant="primary" onClick={handleCreateMember}>
+                <Plus size={16} />
+                Aggiungi Primo Membro
+              </ActionButton>
+              <div style={{ 
+                marginTop: '1rem', 
+                padding: '1rem', 
+                background: '#fff3cd', 
+                border: '1px solid #ffeaa7',
+                borderRadius: '8px',
+                fontSize: '0.9rem',
+                color: '#856404'
+              }}>
+                <strong>💡 Nota:</strong> Se vedi questo messaggio, potresti dover eseguire lo schema SQL del database. 
+                <br />Verifica su <code>/api/team/status</code> lo stato delle tabelle.
+              </div>
+            </>
           )}
         </EmptyState>
       ) : (
