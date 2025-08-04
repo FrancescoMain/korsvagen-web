@@ -765,7 +765,7 @@ router.post("/:id/cv", requireAuth, requireRole(["admin", "editor", "super_admin
         ).end(req.file.buffer);
       });
 
-      // Aggiorna database con info CV (incluso public_id per download futuro)
+      // Aggiorna database con info CV
       const { data: updatedMember, error: updateError } = await supabaseClient
         .from("team_members")
         .update({
@@ -773,8 +773,8 @@ router.post("/:id/cv", requireAuth, requireRole(["admin", "editor", "super_admin
           cv_file_url: uploadResult.secure_url,
           cv_file_size: req.file.size,
           cv_upload_date: new Date().toISOString(),
-          updated_by: req.user.id,
-          cv_public_id: uploadResult.public_id // Salva il public_id reale per il download
+          updated_by: req.user.id
+          // Nota: cv_public_id rimosso temporaneamente - campo non esiste nel DB
         })
         .eq("id", id)
         .select()
@@ -833,10 +833,10 @@ router.get("/:id/cv",
       const { id } = req.params;
       logger.info(`Richiesta download CV per membro ${id}`);
 
-      // Recupera info membro e CV (incluso public_id)
+      // Recupera info membro e CV
       const { data: member, error } = await supabaseClient
         .from("team_members")
-        .select("name, cv_file_name, cv_file_url, cv_public_id, is_active")
+        .select("name, cv_file_name, cv_file_url, is_active")
         .eq("id", id)
         .single();
 
@@ -878,54 +878,62 @@ router.get("/:id/cv",
       
       logger.info(`Download CV per ${member.name}: ${fileName}`);
       
-      // Usa il public_id salvato nel database o estrae dall'URL come fallback
-      let publicId = member.cv_public_id;
-      
-      if (!publicId) {
-        logger.warn("cv_public_id non trovato nel database, estrazione dall'URL");
-        const urlParts = member.cv_file_url.split('/');
-        const versionAndPublicId = urlParts.slice(-2);
-        publicId = versionAndPublicId[1];
-      }
-      
+      // Estrae il public_id corretto dall'URL - ora sappiamo il formato esatto
       logger.info(`URL CV salvato: ${member.cv_file_url}`);
-      logger.info(`Public ID utilizzato: ${publicId}`);
       
-      try {
-        // Genera URL firmato che bypassa le ACL e forza download
-        const signedUrl = cloudinary.utils.private_download_url(publicId, "pdf", {
-          resource_type: "raw",
-          attachment: true,
-          expires_at: Math.floor(Date.now() / 1000) + 3600 // 1 ora
-        });
+      // Dall'URL: https://res.cloudinary.com/dpvzuvloe/raw/upload/v1754319116/team-cvs/marco-rossis-1754319116505.pdf
+      // Il public_id è: team-cvs/marco-rossis-1754319116505.pdf (tutto dopo l'ultimo / e prima di v{timestamp})
+      const urlParts = member.cv_file_url.split('/');
+      // Trova la parte dopo v{timestamp} - dovrebbe essere il public_id completo
+      const vIndex = urlParts.findIndex(part => part.startsWith('v'));
+      if (vIndex !== -1 && vIndex < urlParts.length - 1) {
+        // Tutto dopo v{timestamp} è il public_id
+        const publicId = urlParts.slice(vIndex + 1).join('/');
+        logger.info(`Public ID estratto: ${publicId}`);
         
-        logger.info(`URL firmato generato: ${signedUrl.substring(0, 100)}...`);
-        logger.info(`Redirect per download CV: ${fileName}`);
+        // Rimuovi l'estensione dal public_id se presente (Cloudinary lo aggiunge automaticamente)
+        const publicIdWithoutExt = publicId.replace('.pdf', '');
+        logger.info(`Public ID senza estensione: ${publicIdWithoutExt}`);
         
-        // Redirect all'URL firmato - forzerà il download
-        res.redirect(signedUrl);
-        
-      } catch (signError) {
-        logger.error(`Errore generazione URL firmato:`, signError);
-        
-        // Ultimo fallback: prova con signed URL semplice
         try {
-          const timestamp = Math.round(Date.now() / 1000) + 3600;
-          const signature = cloudinary.utils.api_sign_request({
-            public_id: publicId,
-            timestamp: timestamp
-          }, cloudinary.config().api_secret);
+          // Genera URL firmato che bypassa le ACL e forza download
+          const signedUrl = cloudinary.utils.private_download_url(publicIdWithoutExt, "pdf", {
+            resource_type: "raw",
+            attachment: true,
+            expires_at: Math.floor(Date.now() / 1000) + 3600 // 1 ora
+          });
           
-          const fallbackUrl = `https://res.cloudinary.com/${cloudinary.config().cloud_name}/raw/upload/s--${signature}--/v${timestamp}/${publicId}`;
+          logger.info(`URL firmato generato: ${signedUrl.substring(0, 100)}...`);
+          logger.info(`Redirect per download CV: ${fileName}`);
           
-          logger.info("Fallback: URL firmato manuale");
-          res.redirect(fallbackUrl);
+          // Redirect all'URL firmato - forzerà il download
+          res.redirect(signedUrl);
           
-        } catch (manualSignError) {
-          logger.error(`Errore URL firmato manuale:`, manualSignError);
-          logger.info("Ultimo fallback: redirect diretto");
-          res.redirect(member.cv_file_url);
+        } catch (signError) {
+          logger.error(`Errore generazione URL firmato:`, signError);
+          
+          // Ultimo fallback: prova con signed URL semplice
+          try {
+            const timestamp = Math.round(Date.now() / 1000) + 3600;
+            const signature = cloudinary.utils.api_sign_request({
+              public_id: publicIdWithoutExt,
+              timestamp: timestamp
+            }, cloudinary.config().api_secret);
+            
+            const fallbackUrl = `https://res.cloudinary.com/${cloudinary.config().cloud_name}/raw/upload/s--${signature}--/v${timestamp}/${publicIdWithoutExt}`;
+            
+            logger.info("Fallback: URL firmato manuale");
+            res.redirect(fallbackUrl);
+            
+          } catch (manualSignError) {
+            logger.error(`Errore URL firmato manuale:`, manualSignError);
+            logger.info("Ultimo fallback: redirect diretto");
+            res.redirect(member.cv_file_url);
+          }
         }
+      } else {
+        logger.error("Impossibile estrarre public_id dall'URL");
+        res.redirect(member.cv_file_url);
       }
 
     } catch (error) {
