@@ -384,11 +384,12 @@ export const useTeam = (): UseTeamReturn => {
   }, [fetchMembers]);
 
   /**
-   * Carica membri pubblici al mount del componente
+   * NON caricare automaticamente i membri pubblici
+   * Lascia che ogni componente chiami esplicitamente fetchPublicMembers() o fetchMembers()
    */
-  useEffect(() => {
-    fetchPublicMembers();
-  }, [fetchPublicMembers]);
+  // useEffect(() => {
+  //   fetchPublicMembers();
+  // }, [fetchPublicMembers]);
 
   return {
     // Stati
