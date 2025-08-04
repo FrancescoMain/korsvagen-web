@@ -757,13 +757,15 @@ router.post("/:id/cv", requireAuth, requireRole(["admin", "editor", "super_admin
               logger.info(`Cloudinary public_id: ${result.public_id}`);
               logger.info(`Cloudinary format: ${result.format}`);
               logger.info(`Cloudinary resource_type: ${result.resource_type}`);
+              logger.info(`Public ID usato nell'upload: team-cvs/${filename}`);
+              logger.info(`Public ID restituito da Cloudinary: ${result.public_id}`);
               resolve(result);
             }
           }
         ).end(req.file.buffer);
       });
 
-      // Aggiorna database con info CV
+      // Aggiorna database con info CV (incluso public_id per download futuro)
       const { data: updatedMember, error: updateError } = await supabaseClient
         .from("team_members")
         .update({
@@ -771,7 +773,8 @@ router.post("/:id/cv", requireAuth, requireRole(["admin", "editor", "super_admin
           cv_file_url: uploadResult.secure_url,
           cv_file_size: req.file.size,
           cv_upload_date: new Date().toISOString(),
-          updated_by: req.user.id
+          updated_by: req.user.id,
+          cv_public_id: uploadResult.public_id // Salva il public_id reale per il download
         })
         .eq("id", id)
         .select()
@@ -830,10 +833,10 @@ router.get("/:id/cv",
       const { id } = req.params;
       logger.info(`Richiesta download CV per membro ${id}`);
 
-      // Recupera info membro e CV
+      // Recupera info membro e CV (incluso public_id)
       const { data: member, error } = await supabaseClient
         .from("team_members")
-        .select("name, cv_file_name, cv_file_url, is_active")
+        .select("name, cv_file_name, cv_file_url, cv_public_id, is_active")
         .eq("id", id)
         .single();
 
@@ -875,12 +878,18 @@ router.get("/:id/cv",
       
       logger.info(`Download CV per ${member.name}: ${fileName}`);
       
-      // Genera direttamente URL firmato per download con nome personalizzato
-      const urlParts = member.cv_file_url.split('/');
-      const fileWithExt = urlParts[urlParts.length - 1];
-      const publicId = `team-cvs/${fileWithExt}`;
+      // Usa il public_id salvato nel database o estrae dall'URL come fallback
+      let publicId = member.cv_public_id;
       
-      logger.info(`Generando URL firmato per public_id: ${publicId}`);
+      if (!publicId) {
+        logger.warn("cv_public_id non trovato nel database, estrazione dall'URL");
+        const urlParts = member.cv_file_url.split('/');
+        const versionAndPublicId = urlParts.slice(-2);
+        publicId = versionAndPublicId[1];
+      }
+      
+      logger.info(`URL CV salvato: ${member.cv_file_url}`);
+      logger.info(`Public ID utilizzato: ${publicId}`);
       
       try {
         // Genera URL firmato che bypassa le ACL e forza download
