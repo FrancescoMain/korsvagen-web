@@ -49,6 +49,7 @@ import pagesRoutes from "./routes/pages.js";
 import reviewsRoutes from "./routes/reviews.js";
 import certificationsRoutes from "./routes/certifications.js";
 import aboutContentRoutes from "./routes/about-content.js";
+import teamRoutes from "./routes/team.js";
 
 // Inizializza l'app Express
 const app = express();
@@ -242,6 +243,9 @@ app.use("/api/certifications", certificationsRoutes);
 
 // Contenuti pagina About
 app.use("/api/about-content", aboutContentRoutes);
+
+// Team - gestione membri del team
+app.use("/api/team", teamRoutes);
 
 // Placeholder per futuri endpoint che saranno aggiunti nelle fasi successive:
 // - /api/users (gestione utenti)

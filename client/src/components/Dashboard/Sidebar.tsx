@@ -9,6 +9,7 @@ import {
   Menu,
   X,
   MessageSquare,
+  Users,
 } from "lucide-react";
 
 interface NavigationItem {
@@ -38,6 +39,11 @@ const navigationItems: NavigationItem[] = [
     title: "Gestione About",
     icon: <FileText size={20} />,
     path: "/dashboard/about",
+  },
+  {
+    title: "Gestione Team",
+    icon: <Users size={20} />,
+    path: "/dashboard/team",
   },
   {
     title: "Contact",
