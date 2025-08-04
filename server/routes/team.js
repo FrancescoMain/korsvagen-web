@@ -870,35 +870,18 @@ router.get("/:id/cv",
         });
       }
 
-      logger.info(`CV richiesto per ${member.name}: ${member.cv_file_url}`);
+      // Forza il download del CV con nome file corretto
+      const fileName = `CV_${member.name.replace(/\s+/g, '_')}.pdf`;
       
-      // Prova prima redirect diretto
-      try {
-        // Testa se l'URL è accessibile facendo una richiesta HEAD
-        const response = await fetch(member.cv_file_url, { method: 'HEAD' });
-        if (response.ok) {
-          logger.info(`URL diretto accessibile, redirect a: ${member.cv_file_url}`);
-          res.redirect(member.cv_file_url);
-          return;
-        }
-      } catch (error) {
-        logger.warn(`URL diretto non accessibile: ${error.message}`);
-      }
+      logger.info(`Download CV per ${member.name}: ${fileName}`);
       
-      // Se redirect diretto fallisce, genera URL pubblico alternativo
-      const urlParts = member.cv_file_url.split('/');
-      const fileWithExt = urlParts[urlParts.length - 1];
-      const publicId = `team-cvs/${fileWithExt}`;
+      // Imposta header per download forzato
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+      res.setHeader('Cache-Control', 'no-cache');
       
-      const publicUrl = cloudinary.url(publicId, {
-        resource_type: "raw",
-        secure: true,
-        sign_url: false,
-        type: "upload"
-      });
-      
-      logger.info(`Tentativo URL pubblico generato: ${publicUrl}`);
-      res.redirect(publicUrl);
+      // Redirect all'URL Cloudinary - il browser scaricherà invece di aprire
+      res.redirect(member.cv_file_url);
 
     } catch (error) {
       logger.error("Errore download CV:", error);
