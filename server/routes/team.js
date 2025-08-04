@@ -476,12 +476,11 @@ router.put("/:id", requireAuth, requireRole(["admin", "editor", "super_admin"]),
         updated_by: req.user.id
       };
 
-      const { data: member, error: updateError } = await supabaseClient
+      const { data: members, error: updateError } = await supabaseClient
         .from("team_members")
         .update(updateData)
         .eq("id", id)
-        .select()
-        .single();
+        .select();
 
       if (updateError) {
         logger.error("Errore aggiornamento membro team:", updateError);
@@ -519,11 +518,10 @@ router.put("/:id", requireAuth, requireRole(["admin", "editor", "super_admin"]),
       }
 
       // Recupera il membro completo aggiornato
-      const { data: completeMember, error: fetchError } = await supabaseClient
+      const { data: completeMembers, error: fetchError } = await supabaseClient
         .from("team_members_complete")
         .select("*")
-        .eq("id", id)
-        .single();
+        .eq("id", id);
 
       if (fetchError) {
         logger.error("Errore recupero membro aggiornato:", fetchError);
@@ -534,7 +532,17 @@ router.put("/:id", requireAuth, requireRole(["admin", "editor", "super_admin"]),
         });
       }
 
-      logger.info(`Membro team ${member.name} aggiornato con successo`);
+      const completeMember = completeMembers?.[0];
+      if (!completeMember) {
+        logger.error("Membro aggiornato ma non trovano nella vista completa:", id);
+        return res.status(500).json({
+          success: false,
+          message: "Membro aggiornato ma errore nel recupero dati completi",
+          code: "FETCH_ERROR"
+        });
+      }
+
+      logger.info(`Membro team ${existingMember.name} aggiornato con successo`);
 
       res.json({
         success: true,
