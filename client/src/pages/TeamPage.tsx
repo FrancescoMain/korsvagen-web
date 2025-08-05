@@ -165,12 +165,44 @@ const TeamPage: React.FC = () => {
                 {selectedMember.has_cv && (
                   <div className="section">
                     <button
-                      onClick={() => {
-                        // Usa l'URL completo del backend configurato
-                        const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
-                        const downloadUrl = `${API_BASE_URL}/team/${selectedMember.id}/cv`;
-                        // Usa l'endpoint server per download ottimizzato
-                        window.location.href = downloadUrl;
+                      onClick={async () => {
+                        try {
+                          // Usa l'URL completo del backend configurato
+                          const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
+                          const downloadUrl = `${API_BASE_URL}/team/${selectedMember.id}/cv`;
+                          
+                          // Fetch il file per controllare il nome e estensione
+                          const response = await fetch(downloadUrl);
+                          if (!response.ok) {
+                            throw new Error('Errore nel download del CV');
+                          }
+                          
+                          // Crea blob dal contenuto
+                          const blob = await response.blob();
+                          
+                          // Crea URL temporaneo
+                          const url = window.URL.createObjectURL(blob);
+                          
+                          // Crea link temporaneo con nome file corretto
+                          const link = document.createElement('a');
+                          link.href = url;
+                          link.download = `CV_${selectedMember.name.replace(/\s+/g, '_')}.pdf`;
+                          
+                          // Esegui download
+                          document.body.appendChild(link);
+                          link.click();
+                          
+                          // Pulizia
+                          document.body.removeChild(link);
+                          window.URL.revokeObjectURL(url);
+                          
+                        } catch (error) {
+                          console.error('Errore download CV:', error);
+                          // Fallback al metodo diretto se fetch fallisce
+                          const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
+                          const downloadUrl = `${API_BASE_URL}/team/${selectedMember.id}/cv`;
+                          window.location.href = downloadUrl;
+                        }
                       }}
                       className="download-cv"
                     >

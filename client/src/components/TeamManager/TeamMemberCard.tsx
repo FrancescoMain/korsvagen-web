@@ -253,13 +253,44 @@ const TeamMemberCard: React.FC<TeamMemberCardProps> = ({
   onMoveDown,
   onToggleActive,
 }) => {
-  const handleCVDownload = () => {
-    if (member.cv_file_url || member.id) {
+  const handleCVDownload = async () => {
+    if (!member.id) return;
+    
+    try {
       // Usa l'URL completo del backend configurato nell'apiClient
       const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
       const downloadUrl = `${API_BASE_URL}/team/${member.id}/cv`;
       
-      // Apri direttamente nell'URL per sfruttare la gestione server-side
+      // Fetch il file per controllare il nome e estensione
+      const response = await fetch(downloadUrl);
+      if (!response.ok) {
+        throw new Error('Errore nel download del CV');
+      }
+      
+      // Crea blob dal contenuto
+      const blob = await response.blob();
+      
+      // Crea URL temporaneo
+      const url = window.URL.createObjectURL(blob);
+      
+      // Crea link temporaneo con nome file corretto
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `CV_${member.name.replace(/\s+/g, '_')}.pdf`;
+      
+      // Esegui download
+      document.body.appendChild(link);
+      link.click();
+      
+      // Pulizia
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
+    } catch (error) {
+      console.error('Errore download CV:', error);
+      // Fallback al metodo diretto se fetch fallisce
+      const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
+      const downloadUrl = `${API_BASE_URL}/team/${member.id}/cv`;
       window.location.href = downloadUrl;
     }
   };
