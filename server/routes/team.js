@@ -743,9 +743,11 @@ router.post("/:id/cv", requireAuth, requireRole(["admin", "editor", "super_admin
             public_id: `team-cvs/${filename}`, // Mantieni estensione completa
             use_filename: false,
             unique_filename: false,
-            type: "upload", // Tipo upload pubblico
+            type: "upload", // Tipo upload
             invalidate: true,
-            overwrite: true
+            overwrite: true,
+            access_mode: "public", // Forza accesso pubblico
+            access_type: "token" // Accesso tramite token
           },
           (error, result) => {
             if (error) {
@@ -881,18 +883,24 @@ router.get("/:id/cv",
       // Estrae il public_id corretto dall'URL - ora sappiamo il formato esatto
       logger.info(`URL CV salvato: ${member.cv_file_url}`);
       
-      // Il file è salvato nella root, non in team-cvs/ - estrae solo il filename
+      // Il file è salvato con public_id completo team-cvs/filename - estrae dall'URL
       const urlParts = member.cv_file_url.split('/');
-      const fullFilename = urlParts[urlParts.length - 1]; // marco-rossis-1754384767716.pdf
+      const vIndex = urlParts.findIndex(part => part.startsWith('v'));
+      let publicIdFull = '';
       
-      logger.info(`Filename completo estratto: ${fullFilename}`);
+      if (vIndex !== -1 && vIndex < urlParts.length - 1) {
+        // Tutto dopo v{timestamp} è il public_id completo
+        publicIdFull = urlParts.slice(vIndex + 1).join('/');
+      }
       
-      // Prova prima con l'estensione (filename completo)
-      logger.info(`Tentativo 1: Public ID con estensione: ${fullFilename}`);
+      logger.info(`Public ID completo estratto: ${publicIdFull}`);
+      
+      // Prova prima con il public_id completo (incluso team-cvs/)
+      logger.info(`Tentativo 1: Public ID completo: ${publicIdFull}`);
         
         try {
-          // Prima prova con estensione completa (solo filename)
-          const signedUrl = cloudinary.utils.private_download_url(fullFilename, "pdf", {
+          // Prima prova con public_id completo
+          const signedUrl = cloudinary.utils.private_download_url(publicIdFull, "pdf", {
             resource_type: "raw",
             attachment: true,
             expires_at: Math.floor(Date.now() / 1000) + 3600 // 1 ora
@@ -907,12 +915,12 @@ router.get("/:id/cv",
         } catch (signError) {
           logger.error(`Errore con estensione:`, signError);
           
-          // Prova senza estensione (solo filename senza .pdf)
-          const filenameWithoutExt = fullFilename.replace('.pdf', '');
-          logger.info(`Tentativo 2: Public ID senza estensione: ${filenameWithoutExt}`);
+          // Prova senza estensione (public_id senza .pdf)
+          const publicIdWithoutExt = publicIdFull.replace('.pdf', '');
+          logger.info(`Tentativo 2: Public ID senza estensione: ${publicIdWithoutExt}`);
           
           try {
-            const signedUrl = cloudinary.utils.private_download_url(filenameWithoutExt, "pdf", {
+            const signedUrl = cloudinary.utils.private_download_url(publicIdWithoutExt, "pdf", {
               resource_type: "raw",
               attachment: true,
               expires_at: Math.floor(Date.now() / 1000) + 3600
