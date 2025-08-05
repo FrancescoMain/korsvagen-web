@@ -164,14 +164,22 @@ const TeamPage: React.FC = () => {
 
                 {selectedMember.has_cv && (
                   <div className="section">
-                    <a
-                      href={getCVDownloadUrl(selectedMember.id)}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                    <button
+                      onClick={() => {
+                        const url = getCVDownloadUrl(selectedMember.id);
+                        // Crea un elemento link temporaneo per forzare il download
+                        const link = document.createElement('a');
+                        link.href = url;
+                        link.download = `CV_${selectedMember.name.replace(/\s+/g, '_')}.pdf`;
+                        link.target = '_blank';
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                      }}
                       className="download-cv"
                     >
                       Scarica CV Completo
-                    </a>
+                    </button>
                   </div>
                 )}
               </div>
@@ -549,6 +557,9 @@ const ModalContent = styled.div`
       text-transform: uppercase;
       letter-spacing: 0.5px;
       transition: all 0.3s ease;
+      border: none;
+      cursor: pointer;
+      font-family: inherit;
 
       &:hover {
         background: #d35400;

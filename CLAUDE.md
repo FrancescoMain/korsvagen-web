@@ -196,3 +196,7 @@ NODE_ENV=development
 - Responsive design with mobile-first approach
 - Custom fonts loaded from `/public/fonts/`
 - CSS modules for specific component styles
+
+## Development Workflow
+
+- ogni volta che completi una implementazione fai test di compilazione sia client che server e poi committa e pusha per far partire il deploy

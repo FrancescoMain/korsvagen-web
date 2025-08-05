@@ -607,14 +607,19 @@ router.delete("/:id", requireAuth, requireRole(["admin", "super_admin"]),
       // Elimina CV da Cloudinary se presente
       if (member.cv_file_url) {
         try {
-          // Estrai il public_id dall'URL Cloudinary (include l'estensione .pdf)
+          // Estrai il public_id dall'URL Cloudinary
           const urlParts = member.cv_file_url.split('/');
-          const fileWithExt = urlParts[urlParts.length - 1];
-          const publicId = `team-cvs/${fileWithExt}`;
+          const vIndex = urlParts.findIndex(part => part.startsWith('v'));
+          let publicId = '';
+          
+          if (vIndex !== -1 && vIndex < urlParts.length - 1) {
+            // Tutto dopo v{timestamp} è il public_id completo
+            publicId = urlParts.slice(vIndex + 1).join('/').replace('.pdf', '');
+          }
           
           logger.info(`Eliminando CV membro con public_id: ${publicId}`);
           await cloudinary.uploader.destroy(publicId, {
-            resource_type: "raw" // Torna a raw per PDF
+            resource_type: "image" // Consistente con nuovo approccio
           });
           logger.info("CV eliminato da Cloudinary");
         } catch (cloudinaryError) {
@@ -715,14 +720,19 @@ router.post("/:id/cv", requireAuth, requireRole(["admin", "editor", "super_admin
       // Elimina CV esistente da Cloudinary se presente
       if (member.cv_file_url) {
         try {
-          // Estrai il public_id dall'URL Cloudinary (include l'estensione .pdf)
+          // Estrai il public_id dall'URL Cloudinary
           const urlParts = member.cv_file_url.split('/');
-          const fileWithExt = urlParts[urlParts.length - 1];
-          const publicId = `team-cvs/${fileWithExt}`;
+          const vIndex = urlParts.findIndex(part => part.startsWith('v'));
+          let publicId = '';
+          
+          if (vIndex !== -1 && vIndex < urlParts.length - 1) {
+            // Tutto dopo v{timestamp} è il public_id completo
+            publicId = urlParts.slice(vIndex + 1).join('/').replace('.pdf', '');
+          }
           
           logger.info(`Eliminando CV precedente con public_id: ${publicId}`);
           await cloudinary.uploader.destroy(publicId, {
-            resource_type: "raw" // Torna a raw per PDF
+            resource_type: "image" // Cambiato da "raw" a "image" per consistenza
           });
           logger.info("CV precedente eliminato da Cloudinary");
         } catch (cloudinaryError) {
@@ -730,7 +740,7 @@ router.post("/:id/cv", requireAuth, requireRole(["admin", "editor", "super_admin
         }
       }
 
-      // Upload nuovo CV a Cloudinary
+      // Upload nuovo CV a Cloudinary con configurazione semplificata per accesso pubblico
       const timestamp = Date.now();
       const filename = `${member.name.toLowerCase().replace(/\s+/g, '-')}-${timestamp}.pdf`;
       
@@ -739,15 +749,15 @@ router.post("/:id/cv", requireAuth, requireRole(["admin", "editor", "super_admin
       const uploadResult = await new Promise((resolve, reject) => {
         cloudinary.uploader.upload_stream(
           {
-            resource_type: "raw", // PDF deve essere raw, non image
-            public_id: `team-cvs/${filename}`, // Mantieni estensione completa
+            resource_type: "image", // Cambiato da "raw" a "image" per migliore supporto pubblico
+            public_id: `team-cvs/${filename.replace('.pdf', '')}`, // Rimuovi estensione dal public_id
+            format: "pdf", // Forza formato PDF
             use_filename: false,
             unique_filename: false,
-            type: "upload", // Tipo upload
+            type: "upload",
             invalidate: true,
             overwrite: true,
-            access_mode: "public", // Forza accesso pubblico
-            access_type: "token" // Accesso tramite token
+            access_mode: "public" // Mantieni accesso pubblico
           },
           (error, result) => {
             if (error) {
@@ -875,118 +885,12 @@ router.get("/:id/cv",
         });
       }
 
-      // Forza il download del CV con nome file corretto
-      const fileName = `CV_${member.name.replace(/\s+/g, '_')}.pdf`;
+      // Redirect semplice all'URL Cloudinary pubblico per download diretto
+      // Questo route ora serve principalmente come fallback per vecchi link
+      logger.info(`Redirect CV per ${member.name} -> ${member.cv_file_url}`);
       
-      logger.info(`Download CV per ${member.name}: ${fileName}`);
-      
-      // Estrae il public_id corretto dall'URL - ora sappiamo il formato esatto
-      logger.info(`URL CV salvato: ${member.cv_file_url}`);
-      
-      // Il file è salvato con public_id completo team-cvs/filename - estrae dall'URL
-      const urlParts = member.cv_file_url.split('/');
-      const vIndex = urlParts.findIndex(part => part.startsWith('v'));
-      let publicIdFull = '';
-      
-      if (vIndex !== -1 && vIndex < urlParts.length - 1) {
-        // Tutto dopo v{timestamp} è il public_id completo
-        publicIdFull = urlParts.slice(vIndex + 1).join('/');
-      }
-      
-      logger.info(`Public ID completo estratto: ${publicIdFull}`);
-      
-      // Prova prima con il public_id completo (incluso team-cvs/)
-      logger.info(`Tentativo 1: Public ID completo: ${publicIdFull}`);
-        
-        try {
-          // Usa direttamente l'API di download di Cloudinary con autenticazione server
-          logger.info(`Tentativo download diretto con API Cloudinary per: ${publicIdFull}`);
-          
-          // Usa l'API di download autenticata di Cloudinary
-          const downloadStream = await new Promise((resolve, reject) => {
-            const downloadUrl = `https://api.cloudinary.com/v1_1/${cloudinary.config().cloud_name}/raw/download`;
-            
-            const params = {
-              public_id: publicIdFull,
-              timestamp: Math.round(Date.now() / 1000),
-              api_key: cloudinary.config().api_key
-            };
-            
-            // Genera signature per autenticazione
-            const signature = cloudinary.utils.api_sign_request(params, cloudinary.config().api_secret);
-            params.signature = signature;
-            
-            // Crea URL con parametri
-            const urlParams = new URLSearchParams(params);
-            const fullUrl = `${downloadUrl}?${urlParams}`;
-            
-            logger.info(`URL download API: ${downloadUrl}?[parametri_autenticati]`);
-            
-            fetch(fullUrl)
-              .then(response => {
-                logger.info(`Response status API download: ${response.status}`);
-                if (!response.ok) {
-                  logger.error(`Response headers API: ${JSON.stringify([...response.headers.entries()])}`);
-                  reject(new Error(`API download failed: ${response.status}`));
-                } else {
-                  resolve(response);
-                }
-              })
-              .catch(reject);
-          });
-          
-          const fileBuffer = await downloadStream.arrayBuffer();
-          
-          // Imposta header per download forzato
-          res.setHeader('Content-Type', 'application/pdf');
-          res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
-          res.setHeader('Cache-Control', 'no-cache');
-          res.setHeader('Content-Length', fileBuffer.byteLength.toString());
-          
-          // Invia il file
-          res.send(Buffer.from(fileBuffer));
-          
-          logger.info(`CV scaricato con successo tramite API download: ${fileName}`);
-          
-        } catch (serverError) {
-          logger.error(`Errore download tramite API admin:`, serverError);
-          logger.error(`Dettagli errore:`, JSON.stringify(serverError, null, 2));
-          
-          // Fallback: prova fetch diretto dall'URL salvato nel database
-          logger.info("Fallback: tentativo fetch diretto dall'URL database");
-          
-          try {
-            const directResponse = await fetch(member.cv_file_url);
-            
-            if (directResponse.ok) {
-              const fileBuffer = await directResponse.arrayBuffer();
-              
-              // Imposta header per download forzato
-              res.setHeader('Content-Type', 'application/pdf');
-              res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
-              res.setHeader('Cache-Control', 'no-cache');
-              res.setHeader('Content-Length', fileBuffer.byteLength.toString());
-              
-              // Invia il file
-              res.send(Buffer.from(fileBuffer));
-              
-              logger.info(`CV scaricato con successo tramite fallback diretto: ${fileName}`);
-            } else {
-              throw new Error(`Fetch diretto fallito: ${directResponse.status}`);
-            }
-            
-          } catch (fallbackError) {
-            logger.error(`Anche il fallback diretto è fallito:`, fallbackError);
-            
-            // Ultimo fallback: risposta di errore invece di redirect
-            res.status(500).json({
-              success: false,
-              message: "CV temporaneamente non disponibile. Riprova più tardi.",
-              code: "CV_DOWNLOAD_ERROR"
-            });
-          }
-        }
-      // Chiusura non necessaria più - la logica ora è sequenziale
+      // Redirect diretto all'URL Cloudinary
+      res.redirect(302, member.cv_file_url);
 
     } catch (error) {
       logger.error("Errore download CV:", error);
@@ -1052,14 +956,19 @@ router.delete("/:id/cv", requireAuth, requireRole(["admin", "editor", "super_adm
 
       // Elimina da Cloudinary
       try {
-        // Estrai il public_id dall'URL Cloudinary (include l'estensione .pdf)
+        // Estrai il public_id dall'URL Cloudinary
         const urlParts = member.cv_file_url.split('/');
-        const fileWithExt = urlParts[urlParts.length - 1];
-        const publicId = `team-cvs/${fileWithExt}`;
+        const vIndex = urlParts.findIndex(part => part.startsWith('v'));
+        let publicId = '';
+        
+        if (vIndex !== -1 && vIndex < urlParts.length - 1) {
+          // Tutto dopo v{timestamp} è il public_id completo
+          publicId = urlParts.slice(vIndex + 1).join('/').replace('.pdf', '');
+        }
         
         logger.info(`Eliminando CV con public_id: ${publicId}`);
         const deleteResult = await cloudinary.uploader.destroy(publicId, {
-          resource_type: "raw" // Torna a raw per PDF
+          resource_type: "image" // Consistente con nuovo approccio
         });
         logger.info(`CV eliminato da Cloudinary, risultato: ${deleteResult.result}`);
       } catch (cloudinaryError) {

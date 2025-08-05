@@ -255,7 +255,14 @@ const TeamMemberCard: React.FC<TeamMemberCardProps> = ({
 }) => {
   const handleCVDownload = () => {
     if (member.cv_file_url) {
-      window.open(member.cv_file_url, '_blank');
+      // Crea un elemento link temporaneo per forzare il download
+      const link = document.createElement('a');
+      link.href = member.cv_file_url;
+      link.download = `CV_${member.name.replace(/\s+/g, '_')}.pdf`;
+      link.target = '_blank';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     }
   };
 

@@ -340,10 +340,18 @@ export const useTeam = (): UseTeamReturn => {
 
   /**
    * Ottieni URL per download CV
+   * Usa URL pubblico Cloudinary diretto invece di passare per il server
    */
   const getCVDownloadUrl = useCallback((memberId: string): string => {
+    // Trova il membro per ottenere il cv_file_url
+    const member = members.find(m => m.id === memberId);
+    if (member?.cv_file_url) {
+      // Restituisci l'URL Cloudinary diretto per download
+      return member.cv_file_url;
+    }
+    // Fallback alla vecchia API se l'URL non è disponibile
     return `${apiClient.defaults.baseURL}/team/${memberId}/cv`;
-  }, []);
+  }, [members]);
 
   /**
    * Riordina membri del team
