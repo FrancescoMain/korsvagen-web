@@ -915,17 +915,25 @@ router.get("/:id/cv",
             });
           });
           
-          logger.info(`Risorsa trovata, scarico da: ${resourceInfo.secure_url}`);
+          logger.info(`Risorsa trovata con info: public_id=${resourceInfo.public_id}`);
           logger.info(`Dimensione file: ${resourceInfo.bytes} bytes`);
           
-          // Scarica il file dall'URL sicuro di Cloudinary
-          const response = await fetch(resourceInfo.secure_url);
+          // Genera URL con autenticazione temporanea usando Upload API
+          const tempUrl = cloudinary.utils.private_download_url(resourceInfo.public_id, resourceInfo.format || 'pdf', {
+            resource_type: "raw",
+            expires_at: Math.floor(Date.now() / 1000) + 300 // 5 minuti
+          });
           
-          logger.info(`Response status da secure_url: ${response.status}`);
+          logger.info(`URL temporaneo generato per download diretto`);
+          
+          // Scarica il file dall'URL temporaneo autenticato
+          const response = await fetch(tempUrl);
+          
+          logger.info(`Response status da URL temporaneo: ${response.status}`);
           
           if (!response.ok) {
-            logger.error(`Response headers: ${JSON.stringify([...response.headers.entries()])}`);
-            throw new Error(`Errore fetch da secure_url: ${response.status} - ${response.statusText}`);
+            logger.error(`Response headers URL temporaneo: ${JSON.stringify([...response.headers.entries()])}`);
+            throw new Error(`Errore fetch da URL temporaneo: ${response.status} - ${response.statusText}`);
           }
           
           const fileBuffer = await response.arrayBuffer();
