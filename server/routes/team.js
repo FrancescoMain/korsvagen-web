@@ -619,7 +619,7 @@ router.delete("/:id", requireAuth, requireRole(["admin", "super_admin"]),
           
           logger.info(`Eliminando CV membro con public_id: ${publicId}`);
           await cloudinary.uploader.destroy(publicId, {
-            resource_type: "image" // Consistente con nuovo approccio
+            resource_type: "raw" // Consistente con nuovo approccio raw per PDF
           });
           logger.info("CV eliminato da Cloudinary");
         } catch (cloudinaryError) {
@@ -732,7 +732,7 @@ router.post("/:id/cv", requireAuth, requireRole(["admin", "editor", "super_admin
           
           logger.info(`Eliminando CV precedente con public_id: ${publicId}`);
           await cloudinary.uploader.destroy(publicId, {
-            resource_type: "image" // Cambiato da "raw" a "image" per consistenza
+            resource_type: "raw" // Cambio da "image" a "raw" per consistenza con upload
           });
           logger.info("CV precedente eliminato da Cloudinary");
         } catch (cloudinaryError) {
@@ -740,7 +740,7 @@ router.post("/:id/cv", requireAuth, requireRole(["admin", "editor", "super_admin
         }
       }
 
-      // Upload nuovo CV a Cloudinary con configurazione semplificata per accesso pubblico
+      // Upload nuovo CV a Cloudinary configurato per accesso pubblico diretto
       const timestamp = Date.now();
       const filename = `${member.name.toLowerCase().replace(/\s+/g, '-')}-${timestamp}.pdf`;
       
@@ -749,15 +749,13 @@ router.post("/:id/cv", requireAuth, requireRole(["admin", "editor", "super_admin
       const uploadResult = await new Promise((resolve, reject) => {
         cloudinary.uploader.upload_stream(
           {
-            resource_type: "image", // Cambiato da "raw" a "image" per migliore supporto pubblico
+            resource_type: "raw", // Cambio da "image" a "raw" per supporto PDF completo
             public_id: `team-cvs/${filename.replace('.pdf', '')}`, // Rimuovi estensione dal public_id
-            format: "pdf", // Forza formato PDF
             use_filename: false,
             unique_filename: false,
             type: "upload",
             invalidate: true,
-            overwrite: true,
-            access_mode: "public" // Mantieni accesso pubblico
+            overwrite: true
           },
           (error, result) => {
             if (error) {
@@ -885,12 +883,15 @@ router.get("/:id/cv",
         });
       }
 
-      // Redirect semplice all'URL Cloudinary pubblico per download diretto
-      // Questo route ora serve principalmente come fallback per vecchi link
-      logger.info(`Redirect CV per ${member.name} -> ${member.cv_file_url}`);
+      // Forza download diretto usando Cloudinary API con parametri di download
+      const downloadUrl = member.cv_file_url.includes('?') 
+        ? `${member.cv_file_url}&fl_attachment=${encodeURIComponent(member.cv_file_name || `CV_${member.name}.pdf`)}`
+        : `${member.cv_file_url}?fl_attachment=${encodeURIComponent(member.cv_file_name || `CV_${member.name}.pdf`)}`;
       
-      // Redirect diretto all'URL Cloudinary
-      res.redirect(302, member.cv_file_url);
+      logger.info(`Download CV per ${member.name} -> ${downloadUrl}`);
+      
+      // Redirect con parametri per forzare download
+      res.redirect(302, downloadUrl);
 
     } catch (error) {
       logger.error("Errore download CV:", error);
@@ -968,7 +969,7 @@ router.delete("/:id/cv", requireAuth, requireRole(["admin", "editor", "super_adm
         
         logger.info(`Eliminando CV con public_id: ${publicId}`);
         const deleteResult = await cloudinary.uploader.destroy(publicId, {
-          resource_type: "image" // Consistente con nuovo approccio
+          resource_type: "raw" // Consistente con nuovo approccio raw per PDF
         });
         logger.info(`CV eliminato da Cloudinary, risultato: ${deleteResult.result}`);
       } catch (cloudinaryError) {

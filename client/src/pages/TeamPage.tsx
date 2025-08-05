@@ -166,15 +166,9 @@ const TeamPage: React.FC = () => {
                   <div className="section">
                     <button
                       onClick={() => {
-                        const url = getCVDownloadUrl(selectedMember.id);
-                        // Crea un elemento link temporaneo per forzare il download
-                        const link = document.createElement('a');
-                        link.href = url;
-                        link.download = `CV_${selectedMember.name.replace(/\s+/g, '_')}.pdf`;
-                        link.target = '_blank';
-                        document.body.appendChild(link);
-                        link.click();
-                        document.body.removeChild(link);
+                        const downloadUrl = `/api/team/${selectedMember.id}/cv`;
+                        // Usa l'endpoint server per download ottimizzato
+                        window.location.href = downloadUrl;
                       }}
                       className="download-cv"
                     >

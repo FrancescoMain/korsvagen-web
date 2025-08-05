@@ -254,15 +254,12 @@ const TeamMemberCard: React.FC<TeamMemberCardProps> = ({
   onToggleActive,
 }) => {
   const handleCVDownload = () => {
-    if (member.cv_file_url) {
-      // Crea un elemento link temporaneo per forzare il download
-      const link = document.createElement('a');
-      link.href = member.cv_file_url;
-      link.download = `CV_${member.name.replace(/\s+/g, '_')}.pdf`;
-      link.target = '_blank';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+    if (member.cv_file_url || member.id) {
+      // Usa l'endpoint server per download ottimizzato
+      const downloadUrl = `/api/team/${member.id}/cv`;
+      
+      // Apri direttamente nell'URL per sfruttare la gestione server-side
+      window.location.href = downloadUrl;
     }
   };
 
