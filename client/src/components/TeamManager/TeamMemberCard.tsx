@@ -255,8 +255,9 @@ const TeamMemberCard: React.FC<TeamMemberCardProps> = ({
 }) => {
   const handleCVDownload = () => {
     if (member.cv_file_url || member.id) {
-      // Usa l'endpoint server per download ottimizzato
-      const downloadUrl = `/api/team/${member.id}/cv`;
+      // Usa l'URL completo del backend configurato nell'apiClient
+      const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
+      const downloadUrl = `${API_BASE_URL}/team/${member.id}/cv`;
       
       // Apri direttamente nell'URL per sfruttare la gestione server-side
       window.location.href = downloadUrl;

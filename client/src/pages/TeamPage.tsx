@@ -166,7 +166,9 @@ const TeamPage: React.FC = () => {
                   <div className="section">
                     <button
                       onClick={() => {
-                        const downloadUrl = `/api/team/${selectedMember.id}/cv`;
+                        // Usa l'URL completo del backend configurato
+                        const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
+                        const downloadUrl = `${API_BASE_URL}/team/${selectedMember.id}/cv`;
                         // Usa l'endpoint server per download ottimizzato
                         window.location.href = downloadUrl;
                       }}

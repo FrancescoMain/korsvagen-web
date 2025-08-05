@@ -344,7 +344,8 @@ export const useTeam = (): UseTeamReturn => {
    */
   const getCVDownloadUrl = useCallback((memberId: string): string => {
     // Usa sempre l'endpoint server per gestione download con parametri corretti
-    return `${apiClient.defaults.baseURL}/team/${memberId}/cv`;
+    const API_BASE_URL = process.env.REACT_APP_API_URL || apiClient.defaults.baseURL;
+    return `${API_BASE_URL}/team/${memberId}/cv`;
   }, []);
 
   /**
