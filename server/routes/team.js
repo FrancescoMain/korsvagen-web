@@ -899,44 +899,43 @@ router.get("/:id/cv",
       logger.info(`Tentativo 1: Public ID completo: ${publicIdFull}`);
         
         try {
-          // Usa l'API admin di Cloudinary per scaricare il file con autenticazione
-          logger.info(`Tentativo download con API admin Cloudinary per: ${publicIdFull}`);
+          // Usa direttamente l'API di download di Cloudinary con autenticazione server
+          logger.info(`Tentativo download diretto con API Cloudinary per: ${publicIdFull}`);
           
-          // Ottieni le informazioni del file con API admin autenticata
-          const resourceInfo = await new Promise((resolve, reject) => {
-            cloudinary.api.resource(publicIdFull, {
-              resource_type: "raw"
-            }, (error, result) => {
-              if (error) {
-                reject(error);
-              } else {
-                resolve(result);
-              }
-            });
+          // Usa l'API di download autenticata di Cloudinary
+          const downloadStream = await new Promise((resolve, reject) => {
+            const downloadUrl = `https://api.cloudinary.com/v1_1/${cloudinary.config().cloud_name}/raw/download`;
+            
+            const params = {
+              public_id: publicIdFull,
+              timestamp: Math.round(Date.now() / 1000),
+              api_key: cloudinary.config().api_key
+            };
+            
+            // Genera signature per autenticazione
+            const signature = cloudinary.utils.api_sign_request(params, cloudinary.config().api_secret);
+            params.signature = signature;
+            
+            // Crea URL con parametri
+            const urlParams = new URLSearchParams(params);
+            const fullUrl = `${downloadUrl}?${urlParams}`;
+            
+            logger.info(`URL download API: ${downloadUrl}?[parametri_autenticati]`);
+            
+            fetch(fullUrl)
+              .then(response => {
+                logger.info(`Response status API download: ${response.status}`);
+                if (!response.ok) {
+                  logger.error(`Response headers API: ${JSON.stringify([...response.headers.entries()])}`);
+                  reject(new Error(`API download failed: ${response.status}`));
+                } else {
+                  resolve(response);
+                }
+              })
+              .catch(reject);
           });
           
-          logger.info(`Risorsa trovata con info: public_id=${resourceInfo.public_id}`);
-          logger.info(`Dimensione file: ${resourceInfo.bytes} bytes`);
-          
-          // Genera URL con autenticazione temporanea usando Upload API
-          const tempUrl = cloudinary.utils.private_download_url(resourceInfo.public_id, resourceInfo.format || 'pdf', {
-            resource_type: "raw",
-            expires_at: Math.floor(Date.now() / 1000) + 300 // 5 minuti
-          });
-          
-          logger.info(`URL temporaneo generato per download diretto`);
-          
-          // Scarica il file dall'URL temporaneo autenticato
-          const response = await fetch(tempUrl);
-          
-          logger.info(`Response status da URL temporaneo: ${response.status}`);
-          
-          if (!response.ok) {
-            logger.error(`Response headers URL temporaneo: ${JSON.stringify([...response.headers.entries()])}`);
-            throw new Error(`Errore fetch da URL temporaneo: ${response.status} - ${response.statusText}`);
-          }
-          
-          const fileBuffer = await response.arrayBuffer();
+          const fileBuffer = await downloadStream.arrayBuffer();
           
           // Imposta header per download forzato
           res.setHeader('Content-Type', 'application/pdf');
@@ -947,7 +946,7 @@ router.get("/:id/cv",
           // Invia il file
           res.send(Buffer.from(fileBuffer));
           
-          logger.info(`CV scaricato con successo tramite API admin: ${fileName}`);
+          logger.info(`CV scaricato con successo tramite API download: ${fileName}`);
           
         } catch (serverError) {
           logger.error(`Errore download tramite API admin:`, serverError);
