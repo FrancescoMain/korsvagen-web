@@ -421,91 +421,103 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       console.log("🔐 Inizializzazione autenticazione...");
 
       try {
-        const { accessToken, refreshToken: storedRefreshToken } = getStoredTokens();
+        // Inline getStoredTokens per evitare dipendenze
+        let accessToken = localStorage.getItem("korsvagen_auth_token");
+        let storedRefreshToken = localStorage.getItem("korsvagen_refresh_token");
+        let rememberMe = localStorage.getItem("korsvagen_remember_me") === "true";
+        
+        if (!accessToken) {
+          accessToken = sessionStorage.getItem("korsvagen_auth_token");
+          storedRefreshToken = sessionStorage.getItem("korsvagen_refresh_token");
+          rememberMe = sessionStorage.getItem("korsvagen_remember_me") === "true";
+        }
         
         if (accessToken && storedRefreshToken) {
           console.log("🔑 Token trovati nel storage, validazione...");
           setToken(accessToken);
           setRefreshTokenValue(storedRefreshToken);
           
-          // Se abbiamo appena fatto login, salta la validazione /auth/me
-          if (skipMeValidation) {
-            console.log("⏭️ Skip validazione /auth/me - login appena completato");
-            // Decodifica il token per ottenere dati utente basic
+          try {
+            // Sempre decodifica JWT invece di chiamare /auth/me per evitare 404
+            const tokenPayload = JSON.parse(atob(accessToken.split('.')[1]));
+            const basicUser = {
+              id: tokenPayload.sub || tokenPayload.userId,
+              username: tokenPayload.username,
+              email: tokenPayload.email,
+              role: tokenPayload.role,
+            };
+            console.log("✅ Utente estratto da token JWT");
+            setUser(basicUser);
+            
+            // Inline scheduleTokenRefresh per evitare dipendenze
             try {
-              const tokenPayload = JSON.parse(atob(accessToken.split('.')[1]));
-              const basicUser = {
-                id: tokenPayload.sub || tokenPayload.userId,
-                username: tokenPayload.username,
-                email: tokenPayload.email,
-                role: tokenPayload.role,
-              };
-              setUser(basicUser);
-              scheduleTokenRefresh(accessToken);
-              setSkipMeValidation(false); // Reset flag
-            } catch (error) {
-              console.warn("⚠️ Errore decodifica token, fallback a /auth/me");
-              setSkipMeValidation(false);
-              // Fallback alla validazione normale
-            }
-          } else {
-            // Validazione normale con /auth/me
-            try {
-              const response = await apiClient.get("/auth/me");
-              if (response.data.success) {
-                console.log("✅ Token validi, utente autenticato");
-                setUser(response.data.data.user);
-                // Schedula refresh automatico per token esistente
-                scheduleTokenRefresh(accessToken);
-              } else {
-                console.log("⚠️ Token non validi, tentativo refresh...");
-                // Token non valido, prova refresh
-                const refreshSuccess = await refreshToken();
-                if (!refreshSuccess) {
-                  console.log("❌ Refresh fallito, pulizia stato");
-                  clearTokens();
-                  setUser(null);
-                }
+              const expirationTime = tokenPayload.exp * 1000;
+              const currentTime = Date.now();
+              const timeUntilExpiry = expirationTime - currentTime;
+              const refreshTime = Math.max(timeUntilExpiry - (5 * 60 * 1000), 60000);
+              
+              console.log(`⏰ Token refresh programmato tra ${Math.round(refreshTime / 1000 / 60)} minuti`);
+              
+              if (refreshTimer) {
+                clearTimeout(refreshTimer);
               }
-            } catch (error: any) {
-              // Se /me non esiste (404), salta il refresh e pulisci i token
-              if (error.response?.status === 404) {
-                console.log("📡 Endpoint /auth/me non trovato - assumo token validi");
-                // Invece di pulire i token, decodifica dai JWT
+              
+              const timer = setTimeout(async () => {
+                console.log("🔄 Esecuzione refresh automatico programmato...");
+                // Logica di refresh inline per evitare dipendenze
                 try {
-                  const tokenPayload = JSON.parse(atob(accessToken.split('.')[1]));
-                  const basicUser = {
-                    id: tokenPayload.sub || tokenPayload.userId,
-                    username: tokenPayload.username,
-                    email: tokenPayload.email,
-                    role: tokenPayload.role,
-                  };
-                  console.log("✅ Utente estratto da token JWT");
-                  setUser(basicUser);
-                  scheduleTokenRefresh(accessToken);
-                } catch (decodeError) {
-                  console.error("❌ Errore decodifica token, pulizia necessaria");
-                  clearTokens();
-                  setUser(null);
+                  const currentRefreshToken = localStorage.getItem("korsvagen_refresh_token") || 
+                                              sessionStorage.getItem("korsvagen_refresh_token");
+                  if (currentRefreshToken) {
+                    const response = await apiClient.post<AuthResponse>("/auth/refresh", {
+                      refreshToken: currentRefreshToken,
+                    });
+                    if (response.data.success) {
+                      const { user: userData, tokens } = response.data.data;
+                      setUser(userData);
+                      setToken(tokens.access);
+                      const storage = rememberMe ? localStorage : sessionStorage;
+                      storage.setItem("korsvagen_auth_token", tokens.access);
+                      console.log("✅ Refresh automatico completato");
+                    }
+                  }
+                } catch (error) {
+                  console.log("❌ Refresh automatico fallito:", error);
                 }
-              } else {
-                console.log("⚠️ Errore validazione token, tentativo refresh...");
-                // Se /me fallisce per altri motivi, prova refresh
-                const refreshSuccess = await refreshToken();
-                if (!refreshSuccess) {
-                  console.log("❌ Refresh fallito, pulizia stato");
-                  clearTokens();
-                  setUser(null);
-                }
-              }
+              }, refreshTime);
+              
+              setRefreshTimer(timer);
+            } catch (error) {
+              console.warn("⚠️ Impossibile schedulare refresh automatico:", error);
             }
+            
+          } catch (decodeError) {
+            console.error("❌ Errore decodifica token, pulizia necessaria");
+            // Inline clearTokens per evitare dipendenze
+            localStorage.removeItem("korsvagen_auth_token");
+            localStorage.removeItem("korsvagen_refresh_token");
+            localStorage.removeItem("korsvagen_remember_me");
+            sessionStorage.removeItem("korsvagen_auth_token");
+            sessionStorage.removeItem("korsvagen_refresh_token");
+            sessionStorage.removeItem("korsvagen_remember_me");
+            setToken(null);
+            setRefreshTokenValue(null);
+            setUser(null);
           }
         } else {
           console.log("ℹ️ Nessun token trovato, utente non autenticato");
         }
       } catch (error) {
         console.error("Auth initialization error:", error);
-        clearTokens();
+        // Inline clearTokens per evitare dipendenze
+        localStorage.removeItem("korsvagen_auth_token");
+        localStorage.removeItem("korsvagen_refresh_token");
+        localStorage.removeItem("korsvagen_remember_me");
+        sessionStorage.removeItem("korsvagen_auth_token");
+        sessionStorage.removeItem("korsvagen_refresh_token");
+        sessionStorage.removeItem("korsvagen_remember_me");
+        setToken(null);
+        setRefreshTokenValue(null);
         setUser(null);
       } finally {
         setLoading(false);
@@ -514,7 +526,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     };
 
     initializeAuth();
-  }, [getStoredTokens, refreshToken, clearTokens, scheduleTokenRefresh]); // Esegui solo al mount o quando cambiano le funzioni
+  }, []); // Esegui SOLO al mount - nessuna dipendenza esterna
 
   // Event listener per gestire token scaduti
   useEffect(() => {
