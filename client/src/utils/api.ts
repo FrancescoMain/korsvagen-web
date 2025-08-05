@@ -16,8 +16,11 @@ export const apiClient = axios.create({
 // Add request interceptor to include auth token
 apiClient.interceptors.request.use(
   (config) => {
-    // Get token from localStorage using the correct key
-    const token = localStorage.getItem("korsvagen_auth_token");
+    // Get token from storage (localStorage or sessionStorage) using the correct key
+    let token = localStorage.getItem("korsvagen_auth_token");
+    if (!token) {
+      token = sessionStorage.getItem("korsvagen_auth_token");
+    }
     
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;

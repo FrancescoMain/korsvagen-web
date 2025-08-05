@@ -23,7 +23,6 @@ import React, {
   ReactNode,
   useCallback,
 } from "react";
-import axios from "axios";
 import toast from "react-hot-toast";
 import { apiClient } from "../utils/api";
 
@@ -110,15 +109,12 @@ interface AuthProviderProps {
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // Stati principali
   const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(
-    localStorage.getItem("korsvagen_auth_token")
-  );
-  const [refreshTokenValue, setRefreshTokenValue] = useState<string | null>(
-    localStorage.getItem("korsvagen_refresh_token")
-  );
+  const [token, setToken] = useState<string | null>(null);
+  const [refreshTokenValue, setRefreshTokenValue] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [refreshFailedPermanently, setRefreshFailedPermanently] = useState(false);
+  const [refreshTimer, setRefreshTimer] = useState<NodeJS.Timeout | null>(null);
 
   // Stati derivati
   const isAuthenticated = !!user && !!token;
@@ -128,28 +124,46 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
    * UTILITY FUNCTIONS
    */
 
-  // Salva token nel localStorage
-  const saveTokens = useCallback(
-    (accessToken: string, refreshToken: string) => {
-      localStorage.setItem("korsvagen_auth_token", accessToken);
-      localStorage.setItem("korsvagen_refresh_token", refreshToken);
-      setToken(accessToken);
-      setRefreshTokenValue(refreshToken);
-    },
-    []
-  );
+  // Funzione per recuperare token dal storage appropriato
+  const getStoredTokens = useCallback(() => {
+    // Prova prima localStorage (remember me), poi sessionStorage
+    let accessToken = localStorage.getItem("korsvagen_auth_token");
+    let refreshToken = localStorage.getItem("korsvagen_refresh_token");
+    let rememberMe = localStorage.getItem("korsvagen_remember_me") === "true";
+    
+    if (!accessToken) {
+      accessToken = sessionStorage.getItem("korsvagen_auth_token");
+      refreshToken = sessionStorage.getItem("korsvagen_refresh_token");
+      rememberMe = sessionStorage.getItem("korsvagen_remember_me") === "true";
+    }
+    
+    return { accessToken, refreshToken, rememberMe };
+  }, []);
 
-  // Rimuovi token dal localStorage
+  // Rimuovi token da entrambi i storage
   const clearTokens = useCallback(() => {
     console.log("🧹 Pulizia token e stato auth");
+    
+    // Cancella timer di refresh se attivo
+    if (refreshTimer) {
+      clearTimeout(refreshTimer);
+      setRefreshTimer(null);
+    }
+    
+    // Pulisci da entrambi i storage
     localStorage.removeItem("korsvagen_auth_token");
     localStorage.removeItem("korsvagen_refresh_token");
+    localStorage.removeItem("korsvagen_remember_me");
+    sessionStorage.removeItem("korsvagen_auth_token");
+    sessionStorage.removeItem("korsvagen_refresh_token");
+    sessionStorage.removeItem("korsvagen_remember_me");
+    
     setToken(null);
     setRefreshTokenValue(null);
     setUser(null);
     setIsRefreshing(false);
     setRefreshFailedPermanently(false);
-  }, []);
+  }, [refreshTimer]);
 
   // Controlla se l'utente ha un ruolo specifico
   const hasRole = useCallback(
@@ -163,6 +177,86 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       return user.role === role;
     },
     [user]
+  );
+
+  // Schedula il refresh automatico del token (senza dipendenze circolari)
+  const scheduleTokenRefresh = useCallback((accessToken: string) => {
+    try {
+      // Decodifica il token per ottenere la data di scadenza
+      const tokenPayload = JSON.parse(atob(accessToken.split('.')[1]));
+      const expirationTime = tokenPayload.exp * 1000; // Converte da secondi a millisecondi
+      const currentTime = Date.now();
+      const timeUntilExpiry = expirationTime - currentTime;
+      
+      // Programma il refresh 5 minuti prima della scadenza (o immediatamente se mancano meno di 5 minuti)
+      const refreshTime = Math.max(timeUntilExpiry - (5 * 60 * 1000), 60000); // minimo 1 minuto
+      
+      console.log(`⏰ Token refresh programmato tra ${Math.round(refreshTime / 1000 / 60)} minuti`);
+      
+      // Cancella timer precedente se esiste
+      if (refreshTimer) {
+        clearTimeout(refreshTimer);
+      }
+      
+      const timer = setTimeout(async () => {
+        console.log("🔄 Esecuzione refresh automatico programmato...");
+        // Chiama direttamente l'API senza dipendenza circolare
+        try {
+          const { refreshToken: storedRefreshToken } = getStoredTokens();
+          if (storedRefreshToken) {
+            const response = await apiClient.post<AuthResponse>("/auth/refresh", {
+              refreshToken: storedRefreshToken,
+            });
+            if (response.data.success) {
+              const { user: userData, tokens } = response.data.data;
+              setUser(userData);
+              setToken(tokens.access);
+              const { rememberMe } = getStoredTokens();
+              const storage = rememberMe ? localStorage : sessionStorage;
+              storage.setItem("korsvagen_auth_token", tokens.access);
+              console.log("✅ Refresh automatico completato");
+              // Schedula il prossimo refresh
+              scheduleTokenRefresh(tokens.access);
+            } else {
+              console.log("❌ Refresh automatico fallito");
+              toast.error("Sessione in scadenza. Effettua nuovamente il login.");
+            }
+          }
+        } catch (error) {
+          console.log("❌ Refresh automatico fallito:", error);
+          toast.error("Sessione in scadenza. Effettua nuovamente il login.");
+        }
+      }, refreshTime);
+      
+      setRefreshTimer(timer);
+    } catch (error) {
+      console.warn("⚠️ Impossibile schedulare refresh automatico:", error);
+    }
+  }, [refreshTimer, getStoredTokens]);
+
+  // Salva token nel storage appropriato (localStorage o sessionStorage)
+  const saveTokens = useCallback(
+    (accessToken: string, refreshToken: string, rememberMe: boolean = false) => {
+      const storage = rememberMe ? localStorage : sessionStorage;
+      
+      // Pulisci tokens dall'altro storage per evitare conflitti
+      const otherStorage = rememberMe ? sessionStorage : localStorage;
+      otherStorage.removeItem("korsvagen_auth_token");
+      otherStorage.removeItem("korsvagen_refresh_token");
+      otherStorage.removeItem("korsvagen_remember_me");
+      
+      // Salva nei storage appropriati
+      storage.setItem("korsvagen_auth_token", accessToken);
+      storage.setItem("korsvagen_refresh_token", refreshToken);
+      storage.setItem("korsvagen_remember_me", rememberMe.toString());
+      
+      setToken(accessToken);
+      setRefreshTokenValue(refreshToken);
+      
+      // Schedula refresh automatico
+      scheduleTokenRefresh(accessToken);
+    },
+    [scheduleTokenRefresh]
   );
 
   /**
@@ -193,9 +287,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             tokens.refresh.substring(0, 20) + "..."
           );
 
-          // Salva dati utente e token
+          // Salva dati utente e token con storage appropriato
           setUser(userData);
-          saveTokens(tokens.access, tokens.refresh);
+          saveTokens(tokens.access, tokens.refresh, credentials.rememberMe || false);
           setRefreshFailedPermanently(false); // Reset flag dopo login riuscito
 
           console.log("✅ Token salvati, stato aggiornato");
@@ -275,8 +369,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
         setUser(userData);
         setToken(tokens.access);
-        // Il refresh token rimane lo stesso
-        localStorage.setItem("korsvagen_auth_token", tokens.access);
+        // Il refresh token rimane lo stesso - aggiorna solo nel storage appropriato
+        const { rememberMe } = getStoredTokens();
+        const storage = rememberMe ? localStorage : sessionStorage;
+        storage.setItem("korsvagen_auth_token", tokens.access);
+        
+        // Schedula nuovo refresh automatico
+        scheduleTokenRefresh(tokens.access);
 
         console.log("✅ Refresh token completato con successo");
         return true;
@@ -300,7 +399,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     } finally {
       setIsRefreshing(false);
     }
-  }, [refreshTokenValue, clearTokens, isRefreshing, refreshFailedPermanently]);
+  }, [refreshTokenValue, clearTokens, isRefreshing, refreshFailedPermanently, getStoredTokens, scheduleTokenRefresh]);
 
   // Aggiorna dati utente
   const updateUser = useCallback((userData: Partial<User>) => {
@@ -317,18 +416,30 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   useEffect(() => {
     const initializeAuth = async () => {
       setLoading(true);
+      console.log("🔐 Inizializzazione autenticazione...");
 
       try {
-        if (token && refreshTokenValue) {
+        const { accessToken, refreshToken: storedRefreshToken } = getStoredTokens();
+        
+        if (accessToken && storedRefreshToken) {
+          console.log("🔑 Token trovati nel storage, validazione...");
+          setToken(accessToken);
+          setRefreshTokenValue(storedRefreshToken);
+          
           // Prova a ottenere i dati utente correnti
           try {
             const response = await apiClient.get("/auth/me");
             if (response.data.success) {
+              console.log("✅ Token validi, utente autenticato");
               setUser(response.data.data.user);
+              // Schedula refresh automatico per token esistente
+              scheduleTokenRefresh(accessToken);
             } else {
+              console.log("⚠️ Token non validi, tentativo refresh...");
               // Token non valido, prova refresh
               const refreshSuccess = await refreshToken();
               if (!refreshSuccess) {
+                console.log("❌ Refresh fallito, pulizia stato");
                 clearTokens();
                 setUser(null);
               }
@@ -340,14 +451,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
               clearTokens();
               setUser(null);
             } else {
+              console.log("⚠️ Errore validazione token, tentativo refresh...");
               // Se /me fallisce per altri motivi, prova refresh
               const refreshSuccess = await refreshToken();
               if (!refreshSuccess) {
+                console.log("❌ Refresh fallito, pulizia stato");
                 clearTokens();
                 setUser(null);
               }
             }
           }
+        } else {
+          console.log("ℹ️ Nessun token trovato, utente non autenticato");
         }
       } catch (error) {
         console.error("Auth initialization error:", error);
@@ -355,11 +470,33 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setUser(null);
       } finally {
         setLoading(false);
+        console.log("🔐 Inizializzazione autenticazione completata");
       }
     };
 
     initializeAuth();
-  }, []); // Esegui solo al mount
+  }, [getStoredTokens, refreshToken, clearTokens, scheduleTokenRefresh]); // Esegui solo al mount o quando cambiano le funzioni
+
+  // Event listener per gestire token scaduti
+  useEffect(() => {
+    const handleTokenExpired = async () => {
+      console.log("🔄 Token scaduto, tentativo di refresh...");
+      
+      // Prova refresh automatico
+      const refreshSuccess = await refreshToken();
+      if (!refreshSuccess) {
+        console.log("❌ Refresh automatico fallito, logout necessario");
+        // Non eseguire logout automatico, lascia che l'utente decida
+        toast.error("Sessione scaduta. Effettua nuovamente il login.");
+      }
+    };
+
+    window.addEventListener("auth:token-expired", handleTokenExpired);
+
+    return () => {
+      window.removeEventListener("auth:token-expired", handleTokenExpired);
+    };
+  }, [refreshToken]);
 
   /**
    * VALORE DEL CONTEXT
