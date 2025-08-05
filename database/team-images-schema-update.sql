@@ -45,8 +45,8 @@ SELECT
         ) FILTER (WHERE tms.skill_name IS NOT NULL), 
         '[]'::json
     ) as skills,
-    cu.username as created_by_username,
-    uu.username as updated_by_username,
+    COALESCE(cu.username, 'system') as created_by_username,
+    COALESCE(uu.username, 'system') as updated_by_username,
     -- Info aggiuntive per immagini
     CASE WHEN tm.profile_image_url IS NOT NULL THEN true ELSE false END as has_image
 FROM team_members tm

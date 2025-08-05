@@ -227,6 +227,9 @@ router.get("/public", async (req, res) => {
       display_order: member.display_order,
       // Include solo se c'è un CV caricato
       has_cv: !!member.cv_file_url,
+      // Include campi immagine profilo
+      profile_image_url: member.profile_image_url,
+      has_image: !!member.profile_image_url,
     }));
 
     logger.info(`Recuperati ${publicMembers.length} membri team pubblici`);

@@ -17,7 +17,8 @@
       "Bash(npm run dev:*)",
       "WebFetch(domain:support.cloudinary.com)",
       "WebFetch(domain:cloudinary.com)",
-      "Bash(npm run start:*)"
+      "Bash(npm run start:*)",
+      "Bash(echo \"\n-- Test manual dell''aggiornamento schema\nALTER TABLE team_members ADD COLUMN IF NOT EXISTS image_public_id VARCHAR(255) NULL;\nALTER TABLE team_members ADD COLUMN IF NOT EXISTS image_upload_date TIMESTAMPTZ NULL;\n\n-- Verifica se i campi esistono\nSELECT column_name, data_type \nFROM information_schema.columns \nWHERE table_name = ''team_members'' \nAND column_name IN (''profile_image_url'', ''image_public_id'', ''image_upload_date'');\n\")"
     ],
     "deny": []
   }
