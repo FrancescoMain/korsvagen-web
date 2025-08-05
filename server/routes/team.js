@@ -916,12 +916,16 @@ router.get("/:id/cv",
           });
           
           logger.info(`Risorsa trovata, scarico da: ${resourceInfo.secure_url}`);
+          logger.info(`Dimensione file: ${resourceInfo.bytes} bytes`);
           
           // Scarica il file dall'URL sicuro di Cloudinary
           const response = await fetch(resourceInfo.secure_url);
           
+          logger.info(`Response status da secure_url: ${response.status}`);
+          
           if (!response.ok) {
-            throw new Error(`Errore fetch da secure_url: ${response.status}`);
+            logger.error(`Response headers: ${JSON.stringify([...response.headers.entries()])}`);
+            throw new Error(`Errore fetch da secure_url: ${response.status} - ${response.statusText}`);
           }
           
           const fileBuffer = await response.arrayBuffer();
@@ -941,9 +945,39 @@ router.get("/:id/cv",
           logger.error(`Errore download tramite API admin:`, serverError);
           logger.error(`Dettagli errore:`, JSON.stringify(serverError, null, 2));
           
-          // Fallback: redirect diretto (anche se bloccato, almeno tenta)
-          logger.info("Fallback: redirect diretto a Cloudinary");
-          res.redirect(member.cv_file_url);
+          // Fallback: prova fetch diretto dall'URL salvato nel database
+          logger.info("Fallback: tentativo fetch diretto dall'URL database");
+          
+          try {
+            const directResponse = await fetch(member.cv_file_url);
+            
+            if (directResponse.ok) {
+              const fileBuffer = await directResponse.arrayBuffer();
+              
+              // Imposta header per download forzato
+              res.setHeader('Content-Type', 'application/pdf');
+              res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+              res.setHeader('Cache-Control', 'no-cache');
+              res.setHeader('Content-Length', fileBuffer.byteLength.toString());
+              
+              // Invia il file
+              res.send(Buffer.from(fileBuffer));
+              
+              logger.info(`CV scaricato con successo tramite fallback diretto: ${fileName}`);
+            } else {
+              throw new Error(`Fetch diretto fallito: ${directResponse.status}`);
+            }
+            
+          } catch (fallbackError) {
+            logger.error(`Anche il fallback diretto è fallito:`, fallbackError);
+            
+            // Ultimo fallback: risposta di errore invece di redirect
+            res.status(500).json({
+              success: false,
+              message: "CV temporaneamente non disponibile. Riprova più tardi.",
+              code: "CV_DOWNLOAD_ERROR"
+            });
+          }
         }
       // Chiusura non necessaria più - la logica ora è sequenziale
 
