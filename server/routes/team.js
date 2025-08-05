@@ -899,26 +899,29 @@ router.get("/:id/cv",
       logger.info(`Tentativo 1: Public ID completo: ${publicIdFull}`);
         
         try {
-          // Usa l'API di Cloudinary con autenticazione server per scaricare il file
-          logger.info(`Tentativo download diretto con API Cloudinary per: ${publicIdFull}`);
+          // Usa l'API admin di Cloudinary per scaricare il file con autenticazione
+          logger.info(`Tentativo download con API admin Cloudinary per: ${publicIdFull}`);
           
-          // Ottieni il file da Cloudinary usando le credenziali del server
-          const downloadUrl = cloudinary.url(publicIdFull, {
-            resource_type: "raw",
-            secure: true,
-            sign_url: true, // Firma l'URL con le nostre credenziali
-            auth_token: {
-              duration: 3600 // 1 ora
-            }
+          // Ottieni le informazioni del file con API admin autenticata
+          const resourceInfo = await new Promise((resolve, reject) => {
+            cloudinary.api.resource(publicIdFull, {
+              resource_type: "raw"
+            }, (error, result) => {
+              if (error) {
+                reject(error);
+              } else {
+                resolve(result);
+              }
+            });
           });
           
-          logger.info(`URL autenticato generato: ${downloadUrl.substring(0, 100)}...`);
+          logger.info(`Risorsa trovata, scarico da: ${resourceInfo.secure_url}`);
           
-          // Scarica il file tramite il nostro server e servilo con header corretti
-          const response = await fetch(downloadUrl);
+          // Scarica il file dall'URL sicuro di Cloudinary
+          const response = await fetch(resourceInfo.secure_url);
           
           if (!response.ok) {
-            throw new Error(`Errore fetch Cloudinary: ${response.status}`);
+            throw new Error(`Errore fetch da secure_url: ${response.status}`);
           }
           
           const fileBuffer = await response.arrayBuffer();
@@ -932,10 +935,11 @@ router.get("/:id/cv",
           // Invia il file
           res.send(Buffer.from(fileBuffer));
           
-          logger.info(`CV scaricato con successo tramite server: ${fileName}`);
+          logger.info(`CV scaricato con successo tramite API admin: ${fileName}`);
           
         } catch (serverError) {
-          logger.error(`Errore download tramite server:`, serverError);
+          logger.error(`Errore download tramite API admin:`, serverError);
+          logger.error(`Dettagli errore:`, JSON.stringify(serverError, null, 2));
           
           // Fallback: redirect diretto (anche se bloccato, almeno tenta)
           logger.info("Fallback: redirect diretto a Cloudinary");
