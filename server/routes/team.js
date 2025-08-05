@@ -899,43 +899,47 @@ router.get("/:id/cv",
       logger.info(`Tentativo 1: Public ID completo: ${publicIdFull}`);
         
         try {
-          // Prima prova con public_id completo
-          const signedUrl = cloudinary.utils.private_download_url(publicIdFull, "pdf", {
+          // Usa l'API di Cloudinary con autenticazione server per scaricare il file
+          logger.info(`Tentativo download diretto con API Cloudinary per: ${publicIdFull}`);
+          
+          // Ottieni il file da Cloudinary usando le credenziali del server
+          const downloadUrl = cloudinary.url(publicIdFull, {
             resource_type: "raw",
-            attachment: true,
-            expires_at: Math.floor(Date.now() / 1000) + 3600 // 1 ora
+            secure: true,
+            sign_url: true, // Firma l'URL con le nostre credenziali
+            auth_token: {
+              duration: 3600 // 1 ora
+            }
           });
           
-          logger.info(`URL firmato generato: ${signedUrl.substring(0, 100)}...`);
-          logger.info(`Redirect per download CV: ${fileName}`);
+          logger.info(`URL autenticato generato: ${downloadUrl.substring(0, 100)}...`);
           
-          // Redirect all'URL firmato - forzerà il download
-          res.redirect(signedUrl);
+          // Scarica il file tramite il nostro server e servilo con header corretti
+          const response = await fetch(downloadUrl);
           
-        } catch (signError) {
-          logger.error(`Errore con estensione:`, signError);
-          
-          // Prova senza estensione (public_id senza .pdf)
-          const publicIdWithoutExt = publicIdFull.replace('.pdf', '');
-          logger.info(`Tentativo 2: Public ID senza estensione: ${publicIdWithoutExt}`);
-          
-          try {
-            const signedUrl = cloudinary.utils.private_download_url(publicIdWithoutExt, "pdf", {
-              resource_type: "raw",
-              attachment: true,
-              expires_at: Math.floor(Date.now() / 1000) + 3600
-            });
-            
-            logger.info(`URL firmato generato (senza ext): ${signedUrl.substring(0, 100)}...`);
-            res.redirect(signedUrl);
-            
-          } catch (signError2) {
-            logger.error(`Errore anche senza estensione:`, signError2);
-            
-            // Ultimo fallback: redirect diretto
-            logger.info("Ultimo fallback: redirect diretto a Cloudinary");
-            res.redirect(member.cv_file_url);
+          if (!response.ok) {
+            throw new Error(`Errore fetch Cloudinary: ${response.status}`);
           }
+          
+          const fileBuffer = await response.arrayBuffer();
+          
+          // Imposta header per download forzato
+          res.setHeader('Content-Type', 'application/pdf');
+          res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+          res.setHeader('Cache-Control', 'no-cache');
+          res.setHeader('Content-Length', fileBuffer.byteLength.toString());
+          
+          // Invia il file
+          res.send(Buffer.from(fileBuffer));
+          
+          logger.info(`CV scaricato con successo tramite server: ${fileName}`);
+          
+        } catch (serverError) {
+          logger.error(`Errore download tramite server:`, serverError);
+          
+          // Fallback: redirect diretto (anche se bloccato, almeno tenta)
+          logger.info("Fallback: redirect diretto a Cloudinary");
+          res.redirect(member.cv_file_url);
         }
       // Chiusura non necessaria più - la logica ora è sequenziale
 
