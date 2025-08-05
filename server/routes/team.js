@@ -891,13 +891,12 @@ router.get("/:id/cv",
         const publicId = urlParts.slice(vIndex + 1).join('/');
         logger.info(`Public ID estratto: ${publicId}`);
         
-        // Rimuovi l'estensione dal public_id se presente (Cloudinary lo aggiunge automaticamente)
-        const publicIdWithoutExt = publicId.replace('.pdf', '');
-        logger.info(`Public ID senza estensione: ${publicIdWithoutExt}`);
+        // Prova prima con l'estensione (come è stato caricato)
+        logger.info(`Tentativo 1: Public ID con estensione: ${publicId}`);
         
         try {
-          // Genera URL firmato che bypassa le ACL e forza download
-          const signedUrl = cloudinary.utils.private_download_url(publicIdWithoutExt, "pdf", {
+          // Prima prova con estensione completa
+          const signedUrl = cloudinary.utils.private_download_url(publicId, "pdf", {
             resource_type: "raw",
             attachment: true,
             expires_at: Math.floor(Date.now() / 1000) + 3600 // 1 ora
@@ -910,24 +909,27 @@ router.get("/:id/cv",
           res.redirect(signedUrl);
           
         } catch (signError) {
-          logger.error(`Errore generazione URL firmato:`, signError);
+          logger.error(`Errore con estensione:`, signError);
           
-          // Ultimo fallback: prova con signed URL semplice
+          // Prova senza estensione
+          const publicIdWithoutExt = publicId.replace('.pdf', '');
+          logger.info(`Tentativo 2: Public ID senza estensione: ${publicIdWithoutExt}`);
+          
           try {
-            const timestamp = Math.round(Date.now() / 1000) + 3600;
-            const signature = cloudinary.utils.api_sign_request({
-              public_id: publicIdWithoutExt,
-              timestamp: timestamp
-            }, cloudinary.config().api_secret);
+            const signedUrl = cloudinary.utils.private_download_url(publicIdWithoutExt, "pdf", {
+              resource_type: "raw",
+              attachment: true,
+              expires_at: Math.floor(Date.now() / 1000) + 3600
+            });
             
-            const fallbackUrl = `https://res.cloudinary.com/${cloudinary.config().cloud_name}/raw/upload/s--${signature}--/v${timestamp}/${publicIdWithoutExt}`;
+            logger.info(`URL firmato generato (senza ext): ${signedUrl.substring(0, 100)}...`);
+            res.redirect(signedUrl);
             
-            logger.info("Fallback: URL firmato manuale");
-            res.redirect(fallbackUrl);
+          } catch (signError2) {
+            logger.error(`Errore anche senza estensione:`, signError2);
             
-          } catch (manualSignError) {
-            logger.error(`Errore URL firmato manuale:`, manualSignError);
-            logger.info("Ultimo fallback: redirect diretto");
+            // Ultimo fallback: redirect diretto
+            logger.info("Ultimo fallback: redirect diretto a Cloudinary");
             res.redirect(member.cv_file_url);
           }
         }
