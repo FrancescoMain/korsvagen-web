@@ -881,22 +881,18 @@ router.get("/:id/cv",
       // Estrae il public_id corretto dall'URL - ora sappiamo il formato esatto
       logger.info(`URL CV salvato: ${member.cv_file_url}`);
       
-      // Dall'URL: https://res.cloudinary.com/dpvzuvloe/raw/upload/v1754319116/team-cvs/marco-rossis-1754319116505.pdf
-      // Il public_id è: team-cvs/marco-rossis-1754319116505.pdf (tutto dopo l'ultimo / e prima di v{timestamp})
+      // Il file è salvato nella root, non in team-cvs/ - estrae solo il filename
       const urlParts = member.cv_file_url.split('/');
-      // Trova la parte dopo v{timestamp} - dovrebbe essere il public_id completo
-      const vIndex = urlParts.findIndex(part => part.startsWith('v'));
-      if (vIndex !== -1 && vIndex < urlParts.length - 1) {
-        // Tutto dopo v{timestamp} è il public_id
-        const publicId = urlParts.slice(vIndex + 1).join('/');
-        logger.info(`Public ID estratto: ${publicId}`);
-        
-        // Prova prima con l'estensione (come è stato caricato)
-        logger.info(`Tentativo 1: Public ID con estensione: ${publicId}`);
+      const fullFilename = urlParts[urlParts.length - 1]; // marco-rossis-1754384767716.pdf
+      
+      logger.info(`Filename completo estratto: ${fullFilename}`);
+      
+      // Prova prima con l'estensione (filename completo)
+      logger.info(`Tentativo 1: Public ID con estensione: ${fullFilename}`);
         
         try {
-          // Prima prova con estensione completa
-          const signedUrl = cloudinary.utils.private_download_url(publicId, "pdf", {
+          // Prima prova con estensione completa (solo filename)
+          const signedUrl = cloudinary.utils.private_download_url(fullFilename, "pdf", {
             resource_type: "raw",
             attachment: true,
             expires_at: Math.floor(Date.now() / 1000) + 3600 // 1 ora
@@ -911,12 +907,12 @@ router.get("/:id/cv",
         } catch (signError) {
           logger.error(`Errore con estensione:`, signError);
           
-          // Prova senza estensione
-          const publicIdWithoutExt = publicId.replace('.pdf', '');
-          logger.info(`Tentativo 2: Public ID senza estensione: ${publicIdWithoutExt}`);
+          // Prova senza estensione (solo filename senza .pdf)
+          const filenameWithoutExt = fullFilename.replace('.pdf', '');
+          logger.info(`Tentativo 2: Public ID senza estensione: ${filenameWithoutExt}`);
           
           try {
-            const signedUrl = cloudinary.utils.private_download_url(publicIdWithoutExt, "pdf", {
+            const signedUrl = cloudinary.utils.private_download_url(filenameWithoutExt, "pdf", {
               resource_type: "raw",
               attachment: true,
               expires_at: Math.floor(Date.now() / 1000) + 3600
@@ -933,10 +929,7 @@ router.get("/:id/cv",
             res.redirect(member.cv_file_url);
           }
         }
-      } else {
-        logger.error("Impossibile estrarre public_id dall'URL");
-        res.redirect(member.cv_file_url);
-      }
+      // Chiusura non necessaria più - la logica ora è sequenziale
 
     } catch (error) {
       logger.error("Errore download CV:", error);
