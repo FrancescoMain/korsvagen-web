@@ -287,9 +287,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             tokens.refresh.substring(0, 20) + "..."
           );
 
-          // Salva dati utente e token con storage appropriato
-          setUser(userData);
+          // Salva prima i token, poi l'utente per evitare race condition
           saveTokens(tokens.access, tokens.refresh, credentials.rememberMe || false);
+          setUser(userData);
           setRefreshFailedPermanently(false); // Reset flag dopo login riuscito
 
           console.log("✅ Token salvati, stato aggiornato");

@@ -12,16 +12,26 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   children,
   requiredRole,
 }) => {
-  const { isAuthenticated, user, loading } = useAuth();
+  const { isAuthenticated, user, loading, token } = useAuth();
   const location = useLocation();
+
+  console.log("🛡️ ProtectedRoute check:", {
+    loading,
+    isAuthenticated,
+    hasUser: !!user,
+    hasToken: !!token,
+    location: location.pathname
+  });
 
   // Show loading spinner while checking authentication
   if (loading) {
+    console.log("⏳ ProtectedRoute: Showing loading spinner");
     return <LoadingSpinner centered size="lg" />;
   }
 
   // Redirect to login if not authenticated
   if (!isAuthenticated) {
+    console.log("❌ ProtectedRoute: Not authenticated, redirecting to login");
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
@@ -34,5 +44,6 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     }
   }
 
+  console.log("✅ ProtectedRoute: Access granted");
   return <>{children}</>;
 };

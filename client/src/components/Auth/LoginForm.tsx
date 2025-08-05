@@ -307,13 +307,16 @@ export const LoginForm: React.FC = () => {
     },
   });
 
-  // Redirect se già autenticato
+  // Redirect se già autenticato al caricamento iniziale della pagina
   useEffect(() => {
-    if (user) {
+    // Solo se l'utente è già autenticato quando la pagina di login viene caricata
+    // E solo dopo che l'inizializzazione auth è completata
+    if (user && !loading) {
+      console.log("👤 Utente già autenticato, redirect alla dashboard");
       const from = (location.state as any)?.from?.pathname || "/dashboard";
       navigate(from, { replace: true });
     }
-  }, [user, navigate, location]);
+  }, [user, loading, navigate, location]);
 
   // Submit handler
   const onSubmit: SubmitHandler<LoginFormData> = async (data) => {
@@ -328,7 +331,12 @@ export const LoginForm: React.FC = () => {
 
       if (success) {
         const from = (location.state as any)?.from?.pathname || "/dashboard";
-        navigate(from, { replace: true });
+        console.log("🚀 Login riuscito, navigazione verso:", from);
+        
+        // Piccolo delay per assicurarsi che lo stato React sia aggiornato
+        setTimeout(() => {
+          navigate(from, { replace: true });
+        }, 100);
       } else {
         setGeneralError("Credenziali non valide. Riprova.");
       }
