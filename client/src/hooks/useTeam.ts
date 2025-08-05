@@ -42,8 +42,11 @@ export interface TeamMember {
   cv_upload_date?: string;
   has_cv?: boolean; // Per versione pubblica
   
-  // Immagine profilo (futuro)
+  // Immagine profilo
   profile_image_url?: string;
+  image_public_id?: string;
+  image_upload_date?: string;
+  has_image?: boolean; // Per versione pubblica
   
   // Ordinamento e visibilità
   display_order: number;
@@ -94,6 +97,10 @@ interface UseTeamReturn {
   uploadCV: (memberId: string, file: File) => Promise<boolean>;
   deleteCV: (memberId: string) => Promise<boolean>;
   getCVDownloadUrl: (memberId: string) => string;
+  
+  // Gestione Immagini
+  uploadImage: (memberId: string, file: File) => Promise<boolean>;
+  deleteImage: (memberId: string) => Promise<boolean>;
   
   // Riordinamento
   reorderMembers: (memberIds: string[]) => Promise<boolean>;
@@ -349,6 +356,80 @@ export const useTeam = (): UseTeamReturn => {
   }, []);
 
   /**
+   * Carica immagine profilo per membro del team
+   */
+  const uploadImage = useCallback(async (memberId: string, file: File): Promise<boolean> => {
+    setUploading(true);
+    setError(null);
+
+    try {
+      const formData = new FormData();
+      formData.append("image", file);
+
+      const response = await apiClient.post(`/team/${memberId}/image`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      
+      if (response.data.success) {
+        toast.success("Immagine caricata con successo!");
+        // Ricarica i membri per aggiornare i dati immagine
+        await fetchMembers();
+        return true;
+      } else {
+        throw new Error(response.data.message || "Errore caricamento immagine");
+      }
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.message || err.message || "Errore caricamento immagine";
+      setError(errorMessage);
+      
+      // Gestisci diversi tipi di errore
+      if (err.response?.status === 404) {
+        toast.error("Membro del team non trovato. Ricarica la pagina e riprova.");
+      } else if (err.response?.status === 400) {
+        toast.error("File non valido. Assicurati di caricare un'immagine valida (JPG, PNG, WebP).");
+      } else {
+        toast.error(errorMessage);
+      }
+      
+      console.error("Errore uploadImage:", err);
+      return false;
+    } finally {
+      setUploading(false);
+    }
+  }, [fetchMembers]);
+
+  /**
+   * Elimina immagine profilo di un membro
+   */
+  const deleteImage = useCallback(async (memberId: string): Promise<boolean> => {
+    setUploading(true);
+    setError(null);
+
+    try {
+      const response = await apiClient.delete(`/team/${memberId}/image`);
+      
+      if (response.data.success) {
+        toast.success("Immagine eliminata con successo!");
+        // Ricarica i membri per aggiornare i dati immagine
+        await fetchMembers();
+        return true;
+      } else {
+        throw new Error(response.data.message || "Errore eliminazione immagine");
+      }
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.message || err.message || "Errore eliminazione immagine";
+      setError(errorMessage);
+      toast.error(errorMessage);
+      console.error("Errore deleteImage:", err);
+      return false;
+    } finally {
+      setUploading(false);
+    }
+  }, [fetchMembers]);
+
+  /**
    * Riordina membri del team
    */
   const reorderMembers = useCallback(async (memberIds: string[]): Promise<boolean> => {
@@ -415,6 +496,10 @@ export const useTeam = (): UseTeamReturn => {
     uploadCV,
     deleteCV,
     getCVDownloadUrl,
+    
+    // Gestione Immagini
+    uploadImage,
+    deleteImage,
     
     // Riordinamento
     reorderMembers,

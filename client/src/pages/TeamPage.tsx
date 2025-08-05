@@ -107,9 +107,17 @@ const TeamPage: React.FC = () => {
                   onClick={() => handleMemberClick(member)}
                 >
                   <div className="member-image">
-                    <div className="member-placeholder">
-                      {member.placeholder}
-                    </div>
+                    {member.profile_image_url ? (
+                      <img 
+                        className="member-profile-image"
+                        src={member.profile_image_url} 
+                        alt={member.name}
+                      />
+                    ) : (
+                      <div className="member-placeholder">
+                        {member.placeholder}
+                      </div>
+                    )}
                   </div>
                   <div className="member-info">
                     <h3>{member.name}</h3>
@@ -129,9 +137,17 @@ const TeamPage: React.FC = () => {
               <CloseButton onClick={closeModal}>&times;</CloseButton>
               <div className="modal-header">
                 <div className="member-image">
-                  <div className="member-placeholder">
-                    {selectedMember.placeholder}
-                  </div>
+                  {selectedMember.profile_image_url ? (
+                    <img 
+                      className="member-profile-image"
+                      src={selectedMember.profile_image_url} 
+                      alt={selectedMember.name}
+                    />
+                  ) : (
+                    <div className="member-placeholder">
+                      {selectedMember.placeholder}
+                    </div>
+                  )}
                 </div>
                 <div className="member-basic-info">
                   <h2>{selectedMember.name}</h2>
@@ -380,6 +396,12 @@ const TeamGrid = styled.section`
     }
   }
 
+  .member-profile-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
   .member-placeholder {
     width: 100%;
     height: 100%;
@@ -488,6 +510,13 @@ const ModalContent = styled.div`
       border-radius: 50%;
       overflow: hidden;
       flex-shrink: 0;
+
+      .member-profile-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 50%;
+      }
 
       .member-placeholder {
         width: 100%;

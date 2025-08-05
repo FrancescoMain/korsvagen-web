@@ -29,7 +29,7 @@ import { logger } from "../utils/logger.js";
 
 const router = express.Router();
 
-// Configurazione multer per upload CV
+// Configurazione multer per upload CV e Immagini
 const storage = multer.memoryStorage();
 const upload = multer({
   storage,
@@ -37,11 +37,31 @@ const upload = multer({
     fileSize: 10 * 1024 * 1024, // 10MB max
   },
   fileFilter: (req, file, cb) => {
-    // Solo PDF
-    if (file.mimetype === "application/pdf") {
-      cb(null, true);
+    // Determina il tipo di upload in base all'endpoint
+    const isImageUpload = req.route?.path?.includes('/image');
+    const isCVUpload = req.route?.path?.includes('/cv');
+    
+    if (isImageUpload) {
+      // Solo immagini per upload profilo
+      if (file.mimetype.startsWith('image/')) {
+        cb(null, true);
+      } else {
+        cb(new Error("Solo immagini sono permesse (JPG, PNG, WebP)"), false);
+      }
+    } else if (isCVUpload) {
+      // Solo PDF per CV
+      if (file.mimetype === "application/pdf") {
+        cb(null, true);
+      } else {
+        cb(new Error("Solo file PDF sono permessi per i CV"), false);
+      }
     } else {
-      cb(new Error("Solo file PDF sono permessi per i CV"), false);
+      // Fallback: accetta entrambi
+      if (file.mimetype === "application/pdf" || file.mimetype.startsWith('image/')) {
+        cb(null, true);
+      } else {
+        cb(new Error("Solo PDF e immagini sono permessi"), false);
+      }
     }
   },
 });
@@ -1076,6 +1096,268 @@ router.put("/reorder", requireAuth, requireRole(["admin", "editor", "super_admin
         success: false,
         message: "Errore interno del server",
         code: "TEAM_REORDER_ERROR"
+      });
+    }
+  }
+);
+
+/**
+ * POST /api/team/:id/image
+ * Carica immagine profilo per membro del team
+ */
+router.post("/:id/image", requireAuth, requireRole(["admin", "editor", "super_admin"]),
+  param("id").isUUID().withMessage("ID deve essere un UUID valido"),
+  upload.single("image"),
+  async (req, res) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({
+          success: false,
+          message: "ID non valido",
+          errors: errors.array()
+        });
+      }
+
+      if (!req.file) {
+        return res.status(400).json({
+          success: false,
+          message: "Nessuna immagine caricata",
+          code: "NO_FILE"
+        });
+      }
+
+      // Validazione tipo file per immagini
+      if (!req.file.mimetype.startsWith('image/')) {
+        return res.status(400).json({
+          success: false,
+          message: "Solo immagini sono permesse (JPG, PNG, WebP)",
+          code: "INVALID_FILE_TYPE"
+        });
+      }
+
+      const { id } = req.params;
+      logger.info(`Admin ${req.user.email} carica immagine per membro ${id}`);
+
+      // Verifica esistenza membro
+      const { data: members, error: checkError } = await supabaseClient
+        .from("team_members")
+        .select("name, profile_image_url, image_public_id")
+        .eq("id", id);
+
+      if (checkError) {
+        logger.error("Errore controllo esistenza membro per image upload:", checkError);
+        return res.status(500).json({
+          success: false,
+          message: "Errore interno del server durante la verifica del membro",
+          code: "DATABASE_ERROR"
+        });
+      }
+
+      if (!members || members.length === 0) {
+        logger.error("Membro non trovato per image upload:", id);
+        return res.status(404).json({
+          success: false,
+          message: "Membro del team non trovato",
+          code: "MEMBER_NOT_FOUND"
+        });
+      }
+
+      const member = members[0];
+      logger.info(`Image upload per membro: ${member.name}`);
+
+      // Elimina immagine esistente da Cloudinary se presente
+      if (member.image_public_id) {
+        try {
+          logger.info(`Eliminando immagine precedente con public_id: ${member.image_public_id}`);
+          await cloudinary.uploader.destroy(member.image_public_id, {
+            resource_type: "image"
+          });
+          logger.info("Immagine precedente eliminata da Cloudinary");
+        } catch (cloudinaryError) {
+          logger.error("Errore eliminazione immagine precedente:", cloudinaryError);
+        }
+      }
+
+      // Upload nuova immagine a Cloudinary con ottimizzazioni
+      const timestamp = Date.now();
+      const filename = `${member.name.toLowerCase().replace(/\s+/g, '-')}-${timestamp}`;
+      
+      logger.info(`Iniziando upload immagine: ${filename}, dimensione: ${req.file.size} bytes`);
+      
+      const uploadResult = await new Promise((resolve, reject) => {
+        cloudinary.uploader.upload_stream(
+          {
+            resource_type: "image",
+            public_id: `team-profiles/${filename}`,
+            folder: "korsvagen/team/profiles",
+            use_filename: false,
+            unique_filename: false,
+            overwrite: true,
+            transformation: [
+              { width: 400, height: 400, crop: "fill", gravity: "face" },
+              { quality: "auto:good" },
+              { format: "auto" }
+            ]
+          },
+          (error, result) => {
+            if (error) {
+              logger.error("Errore upload Cloudinary immagine:", error);
+              reject(error);
+            } else {
+              logger.info(`Immagine caricata con successo: ${result.secure_url}`);
+              logger.info(`Cloudinary public_id: ${result.public_id}`);
+              resolve(result);
+            }
+          }
+        ).end(req.file.buffer);
+      });
+
+      // Aggiorna database con info immagine
+      const { data: updatedMember, error: updateError } = await supabaseClient
+        .from("team_members")
+        .update({
+          profile_image_url: uploadResult.secure_url,
+          image_public_id: uploadResult.public_id,
+          image_upload_date: new Date().toISOString(),
+          updated_by: req.user.id
+        })
+        .eq("id", id)
+        .select()
+        .single();
+
+      if (updateError) {
+        logger.error("Errore aggiornamento dati immagine:", updateError);
+        return res.status(500).json({
+          success: false,
+          message: "Immagine caricata ma errore nell'aggiornamento database",
+          code: "DATABASE_ERROR"
+        });
+      }
+
+      logger.info(`Immagine caricata con successo per ${member.name}`);
+
+      res.json({
+        success: true,
+        message: "Immagine caricata con successo",
+        data: {
+          profile_image_url: updatedMember.profile_image_url,
+          image_public_id: updatedMember.image_public_id,
+          image_upload_date: updatedMember.image_upload_date
+        }
+      });
+
+    } catch (error) {
+      logger.error("Errore caricamento immagine:", error);
+      res.status(500).json({
+        success: false,
+        message: "Errore interno del server",
+        code: "IMAGE_UPLOAD_ERROR"
+      });
+    }
+  }
+);
+
+/**
+ * DELETE /api/team/:id/image
+ * Elimina immagine profilo membro del team
+ */
+router.delete("/:id/image", requireAuth, requireRole(["admin", "editor", "super_admin"]),
+  param("id").isUUID().withMessage("ID deve essere un UUID valido"),
+  async (req, res) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({
+          success: false,
+          message: "ID non valido",
+          errors: errors.array()
+        });
+      }
+
+      const { id } = req.params;
+      logger.info(`Admin ${req.user.email} elimina immagine per membro ${id}`);
+
+      // Recupera info immagine
+      const { data: member, error: fetchError } = await supabaseClient
+        .from("team_members")
+        .select("name, profile_image_url, image_public_id")
+        .eq("id", id)
+        .single();
+
+      if (fetchError) {
+        if (fetchError.code === "PGRST116") {
+          return res.status(404).json({
+            success: false,
+            message: "Membro del team non trovato",
+            code: "MEMBER_NOT_FOUND"
+          });
+        }
+        logger.error("Errore recupero membro per eliminazione immagine:", fetchError);
+        return res.status(500).json({
+          success: false,
+          message: "Errore interno del server",
+          code: "DATABASE_ERROR"
+        });
+      }
+
+      if (!member.image_public_id) {
+        return res.status(404).json({
+          success: false,
+          message: "Immagine non trovata per questo membro",
+          code: "IMAGE_NOT_FOUND"
+        });
+      }
+
+      // Elimina da Cloudinary
+      try {
+        logger.info(`Eliminando immagine con public_id: ${member.image_public_id}`);
+        const deleteResult = await cloudinary.uploader.destroy(member.image_public_id, {
+          resource_type: "image"
+        });
+        logger.info(`Immagine eliminata da Cloudinary, risultato: ${deleteResult.result}`);
+      } catch (cloudinaryError) {
+        logger.error("Errore eliminazione immagine da Cloudinary:", cloudinaryError);
+        return res.status(500).json({
+          success: false,
+          message: "Errore eliminazione immagine da storage",
+          code: "CLOUDINARY_ERROR"
+        });
+      }
+
+      // Rimuovi riferimenti immagine dal database
+      const { error: updateError } = await supabaseClient
+        .from("team_members")
+        .update({
+          profile_image_url: null,
+          image_public_id: null,
+          image_upload_date: null,
+          updated_by: req.user.id
+        })
+        .eq("id", id);
+
+      if (updateError) {
+        logger.error("Errore aggiornamento database eliminazione immagine:", updateError);
+        return res.status(500).json({
+          success: false,
+          message: "Immagine eliminata ma errore aggiornamento database",
+          code: "DATABASE_ERROR"
+        });
+      }
+
+      logger.info(`Immagine eliminata con successo per ${member.name}`);
+
+      res.json({
+        success: true,
+        message: "Immagine eliminata con successo"
+      });
+
+    } catch (error) {
+      logger.error("Errore eliminazione immagine:", error);
+      res.status(500).json({
+        success: false,
+        message: "Errore interno del server",
+        code: "IMAGE_DELETE_ERROR"
       });
     }
   }

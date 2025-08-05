@@ -16,6 +16,8 @@ import {
   Eye,
   EyeOff,
   User,
+  Image as ImageIcon,
+  Camera,
 } from "lucide-react";
 
 const Card = styled.div<{ isActive: boolean }>`
@@ -59,18 +61,63 @@ const StatusBadge = styled.div<{ isActive: boolean }>`
   `}
 `;
 
-const MemberAvatar = styled.div`
+const AvatarContainer = styled.div`
+  position: relative;
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+`;
+
+const MemberAvatar = styled.div<{ hasImage: boolean }>`
   width: 80px;
   height: 80px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #1a1a1a, #2c2c2c);
+  background: ${props => props.hasImage ? 'transparent' : 'linear-gradient(135deg, #1a1a1a, #2c2c2c)'};
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
   font-size: 1.8rem;
   font-weight: 600;
-  margin-bottom: 1rem;
+  overflow: hidden;
+  position: relative;
+  margin-bottom: ${props => props.hasImage ? '0.5rem' : '0'};
+`;
+
+const ProfileImage = styled.img`
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+`;
+
+const ImageActions = styled.div`
+  display: flex;
+  gap: 0.25rem;
+  margin-top: 0.25rem;
+`;
+
+const ImageActionButton = styled.button<{ variant?: 'upload' | 'delete' }>`
+  padding: 0.25rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.7rem;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+
+  ${props => props.variant === 'delete' ? `
+    background: #dc3545;
+    color: white;
+    &:hover { background: #c82333; }
+  ` : `
+    background: #d4af37;
+    color: white;
+    &:hover { background: #b8941f; }
+  `}
 `;
 
 const MemberName = styled.h3`
@@ -236,6 +283,8 @@ interface TeamMemberCardProps {
   onDelete: () => void;
   onUploadCV: () => void;
   onDeleteCV: () => void;
+  onUploadImage: () => void;
+  onDeleteImage: () => void;
   onMoveUp: () => void;
   onMoveDown: () => void;
   onToggleActive: () => void;
@@ -249,6 +298,8 @@ const TeamMemberCard: React.FC<TeamMemberCardProps> = ({
   onDelete,
   onUploadCV,
   onDeleteCV,
+  onUploadImage,
+  onDeleteImage,
   onMoveUp,
   onMoveDown,
   onToggleActive,
@@ -302,9 +353,34 @@ const TeamMemberCard: React.FC<TeamMemberCardProps> = ({
           {member.is_active ? 'Attivo' : 'Non Attivo'}
         </StatusBadge>
         
-        <MemberAvatar>
-          {member.placeholder}
-        </MemberAvatar>
+        <AvatarContainer>
+          <MemberAvatar hasImage={!!member.profile_image_url}>
+            {member.profile_image_url ? (
+              <ProfileImage 
+                src={member.profile_image_url} 
+                alt={member.name}
+              />
+            ) : (
+              member.placeholder
+            )}
+          </MemberAvatar>
+          <ImageActions>
+            {member.profile_image_url ? (
+              <>
+                <ImageActionButton onClick={onUploadImage} title="Cambia immagine">
+                  <Camera size={12} />
+                </ImageActionButton>
+                <ImageActionButton variant="delete" onClick={onDeleteImage} title="Rimuovi immagine">
+                  <Trash2 size={12} />
+                </ImageActionButton>
+              </>
+            ) : (
+              <ImageActionButton onClick={onUploadImage} title="Carica immagine">
+                <Camera size={12} />
+              </ImageActionButton>
+            )}
+          </ImageActions>
+        </AvatarContainer>
         
         <MemberName>{member.name}</MemberName>
         <MemberRole>{member.role}</MemberRole>

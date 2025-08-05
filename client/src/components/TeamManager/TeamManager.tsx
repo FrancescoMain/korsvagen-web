@@ -11,6 +11,7 @@ import { useTeam, type TeamMember } from "../../hooks/useTeam";
 import TeamMemberForm from "./TeamMemberForm";
 import TeamMemberCard from "./TeamMemberCard";
 import CVUploadModal from "./CVUploadModal";
+import ImageUploadModal from "./ImageUploadModal";
 import toast from "react-hot-toast";
 import {
   Plus,
@@ -244,6 +245,8 @@ const TeamManager: React.FC<TeamManagerProps> = () => {
     deleteMember,
     uploadCV,
     deleteCV,
+    uploadImage,
+    deleteImage,
     reorderMembers,
     refreshMembers
   } = useTeam();
@@ -253,6 +256,8 @@ const TeamManager: React.FC<TeamManagerProps> = () => {
   const [editingMember, setEditingMember] = useState<TeamMember | null>(null);
   const [showCVModal, setShowCVModal] = useState(false);
   const [cvMemberId, setCvMemberId] = useState<string | null>(null);
+  const [showImageModal, setShowImageModal] = useState(false);
+  const [imageMemberId, setImageMemberId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState<"all" | "active" | "inactive">("all");
 
@@ -317,6 +322,17 @@ const TeamManager: React.FC<TeamManagerProps> = () => {
     }
   };
 
+  const handleUploadImage = (memberId: string) => {
+    setImageMemberId(memberId);
+    setShowImageModal(true);
+  };
+
+  const handleDeleteImage = async (memberId: string, memberName: string) => {
+    if (window.confirm(`Sei sicuro di voler eliminare l'immagine profilo di ${memberName}?`)) {
+      await deleteImage(memberId);
+    }
+  };
+
   const handleFormSubmit = async (memberData: any) => {
     let success = false;
     
@@ -338,6 +354,16 @@ const TeamManager: React.FC<TeamManagerProps> = () => {
       if (success) {
         setShowCVModal(false);
         setCvMemberId(null);
+      }
+    }
+  };
+
+  const handleImageUpload = async (file: File) => {
+    if (imageMemberId) {
+      const success = await uploadImage(imageMemberId, file);
+      if (success) {
+        setShowImageModal(false);
+        setImageMemberId(null);
       }
     }
   };
@@ -490,6 +516,8 @@ const TeamManager: React.FC<TeamManagerProps> = () => {
               onDelete={() => handleDeleteMember(member)}
               onUploadCV={() => handleUploadCV(member.id)}
               onDeleteCV={() => handleDeleteCV(member.id, member.name)}
+              onUploadImage={() => handleUploadImage(member.id)}
+              onDeleteImage={() => handleDeleteImage(member.id, member.name)}
               onMoveUp={() => handleMoveUp(member)}
               onMoveDown={() => handleMoveDown(member)}
               onToggleActive={() => handleToggleActive(member)}
@@ -520,6 +548,20 @@ const TeamManager: React.FC<TeamManagerProps> = () => {
           onCancel={() => {
             setShowCVModal(false);
             setCvMemberId(null);
+          }}
+          uploading={uploading}
+        />
+      )}
+
+      {/* Modal Image Upload */}
+      {showImageModal && imageMemberId && (
+        <ImageUploadModal
+          memberId={imageMemberId}
+          memberName={members.find(m => m.id === imageMemberId)?.name || ""}
+          onUpload={handleImageUpload}
+          onCancel={() => {
+            setShowImageModal(false);
+            setImageMemberId(null);
           }}
           uploading={uploading}
         />
