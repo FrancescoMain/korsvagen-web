@@ -178,10 +178,11 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
     };
   }, []);
 
+  const authState = getAuthState();
   console.log("⚙️ SettingsProvider render - Auth state:", {
-    isAuthenticated: !!getAuthState().token,
-    hasToken: !!getAuthState().token,
-    tokenPreview: getAuthState().token ? `${getAuthState().token.substring(0, 20)}...` : "NO TOKEN",
+    isAuthenticated: authState.isAuthenticated,
+    hasToken: !!authState.token,
+    tokenPreview: authState.token ? `${authState.token.substring(0, 20)}...` : "NO TOKEN",
   });
 
   // Stati principali
