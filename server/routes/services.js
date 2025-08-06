@@ -522,22 +522,13 @@ router.post("/admin/:id/image", requireAuth, upload.single('image'), async (req,
       });
     }
 
-    // Check if service exists
-    const { data: existingService, error: fetchError } = await supabaseClient
+    // Check if service exists - using more robust query
+    const { data: servicesList, error: fetchError } = await supabaseClient
       .from("services")
       .select("id, title, image_public_id")
-      .eq("id", id)
-      .single();
+      .eq("id", id);
 
     if (fetchError) {
-      if (fetchError.code === 'PGRST116') {
-        return res.status(404).json({
-          success: false,
-          error: "Servizio non trovato",
-          code: "SERVICE_NOT_FOUND"
-        });
-      }
-      
       logger.error("Error fetching service for image upload:", fetchError);
       return res.status(500).json({
         success: false,
@@ -545,6 +536,17 @@ router.post("/admin/:id/image", requireAuth, upload.single('image'), async (req,
         code: "FETCH_SERVICE_ERROR"
       });
     }
+
+    if (!servicesList || servicesList.length === 0) {
+      logger.warn(`Service not found for ID: ${id}`);
+      return res.status(404).json({
+        success: false,
+        error: "Servizio non trovato",
+        code: "SERVICE_NOT_FOUND"
+      });
+    }
+
+    const existingService = servicesList[0];
 
     // Delete old image if exists
     if (existingService.image_public_id) {
