@@ -71,32 +71,31 @@ const ServicesGrid = styled.section`
     }
 
     .card-header {
-      background: linear-gradient(135deg, #2c2c2c 0%, #1a1a1a 100%);
+      background: linear-gradient(135deg, rgba(44, 44, 44, 0.9) 0%, rgba(26, 26, 26, 0.95) 100%);
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
       color: white;
       padding: 40px 30px;
       text-align: center;
       position: relative;
-
-      .service-image {
-        margin: -20px auto 20px auto;
-        width: 80px;
-        height: 80px;
-        border-radius: 50%;
-        overflow: hidden;
-        background: rgba(255, 255, 255, 0.1);
-        border: 3px solid rgba(255, 255, 255, 0.2);
-
-        img {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-        }
-
-        @media (max-width: 768px) {
-          width: 60px;
-          height: 60px;
-          margin: -15px auto 15px auto;
-        }
+      
+      /* Overlay to ensure text readability */
+      &::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, rgba(44, 44, 44, 0.8) 0%, rgba(26, 26, 26, 0.9) 100%);
+        z-index: 1;
+      }
+      
+      /* Ensure text is above overlay */
+      h3, .subtitle {
+        position: relative;
+        z-index: 2;
       }
 
       &::after {
@@ -294,12 +293,14 @@ const ServicesPage: React.FC = () => {
 
   const renderServiceCard = (service: any) => (
     <div key={service.id} className="service-card">
-      <div className="card-header">
-        {service.image_url && (
-          <div className="service-image">
-            <img src={service.image_url} alt={service.title} />
-          </div>
-        )}
+      <div 
+        className="card-header"
+        style={{
+          backgroundImage: service.image_url 
+            ? `linear-gradient(135deg, rgba(44, 44, 44, 0.8) 0%, rgba(26, 26, 26, 0.9) 100%), url(${service.image_url})`
+            : undefined
+        }}
+      >
         <h3>{service.title}</h3>
         {service.subtitle && (
           <p className="subtitle">{service.subtitle}</p>
