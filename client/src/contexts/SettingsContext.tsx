@@ -33,7 +33,7 @@ import React, {
 } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
-import { useAuth } from "../hooks/useAuth";
+// import { useAuth } from "../hooks/useAuth"; // Removed to prevent circular dependency
 
 /**
  * TIPI E INTERFACCE
@@ -166,15 +166,22 @@ interface SettingsProviderProps {
 export const SettingsProvider: React.FC<SettingsProviderProps> = ({
   children,
 }) => {
-  // Hook di autenticazione per accesso al token
-  // Commento: useAuth fornisce il token JWT necessario per chiamate API autenticate
-  // Settings pubblici sono disponibili anche senza autenticazione
-  const { token, isAuthenticated } = useAuth();
+  // Get auth state from localStorage/sessionStorage directly to avoid circular dependency
+  const getAuthState = useCallback(() => {
+    let token = localStorage.getItem("korsvagen_auth_token");
+    if (!token) {
+      token = sessionStorage.getItem("korsvagen_auth_token");
+    }
+    return {
+      token,
+      isAuthenticated: !!token,
+    };
+  }, []);
 
   console.log("⚙️ SettingsProvider render - Auth state:", {
-    isAuthenticated,
-    hasToken: !!token,
-    tokenPreview: token ? `${token.substring(0, 20)}...` : "NO TOKEN",
+    isAuthenticated: !!getAuthState().token,
+    hasToken: !!getAuthState().token,
+    tokenPreview: getAuthState().token ? `${getAuthState().token.substring(0, 20)}...` : "NO TOKEN",
   });
 
   // Stati principali
@@ -349,6 +356,8 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
       showNotification: boolean = true
     ): Promise<boolean> => {
       try {
+        const { token, isAuthenticated } = getAuthState();
+        
         // Verifica che l'utente sia autenticato
         if (!isAuthenticated || !token) {
           if (showNotification) {
@@ -405,7 +414,7 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
         return false;
       }
     },
-    [refreshSettings, isAuthenticated, token]
+    [refreshSettings, getAuthState]
   );
 
   /**
@@ -429,6 +438,13 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
     // Carica settings solo se autenticato o se siamo sulla homepage
     const currentPath = window.location.pathname;
     const isHomePage = currentPath === "/" || currentPath === "/home";
+    
+    // Check auth state directly without dependency
+    let token = localStorage.getItem("korsvagen_auth_token");
+    if (!token) {
+      token = sessionStorage.getItem("korsvagen_auth_token");
+    }
+    const isAuthenticated = !!token;
 
     if (isAuthenticated || isHomePage) {
       loadSettings();
@@ -437,7 +453,7 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
         "⏭️ Skipping settings load - not authenticated and not on homepage"
       );
     }
-  }, [loadSettings, isAuthenticated]);
+  }, [loadSettings]);
 
   /**
    * Valore del context

@@ -107,6 +107,8 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+  console.log("🏗️ AuthProvider component mounted/re-mounted");
+  
   // Stati principali
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
@@ -116,6 +118,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [refreshFailedPermanently, setRefreshFailedPermanently] = useState(false);
   const [refreshTimer, setRefreshTimer] = useState<NodeJS.Timeout | null>(null);
   const [skipMeValidation, setSkipMeValidation] = useState(false);
+  const [initialized, setInitialized] = useState(false);
 
   // Stati derivati
   const isAuthenticated = !!user && !!token;
@@ -417,6 +420,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // Inizializzazione: verifica token esistente
   useEffect(() => {
     const initializeAuth = async () => {
+      // Prevenire re-inizializzazioni multiple
+      if (initialized) {
+        console.log("⚠️ AuthContext già inizializzato, saltando...");
+        return;
+      }
+      
       setLoading(true);
       console.log("🔐 Inizializzazione autenticazione...");
 
@@ -521,6 +530,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setUser(null);
       } finally {
         setLoading(false);
+        setInitialized(true);
         console.log("🔐 Inizializzazione autenticazione completata");
       }
     };

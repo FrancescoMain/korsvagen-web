@@ -39,8 +39,8 @@ import "./styles/dashboard.css";
 function App() {
   return (
     <ThemeProvider>
-      <AuthProvider>
-        <SettingsProvider>
+      <SettingsProvider>
+        <AuthProvider>
           <Router>
             <ScrollToTop />
             <Toaster
@@ -106,8 +106,8 @@ function App() {
               <Route path="*" element={<HomePage />} />
             </Routes>
           </Router>
-        </SettingsProvider>
-      </AuthProvider>
+        </AuthProvider>
+      </SettingsProvider>
     </ThemeProvider>
   );
 }
