@@ -288,6 +288,16 @@ const ServicesPage: React.FC = () => {
     const contactSection = document.getElementById("contact-form");
     if (contactSection) {
       contactSection.scrollIntoView({ behavior: "smooth" });
+    } else {
+      // Fallback: scroll to ContactCTA component if ID not found
+      const contactCTA = document.querySelector('[id="contact-form"]') || 
+                        document.querySelector('section:last-of-type');
+      if (contactCTA) {
+        contactCTA.scrollIntoView({ behavior: "smooth" });
+      } else {
+        // Ultimate fallback: navigate to contacts page
+        window.location.href = '/contatti';
+      }
     }
   };
 

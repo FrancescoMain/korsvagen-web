@@ -24,7 +24,7 @@ const ContactCTA: React.FC = () => {
   const contactData = dynamicContactData || fallbackData;
 
   return (
-    <ContactContainer>
+    <ContactContainer id="contact-form">
       <ContactContent>
         <HeroWrapper>
           <ContactTitle>Hai un progetto in mente?</ContactTitle>
