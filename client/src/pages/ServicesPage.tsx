@@ -3,6 +3,7 @@ import styled from "styled-components";
 import Header from "../components/layout/Header";
 import Footer from "../components/layout/Footer";
 import ContactCTA from "../components/common/ContactCTA";
+import PageHero from "../components/common/PageHero";
 
 const ServicesContainer = styled.div`
   min-height: 100vh;
@@ -24,105 +25,6 @@ const MainContent = styled.main`
   }
 `;
 
-const HeroSection = styled.section`
-  background: linear-gradient(
-      135deg,
-      rgba(26, 26, 26, 0.95) 0%,
-      rgba(44, 44, 44, 0.95) 100%
-    ),
-    url("https://images.unsplash.com/photo-1541976590-713941681591?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80");
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
-  color: white;
-  text-align: center;
-  padding: 120px 20px 80px;
-  min-height: 70vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  overflow: hidden;
-  position: relative;
-
-  &::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(26, 26, 26, 0.7);
-    z-index: 1;
-  }
-
-  .hero-content {
-    max-width: 800px;
-    width: 100%;
-    padding: 0 10px;
-    position: relative;
-    z-index: 2;
-
-    h1 {
-      font-size: 4.5rem;
-      font-weight: 400;
-      margin-bottom: 30px;
-      font-family: "Korsvagen Brand", "Times New Roman", serif;
-      letter-spacing: 0.1em;
-      line-height: 1.1;
-      color: #ffffff;
-      text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7);
-      text-transform: uppercase;
-
-      @media (max-width: 1024px) {
-        font-size: 3.5rem;
-      }
-
-      @media (max-width: 768px) {
-        font-size: 3rem;
-        margin-bottom: 20px;
-      }
-
-      @media (max-width: 480px) {
-        font-size: 2.5rem;
-        margin-bottom: 15px;
-      }
-    }
-
-    p {
-      font-size: 1.4rem;
-      color: #e2e8f0;
-      margin: 0;
-      line-height: 1.6;
-      font-family: "Inter", "Segoe UI", sans-serif;
-      font-weight: 300;
-
-      @media (max-width: 768px) {
-        font-size: 1.2rem;
-      }
-
-      @media (max-width: 480px) {
-        font-size: 1.1rem;
-      }
-    }
-  }
-
-  @media (max-width: 1024px) {
-    padding: 100px 15px 60px;
-    min-height: 60vh;
-  }
-
-  @media (max-width: 768px) {
-    padding: 80px 15px 50px;
-    min-height: 50vh;
-    background-attachment: scroll;
-  }
-
-  @media (max-width: 480px) {
-    padding: 60px 10px 40px;
-    min-height: 45vh;
-  }
-`;
 
 const ServicesGrid = styled.section`
   background: #1a1a1a;
@@ -333,12 +235,11 @@ const ServicesPage: React.FC = () => {
     <ServicesContainer>
       <Header />
       <MainContent>
-        <HeroSection>
-          <div className="hero-content">
-            <h1>I Nostri Servizi</h1>
-            <p>Soluzioni complete per ogni esigenza edilizia</p>
-          </div>
-        </HeroSection>
+        <PageHero
+          title="I Nostri Servizi"
+          subtitle="Soluzioni complete per ogni esigenza edilizia"
+          size="compact"
+        />
 
         <ServicesGrid>
           <div className="services-grid">

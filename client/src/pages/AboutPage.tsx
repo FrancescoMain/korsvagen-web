@@ -3,6 +3,7 @@ import styled from "styled-components";
 import Header from "../components/layout/Header";
 import Footer from "../components/layout/Footer";
 import ContactCTA from "../components/common/ContactCTA";
+import PageHero from "../components/common/PageHero";
 import { useSettings } from "../contexts/SettingsContext";
 
 const AboutContainer = styled.div`
@@ -25,104 +26,6 @@ const MainContent = styled.main`
   }
 `;
 
-const HeroSection = styled.section`
-  background: linear-gradient(
-      135deg,
-      rgba(26, 26, 26, 0.95) 0%,
-      rgba(44, 44, 44, 0.95) 100%
-    ),
-    url("https://images.unsplash.com/photo-1541976590-713941681591?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80");
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
-  color: white;
-  text-align: center;
-  padding: 120px 20px 80px;
-  position: relative;
-  overflow: hidden;
-  min-height: 70vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  @media (max-width: 768px) {
-    min-height: 60vh;
-    padding: 100px 20px 60px;
-    background-attachment: scroll;
-  }
-
-  @media (max-width: 480px) {
-    min-height: 50vh;
-    padding: 80px 20px 50px;
-  }
-
-  &::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(26, 26, 26, 0.7);
-    z-index: 1;
-  }
-
-  .hero-content {
-    position: relative;
-    z-index: 2;
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 0 2rem;
-    text-align: center;
-
-    h1 {
-      font-size: 4rem;
-      font-weight: 400;
-      margin-bottom: 20px;
-      font-family: "Korsvagen Brand", "Times New Roman", serif;
-      letter-spacing: 0.1em;
-      line-height: 1.1;
-      color: #ffffff;
-      text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7);
-      text-transform: uppercase;
-
-      @media (max-width: 768px) {
-        font-size: 3rem;
-      }
-
-      @media (max-width: 480px) {
-        font-size: 2.5rem;
-      }
-    }
-
-    .subtitle {
-      font-size: 1.3rem;
-      font-weight: 300;
-      color: rgba(255, 255, 255, 0.9);
-      font-family: "Inter", "Segoe UI", sans-serif;
-      letter-spacing: 0.05em;
-      line-height: 1.5;
-      max-width: 600px;
-      margin: 0 auto;
-
-      @media (max-width: 768px) {
-        font-size: 1.1rem;
-      }
-
-      @media (max-width: 480px) {
-        font-size: 1rem;
-      }
-    }
-
-    @media (max-width: 768px) {
-      padding: 0 1.5rem;
-    }
-
-    @media (max-width: 480px) {
-      padding: 0 1rem;
-    }
-  }
-`;
 
 const ContentSection = styled.section`
   padding: 100px 0;
@@ -938,14 +841,11 @@ const AboutPage: React.FC = () => {
     <AboutContainer>
       <Header />
       <MainContent>
-        <HeroSection>
-          <div className="hero-content">
-            <h1>Chi Siamo</h1>
-            <p className="subtitle">
-              Esperienza, professionalità e passione per l'edilizia di qualità
-            </p>
-          </div>
-        </HeroSection>
+        <PageHero
+          title="Chi Siamo"
+          subtitle="Esperienza, professionalità e passione per l'edilizia di qualità"
+          size="compact"
+        />
 
         <ContentSection>
           <div className="section">

@@ -3,6 +3,7 @@ import styled from "styled-components";
 import Header from "../components/layout/Header";
 import Footer from "../components/layout/Footer";
 import ContactCTA from "../components/common/ContactCTA";
+import PageHero from "../components/common/PageHero";
 import { useTeam, type TeamMember } from "../hooks/useTeam";
 
 
@@ -88,14 +89,11 @@ const TeamPage: React.FC = () => {
     <TeamContainer>
       <Header />
       <MainContent>
-        <HeroSection>
-          <div className="hero-content">
-            <h1>Il Nostro Team</h1>
-            <p className="subtitle">
-              Professionisti esperti al servizio dei tuoi progetti
-            </p>
-          </div>
-        </HeroSection>
+        <PageHero
+          title="Il Nostro Team"
+          subtitle="Professionisti esperti al servizio dei tuoi progetti"
+          size="compact"
+        />
 
         <TeamGrid>
           <div className="team-container">
@@ -258,84 +256,6 @@ const MainContent = styled.main`
   }
 `;
 
-const HeroSection = styled.section`
-  background: linear-gradient(
-      135deg,
-      rgba(26, 26, 26, 0.95) 0%,
-      rgba(44, 44, 44, 0.95) 100%
-    ),
-    url("https://images.unsplash.com/photo-1560472354-b33ff0c44a43?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80");
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
-  color: white;
-  text-align: center;
-  padding: 120px 20px 80px;
-  position: relative;
-  overflow: hidden;
-  min-height: 70vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  &::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(26, 26, 26, 0.7);
-    z-index: 1;
-  }
-
-  @media (max-width: 768px) {
-    min-height: 60vh;
-    padding: 100px 20px 60px;
-    background-attachment: scroll;
-  }
-
-  .hero-content {
-    max-width: 800px;
-    width: 100%;
-    position: relative;
-    z-index: 2;
-
-    h1 {
-      font-size: 3.5rem;
-      font-weight: 700;
-      margin-bottom: 20px;
-      font-family: "Korsvagen Brand", "Times New Roman", serif;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: white;
-
-      @media (max-width: 768px) {
-        font-size: 2.8rem;
-      }
-
-      @media (max-width: 480px) {
-        font-size: 2.2rem;
-      }
-    }
-
-    .subtitle {
-      font-size: 1.3rem;
-      color: #e2e8f0;
-      margin: 0;
-      line-height: 1.4;
-      font-family: "Inter", "Segoe UI", sans-serif;
-
-      @media (max-width: 768px) {
-        font-size: 1.2rem;
-      }
-
-      @media (max-width: 480px) {
-        font-size: 1rem;
-      }
-    }
-  }
-`;
 
 const TeamGrid = styled.section`
   background: #f8f9fa;

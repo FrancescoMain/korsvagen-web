@@ -3,6 +3,7 @@ import styled from "styled-components";
 import Header from "../components/layout/Header";
 import Footer from "../components/layout/Footer";
 import ContactCTA from "../components/common/ContactCTA";
+import PageHero from "../components/common/PageHero";
 
 const CareersContainer = styled.div`
   min-height: 100vh;
@@ -32,110 +33,6 @@ const MainContent = styled.main`
   }
 `;
 
-const HeroSection = styled.section`
-  background: linear-gradient(
-      135deg,
-      rgba(26, 26, 26, 0.95) 0%,
-      rgba(44, 44, 44, 0.95) 100%
-    ),
-    url("https://images.unsplash.com/photo-1521737604893-d14cc237f11d?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80");
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
-  color: white;
-  text-align: center;
-  padding: 120px 20px 80px;
-  min-height: 60vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  overflow: hidden;
-  position: relative;
-
-  &::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.4);
-    z-index: 1;
-  }
-
-  .hero-content {
-    position: relative;
-    z-index: 2;
-    max-width: 900px;
-    margin: 0 auto;
-    width: 100%;
-
-    h1 {
-      font-size: 3.5rem;
-      margin-bottom: 30px;
-      font-family: "Korsvagen Brand", "Times New Roman", serif;
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-      color: #ffffff;
-      line-height: 1.2;
-      font-weight: 400;
-
-      @media (max-width: 1024px) {
-        font-size: 3rem;
-      }
-
-      @media (max-width: 768px) {
-        font-size: 2.5rem;
-        margin-bottom: 25px;
-      }
-
-      @media (max-width: 480px) {
-        font-size: 2rem;
-        margin-bottom: 20px;
-        letter-spacing: 0.02em;
-      }
-    }
-
-    p {
-      font-size: 1.3rem;
-      color: #cccccc;
-      font-weight: 300;
-      max-width: 700px;
-      margin: 0 auto;
-      line-height: 1.6;
-      font-family: "Inter", "Segoe UI", sans-serif;
-
-      @media (max-width: 1024px) {
-        font-size: 1.2rem;
-      }
-
-      @media (max-width: 768px) {
-        font-size: 1.1rem;
-      }
-
-      @media (max-width: 480px) {
-        font-size: 1rem;
-      }
-    }
-  }
-
-  @media (max-width: 1024px) {
-    padding: 110px 20px 70px;
-    min-height: 55vh;
-    background-attachment: scroll;
-  }
-
-  @media (max-width: 768px) {
-    padding: 100px 20px 60px;
-    min-height: 50vh;
-  }
-
-  @media (max-width: 480px) {
-    padding: 90px 15px 50px;
-    min-height: 45vh;
-  }
-`;
 
 const ContentSection = styled.section`
   padding: 80px 0;
@@ -932,16 +829,11 @@ const CareersPage: React.FC = () => {
     <CareersContainer>
       <Header />
       <MainContent>
-        <HeroSection>
-          <div className="hero-content">
-            <h1>Lavora con Noi</h1>
-            <p>
-              Unisciti al team KORSVAGEN e contribuisci a costruire il futuro
-              dell'edilizia. Cerchiamo professionisti appassionati e qualificati
-              per crescere insieme.
-            </p>
-          </div>
-        </HeroSection>
+        <PageHero
+          title="Lavora con Noi"
+          subtitle="Unisciti al team KORSVAGEN e contribuisci a costruire il futuro dell'edilizia"
+          size="compact"
+        />
 
         <ContentSection>
           <Container>

@@ -13,6 +13,7 @@ import React from "react";
 import styled from "styled-components";
 import Header from "../components/layout/Header";
 import Footer from "../components/layout/Footer";
+import PageHero from "../components/common/PageHero";
 import { useContactData, useSettings } from "../contexts/SettingsContext";
 import { contactData as fallbackData } from "../data/contactData";
 
@@ -44,110 +45,6 @@ const MainContent = styled.main`
   }
 `;
 
-const HeroSection = styled.section`
-  background: linear-gradient(
-      135deg,
-      rgba(26, 26, 26, 0.95) 0%,
-      rgba(44, 44, 44, 0.95) 100%
-    ),
-    url("https://images.unsplash.com/photo-1560472354-b33ff0c44a43?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80");
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
-  color: white;
-  text-align: center;
-  padding: 120px 20px 80px;
-  min-height: 60vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  overflow: hidden;
-  position: relative;
-
-  &::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.4);
-    z-index: 1;
-  }
-
-  .hero-content {
-    position: relative;
-    z-index: 2;
-    max-width: 800px;
-    margin: 0 auto;
-    width: 100%;
-
-    h1 {
-      font-size: 4rem;
-      margin-bottom: 30px;
-      font-family: "Korsvagen Brand", "Times New Roman", serif;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: #ffffff;
-      line-height: 1.1;
-      font-weight: 400;
-
-      @media (max-width: 1024px) {
-        font-size: 3.5rem;
-      }
-
-      @media (max-width: 768px) {
-        font-size: 2.5rem;
-        margin-bottom: 25px;
-      }
-
-      @media (max-width: 480px) {
-        font-size: 2rem;
-        margin-bottom: 20px;
-        letter-spacing: 0.05em;
-      }
-    }
-
-    p {
-      font-size: 1.3rem;
-      color: #cccccc;
-      font-weight: 300;
-      max-width: 600px;
-      margin: 0 auto;
-      line-height: 1.6;
-      font-family: "Inter", "Segoe UI", sans-serif;
-
-      @media (max-width: 1024px) {
-        font-size: 1.2rem;
-      }
-
-      @media (max-width: 768px) {
-        font-size: 1.1rem;
-      }
-
-      @media (max-width: 480px) {
-        font-size: 1rem;
-      }
-    }
-  }
-
-  @media (max-width: 1024px) {
-    padding: 110px 20px 70px;
-    min-height: 55vh;
-    background-attachment: scroll;
-  }
-
-  @media (max-width: 768px) {
-    padding: 100px 20px 60px;
-    min-height: 50vh;
-  }
-
-  @media (max-width: 480px) {
-    padding: 90px 15px 50px;
-    min-height: 45vh;
-  }
-`;
 
 const ContactSection = styled.section`
   padding: 80px 0;
@@ -610,12 +507,11 @@ const ContactPage: React.FC = () => {
     <ContactContainer>
       <Header />
       <MainContent>
-        <HeroSection>
-          <div className="hero-content">
-            <h1>Contattaci</h1>
-            <p>Siamo qui per realizzare i tuoi progetti edilizi</p>
-          </div>
-        </HeroSection>
+        <PageHero
+          title="Contatti"
+          subtitle="Siamo qui per realizzare i tuoi progetti edilizi"
+          size="compact"
+        />
 
         <ContactContent>
           <div className="contact-intro">
