@@ -15,7 +15,7 @@
 
 import express from "express";
 import { supabaseClient } from "../config/supabase.js";
-import { verifyAuth } from "../utils/auth.js";
+import { requireAuth } from "../utils/auth.js";
 import { logger } from "../utils/logger.js";
 import multer from "multer";
 import { v2 as cloudinary } from "cloudinary";
@@ -88,7 +88,7 @@ router.get("/", async (req, res) => {
  * GET /api/services/admin
  * Admin endpoint - Returns all services with complete data
  */
-router.get("/admin", verifyAuth, async (req, res) => {
+router.get("/admin", requireAuth, async (req, res) => {
   try {
     logger.info(`Admin ${req.user.username} fetching all services`);
     
@@ -127,7 +127,7 @@ router.get("/admin", verifyAuth, async (req, res) => {
  * GET /api/services/admin/:id
  * Admin endpoint - Get single service details
  */
-router.get("/admin/:id", verifyAuth, async (req, res) => {
+router.get("/admin/:id", requireAuth, async (req, res) => {
   try {
     const { id } = req.params;
     logger.info(`Admin ${req.user.username} fetching service: ${id}`);
@@ -174,7 +174,7 @@ router.get("/admin/:id", verifyAuth, async (req, res) => {
  * POST /api/services/admin
  * Admin endpoint - Create new service
  */
-router.post("/admin", verifyAuth, async (req, res) => {
+router.post("/admin", requireAuth, async (req, res) => {
   try {
     const { title, subtitle, description, microservices, is_active, display_order } = req.body;
     const userId = req.user.id;
@@ -275,7 +275,7 @@ router.post("/admin", verifyAuth, async (req, res) => {
  * PUT /api/services/admin/:id
  * Admin endpoint - Update existing service
  */
-router.put("/admin/:id", verifyAuth, async (req, res) => {
+router.put("/admin/:id", requireAuth, async (req, res) => {
   try {
     const { id } = req.params;
     const { title, subtitle, description, microservices, is_active, display_order } = req.body;
@@ -376,7 +376,7 @@ router.put("/admin/:id", verifyAuth, async (req, res) => {
  * DELETE /api/services/admin/:id
  * Admin endpoint - Delete service
  */
-router.delete("/admin/:id", verifyAuth, async (req, res) => {
+router.delete("/admin/:id", requireAuth, async (req, res) => {
   try {
     const { id } = req.params;
     logger.info(`Admin ${req.user.username} deleting service: ${id}`);
@@ -452,7 +452,7 @@ router.delete("/admin/:id", verifyAuth, async (req, res) => {
  * PUT /api/services/admin/reorder
  * Admin endpoint - Reorder services
  */
-router.put("/admin/reorder", verifyAuth, async (req, res) => {
+router.put("/admin/reorder", requireAuth, async (req, res) => {
   try {
     const { serviceIds } = req.body;
     logger.info(`Admin ${req.user.username} reordering services`);
@@ -499,7 +499,7 @@ router.put("/admin/reorder", verifyAuth, async (req, res) => {
  * POST /api/services/admin/:id/image
  * Admin endpoint - Upload service image
  */
-router.post("/admin/:id/image", verifyAuth, upload.single('image'), async (req, res) => {
+router.post("/admin/:id/image", requireAuth, upload.single('image'), async (req, res) => {
   try {
     const { id } = req.params;
     const userId = req.user.id;
@@ -625,7 +625,7 @@ router.post("/admin/:id/image", verifyAuth, upload.single('image'), async (req, 
  * DELETE /api/services/admin/:id/image
  * Admin endpoint - Delete service image
  */
-router.delete("/admin/:id/image", verifyAuth, async (req, res) => {
+router.delete("/admin/:id/image", requireAuth, async (req, res) => {
   try {
     const { id } = req.params;
     const userId = req.user.id;
@@ -721,7 +721,7 @@ router.delete("/admin/:id/image", verifyAuth, async (req, res) => {
  * GET /api/services/admin/stats
  * Admin endpoint - Get services statistics
  */
-router.get("/admin/stats", verifyAuth, async (req, res) => {
+router.get("/admin/stats", requireAuth, async (req, res) => {
   try {
     logger.info(`Admin ${req.user.username} fetching services statistics`);
 
