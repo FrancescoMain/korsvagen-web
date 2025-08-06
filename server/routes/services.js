@@ -505,6 +505,14 @@ router.post("/admin/:id/image", requireAuth, upload.single('image'), async (req,
     const userId = req.user.id;
     
     logger.info(`Admin ${req.user.username} uploading image for service: ${id}`);
+    
+    // Debug: List all services to see what IDs we actually have
+    const { data: allServices } = await supabaseClient
+      .from("services")
+      .select("id, title")
+      .order("title");
+    
+    logger.info(`Available services in DB:`, allServices?.map(s => ({ id: s.id, title: s.title })));
 
     if (!req.file) {
       return res.status(400).json({
