@@ -436,24 +436,9 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
    * Effetto per il caricamento iniziale
    */
   useEffect(() => {
-    // Carica settings solo se autenticato o se siamo sulla homepage
-    const currentPath = window.location.pathname;
-    const isHomePage = currentPath === "/" || currentPath === "/home";
-    
-    // Check auth state directly without dependency
-    let token = localStorage.getItem("korsvagen_auth_token");
-    if (!token) {
-      token = sessionStorage.getItem("korsvagen_auth_token");
-    }
-    const isAuthenticated = !!token;
-
-    if (isAuthenticated || isHomePage) {
-      loadSettings();
-    } else {
-      console.log(
-        "⏭️ Skipping settings load - not authenticated and not on homepage"
-      );
-    }
+    // Carica sempre i settings pubblici - sono necessari per ContactCTA su tutte le pagine
+    console.log("🔄 Loading public settings for all pages");
+    loadSettings();
   }, [loadSettings]);
 
   /**
