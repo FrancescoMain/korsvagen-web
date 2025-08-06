@@ -34,6 +34,7 @@ import { Settings } from "./pages/Settings";
 import { ReviewsManagement } from "./pages/ReviewsManagement";
 import AboutManagement from "./pages/AboutManagement";
 import TeamManagement from "./pages/TeamManagement";
+import ServicesManagement from "./pages/ServicesManagement";
 import "./styles/dashboard.css";
 
 function App() {
@@ -94,6 +95,7 @@ function App() {
                 <Route path="reviews" element={<ReviewsManagement />} />
                 <Route path="about" element={<AboutManagement />} />
                 <Route path="team" element={<TeamManagement />} />
+                <Route path="services" element={<ServicesManagement />} />
                 <Route path="settings" element={<Settings />} />
               </Route>
 

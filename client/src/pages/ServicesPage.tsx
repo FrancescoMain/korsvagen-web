@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import Header from "../components/layout/Header";
 import Footer from "../components/layout/Footer";
 import ContactCTA from "../components/common/ContactCTA";
 import PageHero from "../components/common/PageHero";
+import { useServices } from "../hooks/useServices";
 
 const ServicesContainer = styled.div`
   min-height: 100vh;
@@ -75,6 +76,28 @@ const ServicesGrid = styled.section`
       padding: 40px 30px;
       text-align: center;
       position: relative;
+
+      .service-image {
+        margin: -20px auto 20px auto;
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        overflow: hidden;
+        background: rgba(255, 255, 255, 0.1);
+        border: 3px solid rgba(255, 255, 255, 0.2);
+
+        img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+
+        @media (max-width: 768px) {
+          width: 60px;
+          height: 60px;
+          margin: -15px auto 15px auto;
+        }
+      }
 
       &::after {
         content: "";
@@ -223,13 +246,82 @@ const ServicesGrid = styled.section`
   }
 `;
 
+const LoadingSpinner = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 4rem 0;
+  color: #ffffff;
+  font-size: 1.2rem;
+`;
+
+const ErrorMessage = styled.div`
+  background: rgba(220, 53, 69, 0.1);
+  border: 1px solid rgba(220, 53, 69, 0.3);
+  color: #dc3545;
+  padding: 2rem;
+  border-radius: 8px;
+  text-align: center;
+  margin: 2rem auto;
+  max-width: 600px;
+  
+  .title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+  
+  .message {
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+`;
+
 const ServicesPage: React.FC = () => {
+  const { services, loading, error, fetchPublicServices } = useServices();
+
+  // Carica servizi al mount
+  useEffect(() => {
+    fetchPublicServices();
+  }, [fetchPublicServices]);
+
   const scrollToContact = () => {
     const contactSection = document.getElementById("contact-form");
     if (contactSection) {
       contactSection.scrollIntoView({ behavior: "smooth" });
     }
   };
+
+  const renderServiceCard = (service: any) => (
+    <div key={service.id} className="service-card">
+      <div className="card-header">
+        {service.image_url && (
+          <div className="service-image">
+            <img src={service.image_url} alt={service.title} />
+          </div>
+        )}
+        <h3>{service.title}</h3>
+        {service.subtitle && (
+          <p className="subtitle">{service.subtitle}</p>
+        )}
+      </div>
+      <div className="card-content">
+        <p className="description">
+          {service.description}
+        </p>
+        {service.microservices && service.microservices.length > 0 && (
+          <ul>
+            {service.microservices.map((microservice: string, index: number) => (
+              <li key={index}>{microservice}</li>
+            ))}
+          </ul>
+        )}
+        <button className="cta-button" onClick={scrollToContact}>
+          Richiedi Preventivo
+        </button>
+      </div>
+    </div>
+  );
 
   return (
     <ServicesContainer>
@@ -242,145 +334,31 @@ const ServicesPage: React.FC = () => {
         />
 
         <ServicesGrid>
-          <div className="services-grid">
-            <div className="service-card">
-              <div className="card-header">
-                <h3>Progettazione</h3>
-                <p className="subtitle">Dall'idea al progetto definitivo</p>
+          {loading ? (
+            <LoadingSpinner>
+              Caricamento servizi...
+            </LoadingSpinner>
+          ) : error ? (
+            <ErrorMessage>
+              <div className="title">Errore nel caricamento</div>
+              <div className="message">
+                Non è stato possibile caricare i servizi. Riprova più tardi.
+                <br />
+                <small>Dettagli: {error}</small>
               </div>
-              <div className="card-content">
-                <p className="description">
-                  Offriamo servizi completi di progettazione per trasformare le
-                  tue idee in progetti realizzabili.
-                </p>
-                <ul>
-                  <li>Progettazione Architettonica</li>
-                  <li>Progettazione Strutturale</li>
-                  <li>Progettazione Impiantistica</li>
-                  <li>Pratiche Edilizie</li>
-                  <li>Rendering 3D</li>
-                </ul>
-                <button className="cta-button" onClick={scrollToContact}>
-                  Richiedi Preventivo
-                </button>
+            </ErrorMessage>
+          ) : services.length === 0 ? (
+            <ErrorMessage>
+              <div className="title">Nessun servizio disponibile</div>
+              <div className="message">
+                I nostri servizi saranno presto disponibili. Torna a trovarci!
               </div>
+            </ErrorMessage>
+          ) : (
+            <div className="services-grid">
+              {services.map(renderServiceCard)}
             </div>
-
-            <div className="service-card">
-              <div className="card-header">
-                <h3>Costruzioni</h3>
-                <p className="subtitle">Realizziamo i tuoi progetti</p>
-              </div>
-              <div className="card-content">
-                <p className="description">
-                  Costruiamo edifici di ogni tipo con materiali di qualità e
-                  tecniche all'avanguardia.
-                </p>
-                <ul>
-                  <li>Costruzioni Residenziali</li>
-                  <li>Costruzioni Commerciali</li>
-                  <li>Costruzioni Industriali</li>
-                  <li>Ville e Abitazioni Custom</li>
-                  <li>Edifici Pubblici</li>
-                </ul>
-                <button className="cta-button" onClick={scrollToContact}>
-                  Richiedi Preventivo
-                </button>
-              </div>
-            </div>
-
-            <div className="service-card">
-              <div className="card-header">
-                <h3>Ristrutturazioni</h3>
-                <p className="subtitle">Rinnova i tuoi spazi</p>
-              </div>
-              <div className="card-content">
-                <p className="description">
-                  Ristrutturiamo e riqualifichiamo edifici esistenti per
-                  renderli moderni e funzionali.
-                </p>
-                <ul>
-                  <li>Ristrutturazioni Complete</li>
-                  <li>Ristrutturazioni Parziali</li>
-                  <li>Riqualificazione Energetica</li>
-                  <li>Restauro Conservativo</li>
-                  <li>Bonus Edilizi</li>
-                </ul>
-                <button className="cta-button" onClick={scrollToContact}>
-                  Richiedi Preventivo
-                </button>
-              </div>
-            </div>
-
-            <div className="service-card">
-              <div className="card-header">
-                <h3>Gestione Cantiere</h3>
-                <p className="subtitle">Controllo totale del progetto</p>
-              </div>
-              <div className="card-content">
-                <p className="description">
-                  Gestiamo ogni fase del cantiere garantendo qualità, sicurezza
-                  e rispetto dei tempi.
-                </p>
-                <ul>
-                  <li>Direzione Lavori</li>
-                  <li>Coordinamento Sicurezza</li>
-                  <li>Controllo Qualità</li>
-                  <li>Gestione Fornitori</li>
-                  <li>Collaudi e Certificazioni</li>
-                </ul>
-                <button className="cta-button" onClick={scrollToContact}>
-                  Richiedi Preventivo
-                </button>
-              </div>
-            </div>
-
-            <div className="service-card">
-              <div className="card-header">
-                <h3>Consulenza Tecnica</h3>
-                <p className="subtitle">Esperti al tuo servizio</p>
-              </div>
-              <div className="card-content">
-                <p className="description">
-                  Forniamo consulenza specializzata per risolvere problematiche
-                  tecniche e normative.
-                </p>
-                <ul>
-                  <li>Perizie Tecniche</li>
-                  <li>Valutazioni Immobiliari</li>
-                  <li>Consulenza Normativa</li>
-                  <li>Due Diligence Immobiliare</li>
-                  <li>Assistenza Legale Tecnica</li>
-                </ul>
-                <button className="cta-button" onClick={scrollToContact}>
-                  Richiedi Preventivo
-                </button>
-              </div>
-            </div>
-
-            <div className="service-card">
-              <div className="card-header">
-                <h3>Efficienza Energetica</h3>
-                <p className="subtitle">Sostenibilità e risparmio</p>
-              </div>
-              <div className="card-content">
-                <p className="description">
-                  Miglioriamo l'efficienza energetica degli edifici per ridurre
-                  i consumi e l'impatto ambientale.
-                </p>
-                <ul>
-                  <li>Certificazione Energetica</li>
-                  <li>Cappotto Termico</li>
-                  <li>Impianti Rinnovabili</li>
-                  <li>Domotica e Smart Home</li>
-                  <li>Superbonus e Incentivi</li>
-                </ul>
-                <button className="cta-button" onClick={scrollToContact}>
-                  Richiedi Preventivo
-                </button>
-              </div>
-            </div>
-          </div>
+          )}
         </ServicesGrid>
 
         <ContactCTA />

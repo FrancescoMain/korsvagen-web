@@ -10,6 +10,7 @@ import {
   X,
   MessageSquare,
   Users,
+  Cog,
 } from "lucide-react";
 
 interface NavigationItem {
@@ -44,6 +45,11 @@ const navigationItems: NavigationItem[] = [
     title: "Gestione Team",
     icon: <Users size={20} />,
     path: "/dashboard/team",
+  },
+  {
+    title: "Gestione Servizi",
+    icon: <Cog size={20} />,
+    path: "/dashboard/services",
   },
   {
     title: "Contact",
