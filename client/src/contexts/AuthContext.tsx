@@ -223,12 +223,26 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
               scheduleTokenRefresh(tokens.access);
             } else {
               console.log("❌ Refresh automatico fallito");
-              toast.error("Sessione in scadenza. Effettua nuovamente il login.");
+              // Only show toast if we're in admin context
+              const currentPath = window.location.pathname;
+              const isAdminRoute = currentPath.startsWith('/dashboard') || 
+                                  currentPath.startsWith('/admin') || 
+                                  currentPath === '/login';
+              if (isAdminRoute) {
+                toast.error("Sessione in scadenza. Effettua nuovamente il login.");
+              }
             }
           }
         } catch (error) {
           console.log("❌ Refresh automatico fallito:", error);
-          toast.error("Sessione in scadenza. Effettua nuovamente il login.");
+          // Only show toast if we're in admin context
+          const currentPath = window.location.pathname;
+          const isAdminRoute = currentPath.startsWith('/dashboard') || 
+                              currentPath.startsWith('/admin') || 
+                              currentPath === '/login';
+          if (isAdminRoute) {
+            toast.error("Sessione in scadenza. Effettua nuovamente il login.");
+          }
         }
       }, refreshTime);
       
@@ -492,6 +506,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                   }
                 } catch (error) {
                   console.log("❌ Refresh automatico fallito:", error);
+                  // Only show toast if we're in admin context
+                  const currentPath = window.location.pathname;
+                  const isAdminRoute = currentPath.startsWith('/dashboard') || 
+                                      currentPath.startsWith('/admin') || 
+                                      currentPath === '/login';
+                  if (isAdminRoute) {
+                    toast.error("Sessione in scadenza. Effettua nuovamente il login.");
+                  }
                 }
               }, refreshTime);
               
@@ -538,10 +560,30 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     initializeAuth();
   }, []); // Esegui SOLO al mount - nessuna dipendenza esterna
 
+  // Utility function to check if we're in admin context
+  const isAdminContext = useCallback(() => {
+    const currentPath = window.location.pathname;
+    const isAdminRoute = currentPath.startsWith('/dashboard') || 
+                        currentPath.startsWith('/admin') || 
+                        currentPath === '/login';
+    const hasAuthToken = !!token;
+    
+    // Show auth popup only if:
+    // 1. We're on an admin route, OR
+    // 2. We have an active auth token (user is/was authenticated)
+    return isAdminRoute || hasAuthToken;
+  }, [token]);
+
   // Event listener per gestire token scaduti
   useEffect(() => {
     const handleTokenExpired = async () => {
       console.log("🔄 Token scaduto, tentativo di refresh...");
+      
+      // Skip auth popup for public routes without active auth session
+      if (!isAdminContext()) {
+        console.log("ℹ️ Token expired su rotta pubblica - ignoro popup auth");
+        return;
+      }
       
       // Prova refresh automatico
       const refreshSuccess = await refreshToken();
@@ -557,7 +599,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     return () => {
       window.removeEventListener("auth:token-expired", handleTokenExpired);
     };
-  }, [refreshToken]);
+  }, [refreshToken, isAdminContext]);
 
   /**
    * VALORE DEL CONTEXT
