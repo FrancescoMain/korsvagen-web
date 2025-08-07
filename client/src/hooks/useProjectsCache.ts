@@ -120,11 +120,11 @@ export const useProjectsCache = () => {
     limit?: number;
     page?: number;
   }): Project[] | null => {
-    if (!isCacheValid(globalCache.projects)) {
+    if (!globalCache.projects || !isCacheValid(globalCache.projects)) {
       return null;
     }
 
-    let projects = globalCache.projects!.data;
+    let projects = globalCache.projects.data;
 
     // Apply filters if provided
     if (filters) {
@@ -150,12 +150,12 @@ export const useProjectsCache = () => {
   // Get cached project detail
   const getCachedProjectDetail = useCallback((id: string): Project | null => {
     const cached = globalCache.projectDetails.get(id);
-    return isCacheValid(cached) ? cached!.data : null;
+    return cached && isCacheValid(cached) ? cached.data : null;
   }, [isCacheValid]);
 
   // Get cached labels
   const getCachedLabels = useCallback((): ProjectLabel[] | null => {
-    return isCacheValid(globalCache.labels) ? globalCache.labels!.data : null;
+    return globalCache.labels && isCacheValid(globalCache.labels) ? globalCache.labels.data : null;
   }, [isCacheValid]);
 
   // Set cached projects
@@ -211,7 +211,7 @@ export const useProjectsCache = () => {
     return {
       projects: {
         cached: !!globalCache.projects,
-        valid: isCacheValid(globalCache.projects),
+        valid: globalCache.projects ? isCacheValid(globalCache.projects) : false,
         timestamp: globalCache.projects?.timestamp,
         age: globalCache.projects ? Date.now() - globalCache.projects.timestamp : 0,
       },
@@ -221,7 +221,7 @@ export const useProjectsCache = () => {
       },
       labels: {
         cached: !!globalCache.labels,
-        valid: isCacheValid(globalCache.labels),
+        valid: globalCache.labels ? isCacheValid(globalCache.labels) : false,
         timestamp: globalCache.labels?.timestamp,
         age: globalCache.labels ? Date.now() - globalCache.labels.timestamp : 0,
       },
@@ -249,8 +249,7 @@ export const useProjectsCache = () => {
       globalCache.labels = null;
     }
 
-    if (expiredDetails.length > 0 || 
-        (!globalCache.projects || !globalCache.labels)) {
+    if (expiredDetails.length > 0) {
       notifyListeners();
     }
   }, [isCacheValid, notifyListeners]);
@@ -281,9 +280,9 @@ export const useProjectsCache = () => {
     isCacheValid: (type: 'projects' | 'labels') => {
       switch (type) {
         case 'projects':
-          return isCacheValid(globalCache.projects);
+          return globalCache.projects ? isCacheValid(globalCache.projects) : false;
         case 'labels':
-          return isCacheValid(globalCache.labels);
+          return globalCache.labels ? isCacheValid(globalCache.labels) : false;
         default:
           return false;
       }
