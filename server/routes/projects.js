@@ -31,6 +31,21 @@ import { v2 as cloudinary } from "cloudinary";
 
 const router = express.Router();
 
+// Test endpoint to verify deployment
+router.get("/test", (req, res) => {
+  res.json({
+    success: true,
+    message: "Projects API is working!",
+    timestamp: new Date().toISOString(),
+    routes: [
+      "GET /api/projects - Public projects",
+      "GET /api/projects/admin - Admin projects list",
+      "POST /api/projects/admin - Create project",
+      "GET /api/projects/labels - Project labels"
+    ]
+  });
+});
+
 // Configure multer for image uploads
 const upload = multer({ 
   storage: multer.memoryStorage(),
