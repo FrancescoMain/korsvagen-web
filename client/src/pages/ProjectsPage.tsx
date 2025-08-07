@@ -1,11 +1,13 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { useNavigateWithScroll } from "../hooks/useNavigateWithScroll";
+import { useProjects } from "../hooks/useProjects";
 import Header from "../components/layout/Header";
 import Footer from "../components/layout/Footer";
 import ContactCTA from "../components/common/ContactCTA";
 import ProjectsCTA from "../components/common/ProjectsCTA";
 import PageHero from "../components/common/PageHero";
+import toast from "react-hot-toast";
 
 const ProjectsContainer = styled.div`
   min-height: 100vh;
@@ -321,83 +323,60 @@ const ProjectsGrid = styled.section`
 
 const ProjectsPage: React.FC = () => {
   const navigate = useNavigateWithScroll();
-  const [activeFilter, setActiveFilter] = React.useState("tutti");
+  const { fetchPublicProjects, fetchProjectLabels, loading } = useProjects();
 
-  const projects = [
-    {
-      id: 1,
-      title: "Villa Residenziale Moderna",
-      category: "residenziale",
-      description:
-        "Progettazione e costruzione di villa unifamiliare con design contemporaneo e soluzioni tecnologiche avanzate.",
-      year: "2024",
-      location: "Milano",
-      status: "Completato",
-    },
-    {
-      id: 2,
-      title: "Centro Commerciale",
-      category: "commerciale",
-      description:
-        "Realizzazione di complesso commerciale multifunzionale con aree retail, uffici e spazi comuni.",
-      year: "2023",
-      location: "Roma",
-      status: "Completato",
-    },
-    {
-      id: 3,
-      title: "Ristrutturazione Palazzo Storico",
-      category: "ristrutturazione",
-      description:
-        "Restauro conservativo e riqualificazione energetica di palazzo storico del XVIII secolo.",
-      year: "2024",
-      location: "Firenze",
-      status: "In corso",
-    },
-    {
-      id: 4,
-      title: "Complesso Industriale",
-      category: "industriale",
-      description:
-        "Progettazione e costruzione di stabilimento produttivo con uffici amministrativi integrati.",
-      year: "2023",
-      location: "Torino",
-      status: "Completato",
-    },
-    {
-      id: 5,
-      title: "Residenza Eco-Sostenibile",
-      category: "residenziale",
-      description:
-        "Condominio residenziale con certificazione energetica A+ e sistemi di energia rinnovabile.",
-      year: "2024",
-      location: "Bologna",
-      status: "In corso",
-    },
-    {
-      id: 6,
-      title: "Uffici Direzionali",
-      category: "commerciale",
-      description:
-        "Torre per uffici con tecnologie smart building e spazi flessibili per coworking.",
-      year: "2024",
-      location: "Napoli",
-      status: "In progettazione",
-    },
-  ];
-
-  const categories = [
+  // States
+  const [activeFilter, setActiveFilter] = useState("tutti");
+  const [projects, setProjects] = useState<any[]>([]);
+  const [categories, setCategories] = useState([
     { key: "tutti", label: "Tutti i Progetti" },
     { key: "residenziale", label: "Residenziale" },
     { key: "commerciale", label: "Commerciale" },
     { key: "industriale", label: "Industriale" },
     { key: "ristrutturazione", label: "Ristrutturazioni" },
-  ];
+  ]);
+  const [pageLoading, setPageLoading] = useState(true);
 
-  const filteredProjects =
-    activeFilter === "tutti"
-      ? projects
-      : projects.filter((project) => project.category === activeFilter);
+  // Load projects and categories
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setPageLoading(true);
+        
+        // Load categories/labels
+        try {
+          const labels = await fetchProjectLabels();
+          const dynamicCategories = [
+            { key: "tutti", label: "Tutti i Progetti" },
+            ...labels.map(label => ({
+              key: label.name,
+              label: label.display_name
+            }))
+          ];
+          setCategories(dynamicCategories);
+        } catch (error) {
+          console.warn("Could not load project labels, using defaults");
+        }
+
+        // Load projects
+        const projectsData = await fetchPublicProjects({
+          label: activeFilter === "tutti" ? undefined : activeFilter,
+          limit: 50 // Load more projects for the public page
+        });
+        
+        setProjects(projectsData.projects || []);
+
+      } catch (error: any) {
+        console.error("Error loading projects:", error);
+        toast.error("Errore nel caricamento dei progetti");
+        setProjects([]);
+      } finally {
+        setPageLoading(false);
+      }
+    };
+
+    loadData();
+  }, [activeFilter, fetchPublicProjects, fetchProjectLabels]);
 
   const handleProjectClick = (projectId: number) => {
     navigate(`/progetti/${projectId}`);
@@ -427,20 +406,70 @@ const ProjectsPage: React.FC = () => {
           </div>
 
           <div className="projects-grid">
-            {filteredProjects.map((project) => (
+            {pageLoading ? (
+              // Loading state
+              [...Array(6)].map((_, i) => (
+                <div key={i} className="project-card" style={{ opacity: 0.6 }}>
+                  <div className="project-image">
+                    <div className="project-category">CARICAMENTO...</div>
+                    Caricamento progetto...
+                  </div>
+                  <div className="project-content">
+                    <h3>Caricamento...</h3>
+                    <p>Caricamento progetti in corso...</p>
+                    <div className="project-details">
+                      <div className="detail-item">
+                        <div className="label">Anno</div>
+                        <div className="value">----</div>
+                      </div>
+                      <div className="detail-item">
+                        <div className="label">Luogo</div>
+                        <div className="value">----</div>
+                      </div>
+                      <div className="detail-item">
+                        <div className="label">Status</div>
+                        <div className="value">----</div>
+                      </div>
+                    </div>
+                    <button className="view-project-btn" disabled>
+                      Caricamento...
+                    </button>
+                  </div>
+                </div>
+              ))
+            ) : projects.map((project) => (
               <div
                 key={project.id}
                 className="project-card"
                 onClick={() => handleProjectClick(project.id)}
               >
-                <div className="project-image">
+                <div 
+                  className="project-image"
+                  style={project.cover_image_url ? {
+                    backgroundImage: `url(${project.cover_image_url})`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    color: 'white',
+                    textShadow: '0 2px 4px rgba(0,0,0,0.7)'
+                  } : {}}
+                >
                   <div className="project-category">
-                    {project.category.toUpperCase()}
+                    {project.label.toUpperCase()}
                   </div>
-                  Immagine del progetto in arrivo
+                  {!project.cover_image_url && "Immagine del progetto in arrivo"}
                 </div>
                 <div className="project-content">
                   <h3>{project.title}</h3>
+                  {project.subtitle && (
+                    <p style={{ 
+                      fontSize: '0.9rem', 
+                      color: '#d4af37', 
+                      fontWeight: '600',
+                      marginBottom: '0.5rem'
+                    }}>
+                      {project.subtitle}
+                    </p>
+                  )}
                   <p>{project.description}</p>
                   <div className="project-details">
                     <div className="detail-item">
@@ -464,11 +493,14 @@ const ProjectsPage: React.FC = () => {
             ))}
           </div>
 
-          {filteredProjects.length === 0 && (
+          {!pageLoading && projects.length === 0 && (
             <div className="coming-soon">
-              <h2>Progetti in arrivo</h2>
+              <h2>Nessun progetto trovato</h2>
               <p>
-                Stiamo aggiornando questa sezione con i nostri ultimi progetti.
+                {activeFilter === "tutti" 
+                  ? "Al momento non ci sono progetti pubblicati. Torna presto per scoprire le nostre realizzazioni."
+                  : `Nessun progetto trovato per la categoria "${categories.find(c => c.key === activeFilter)?.label}". Prova con una categoria diversa.`
+                }
               </p>
             </div>
           )}

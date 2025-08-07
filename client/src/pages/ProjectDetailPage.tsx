@@ -1,10 +1,12 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { useNavigateWithScroll } from "../hooks/useNavigateWithScroll";
+import { useProjects } from "../hooks/useProjects";
 import styled from "styled-components";
 import Header from "../components/layout/Header";
 import Footer from "../components/layout/Footer";
 import ContactCTA from "../components/common/ContactCTA";
+import toast from "react-hot-toast";
 
 const ProjectDetailContainer = styled.div`
   min-height: 100vh;
@@ -699,69 +701,53 @@ const ModalImage = styled.div`
 const ProjectDetailPage: React.FC = () => {
   const { projectId } = useParams<{ projectId: string }>();
   const navigate = useNavigateWithScroll();
-  const [selectedImage, setSelectedImage] = React.useState<number | null>(null);
+  const { fetchProject } = useProjects();
+  
+  // States
+  const [project, setProject] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [selectedImage, setSelectedImage] = useState<number | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  // Mock data del progetto - in un'app reale, questo dovrebbe venire da un API
-  const project = {
-    id: projectId,
-    title: "Ristrutturazione Villa Moderna",
-    description:
-      "Un progetto completo di ristrutturazione che ha trasformato una villa degli anni '80 in una moderna abitazione sostenibile.",
-    category: "Residenziale",
-    year: "2023",
-    location: "Milano",
-    status: "Completato",
-    client: "Famiglia Rossi",
-    surface: "350 mq",
-    budget: "€ 450.000",
-    timeline: "18 mesi",
-    longDescription: `
-      Questo progetto di ristrutturazione ha completamente trasformato una villa degli anni '80 in una moderna abitazione sostenibile. 
-      Il nostro team ha lavorato a stretto contatto con la famiglia per creare spazi funzionali e accoglienti, 
-      integrando tecnologie all'avanguardia per l'efficienza energetica.
-      
-      La ristrutturazione ha incluso una completa riprogettazione degli interni, l'installazione di un sistema di 
-      riscaldamento a pompa di calore, pannelli solari e un sistema di domotica avanzato. 
-      Particolare attenzione è stata dedicata all'illuminazione naturale e alla creazione di spazi aperti che 
-      favoriscono la convivialità familiare.
-    `,
-    features: [
-      "Ristrutturazione completa interni ed esterni",
-      "Installazione pannelli solari",
-      "Sistema di riscaldamento a pompa di calore",
-      "Domotica avanzata",
-      "Cucina moderna open space",
-      "Bagni di design con materiali sostenibili",
-      "Giardino paesaggistico",
-      "Certificazione energetica A+",
-    ],
-    images: [
-      {
-        id: 1,
-        title: "Vista principale della villa",
-        alt: "Vista principale della villa ristrutturata",
-        url: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-      },
-      {
-        id: 2,
-        title: "Interni moderni",
-        alt: "Interni moderni della villa",
-        url: "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-      },
-      {
-        id: 3,
-        title: "Esterni e giardino",
-        alt: "Esterni e giardino della villa",
-        url: "https://images.unsplash.com/photo-1600047508788-786564deb7f2?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-      },
-      {
-        id: 4,
-        title: "Dettagli costruttivi",
-        alt: "Dettagli tecnici e costruttivi",
-        url: "https://images.unsplash.com/photo-1600047508798-b3a5d7d3c4f2?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-      },
-    ],
-  };
+  // Load project data
+  useEffect(() => {
+    const loadProject = async () => {
+      if (!projectId) {
+        setError("ID progetto mancante");
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        setError(null);
+        
+        const projectData = await fetchProject(projectId);
+        setProject(projectData);
+        
+        // Set document title
+        if (projectData.title) {
+          document.title = `${projectData.title} - KORSVAGEN`;
+        }
+
+      } catch (error: any) {
+        console.error("Error loading project:", error);
+        setError(error.message || "Progetto non trovato");
+        toast.error("Errore nel caricamento del progetto");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadProject();
+  }, [projectId, fetchProject]);
+
+  // Reset document title on unmount
+  useEffect(() => {
+    return () => {
+      document.title = "KORSVAGEN - Costruzioni e Ristrutturazioni";
+    };
+  }, []);
 
   const handleBack = () => {
     navigate(-1);
@@ -774,6 +760,85 @@ const ProjectDetailPage: React.FC = () => {
   const closeImageModal = () => {
     setSelectedImage(null);
   };
+
+  // Error state
+  if (error) {
+    return (
+      <ProjectDetailContainer>
+        <Header />
+        <MainContent>
+          <div style={{ 
+            padding: '4rem 2rem', 
+            textAlign: 'center', 
+            color: '#666',
+            minHeight: '60vh',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center'
+          }}>
+            <h1 style={{ color: '#333', marginBottom: '1rem' }}>
+              Progetto non trovato
+            </h1>
+            <p style={{ marginBottom: '2rem', fontSize: '1.1rem' }}>
+              {error}
+            </p>
+            <button 
+              onClick={() => navigate('/progetti')}
+              style={{
+                background: '#d4af37',
+                color: 'white',
+                border: 'none',
+                padding: '0.75rem 2rem',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                fontSize: '1rem',
+                fontWeight: '600'
+              }}
+            >
+              Torna ai Progetti
+            </button>
+          </div>
+        </MainContent>
+        <Footer />
+      </ProjectDetailContainer>
+    );
+  }
+
+  // Loading state
+  if (loading) {
+    return (
+      <ProjectDetailContainer>
+        <Header />
+        <MainContent>
+          <div style={{ 
+            padding: '4rem 2rem', 
+            textAlign: 'center', 
+            color: '#666',
+            minHeight: '60vh',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center'
+          }}>
+            <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>
+              🔄
+            </div>
+            <h2 style={{ color: '#333', marginBottom: '1rem' }}>
+              Caricamento progetto...
+            </h2>
+            <p>Attendere prego...</p>
+          </div>
+        </MainContent>
+        <Footer />
+      </ProjectDetailContainer>
+    );
+  }
+
+  // Project not loaded
+  if (!project) {
+    return null;
+  }
 
   return (
     <ProjectDetailContainer>
@@ -799,10 +864,20 @@ const ProjectDetailPage: React.FC = () => {
             </div>
 
             <h1>{project.title}</h1>
+            {project.subtitle && (
+              <p style={{ 
+                fontSize: '1.4rem', 
+                color: '#d4af37', 
+                fontWeight: '600',
+                marginBottom: '1.5rem'
+              }}>
+                {project.subtitle}
+              </p>
+            )}
             <div className="project-meta">
               <div className="meta-item">
                 <div className="label">Categoria</div>
-                <div className="value">{project.category}</div>
+                <div className="value">{project.label}</div>
               </div>
               <div className="meta-item">
                 <div className="label">Anno</div>
@@ -825,59 +900,101 @@ const ProjectDetailPage: React.FC = () => {
           <Container>
             <ProjectGallery>
               <div className="gallery-grid">
-                {project.images.map((image, index) => (
-                  <div
-                    key={image.id}
-                    className="gallery-image"
-                    style={{ backgroundImage: `url(${image.url})` }}
-                    onClick={() => openImageModal(index)}
-                    title={`Clicca per ingrandire: ${image.alt}`}
-                  >
-                    <div className="image-title">{image.title}</div>
+                {project.images && project.images.length > 0 ? (
+                  project.images.map((image: any, index: number) => (
+                    <div
+                      key={image.id}
+                      className="gallery-image"
+                      style={{ backgroundImage: `url(${image.image_url || image.url})` }}
+                      onClick={() => openImageModal(index)}
+                      title={`Clicca per ingrandire: ${image.alt_text || image.title}`}
+                    >
+                      <div className="image-title">{image.title}</div>
+                    </div>
+                  ))
+                ) : (
+                  <div style={{ 
+                    gridColumn: '1 / -1',
+                    textAlign: 'center',
+                    padding: '4rem 2rem',
+                    color: '#666'
+                  }}>
+                    <div style={{ fontSize: '3rem', marginBottom: '1rem', opacity: 0.3 }}>
+                      🖼️
+                    </div>
+                    <h3>Nessuna immagine disponibile</h3>
+                    <p>Le immagini di questo progetto saranno aggiunte presto.</p>
                   </div>
-                ))}
+                )}
               </div>
             </ProjectGallery>
 
             <ProjectInfo>
               <div className="project-description">
                 <h2>Descrizione del Progetto</h2>
-                {project.longDescription
-                  .split("\n")
-                  .map(
-                    (paragraph, index) =>
+                {project.long_description ? (
+                  project.long_description
+                    .split("\n")
+                    .map((paragraph: string, index: number) =>
                       paragraph.trim() && <p key={index}>{paragraph.trim()}</p>
-                  )}
+                    )
+                ) : (
+                  <p>
+                    {project.description}
+                  </p>
+                )}
 
-                <div className="project-features">
-                  <h3>Caratteristiche Principali</h3>
-                  <ul>
-                    {project.features.map((feature, index) => (
-                      <li key={index}>{feature}</li>
-                    ))}
-                  </ul>
-                </div>
+                {project.features && project.features.length > 0 && (
+                  <div className="project-features">
+                    <h3>Caratteristiche Principali</h3>
+                    <ul>
+                      {project.features.map((feature: string, index: number) => (
+                        <li key={index}>{feature}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </div>
 
               <div className="project-sidebar">
                 <div className="sidebar-card">
                   <h3>Dettagli Progetto</h3>
                   <div className="detail-list">
+                    {project.client && (
+                      <div className="detail-item">
+                        <span className="label">Cliente</span>
+                        <span className="value">{project.client}</span>
+                      </div>
+                    )}
+                    {project.surface && (
+                      <div className="detail-item">
+                        <span className="label">Superficie</span>
+                        <span className="value">{project.surface}</span>
+                      </div>
+                    )}
+                    {project.budget && (
+                      <div className="detail-item">
+                        <span className="label">Budget</span>
+                        <span className="value">{project.budget}</span>
+                      </div>
+                    )}
+                    {project.duration && (
+                      <div className="detail-item">
+                        <span className="label">Durata</span>
+                        <span className="value">{project.duration}</span>
+                      </div>
+                    )}
                     <div className="detail-item">
-                      <span className="label">Cliente</span>
-                      <span className="value">{project.client}</span>
+                      <span className="label">Anno</span>
+                      <span className="value">{project.year}</span>
                     </div>
                     <div className="detail-item">
-                      <span className="label">Superficie</span>
-                      <span className="value">{project.surface}</span>
+                      <span className="label">Luogo</span>
+                      <span className="value">{project.location}</span>
                     </div>
                     <div className="detail-item">
-                      <span className="label">Budget</span>
-                      <span className="value">{project.budget}</span>
-                    </div>
-                    <div className="detail-item">
-                      <span className="label">Durata</span>
-                      <span className="value">{project.timeline}</span>
+                      <span className="label">Status</span>
+                      <span className="value">{project.status}</span>
                     </div>
                   </div>
                 </div>
@@ -892,29 +1009,31 @@ const ProjectDetailPage: React.FC = () => {
       <Footer />
 
       {/* Modal per visualizzare le immagini in grande */}
-      <ImageModal isOpen={selectedImage !== null} onClick={closeImageModal}>
-        <ModalImage onClick={(e) => e.stopPropagation()}>
-          <div className="close-button" onClick={closeImageModal}>
-            ×
-          </div>
-          {selectedImage !== null && project.images[selectedImage] && (
-            <>
-              <img
-                src={project.images[selectedImage].url}
-                alt={project.images[selectedImage].alt}
-                className="modal-image"
-              />
-              <div className="image-info">
-                <h3>{project.images[selectedImage].title}</h3>
-                <p>{project.images[selectedImage].alt}</p>
-                <small>
-                  Immagine {selectedImage + 1} di {project.images.length}
-                </small>
-              </div>
-            </>
-          )}
-        </ModalImage>
-      </ImageModal>
+      {project.images && project.images.length > 0 && (
+        <ImageModal isOpen={selectedImage !== null} onClick={closeImageModal}>
+          <ModalImage onClick={(e) => e.stopPropagation()}>
+            <div className="close-button" onClick={closeImageModal}>
+              ×
+            </div>
+            {selectedImage !== null && project.images[selectedImage] && (
+              <>
+                <img
+                  src={project.images[selectedImage].image_url || project.images[selectedImage].url}
+                  alt={project.images[selectedImage].alt_text || project.images[selectedImage].title}
+                  className="modal-image"
+                />
+                <div className="image-info">
+                  <h3>{project.images[selectedImage].title}</h3>
+                  <p>{project.images[selectedImage].alt_text || project.images[selectedImage].title}</p>
+                  <small>
+                    Immagine {selectedImage + 1} di {project.images.length}
+                  </small>
+                </div>
+              </>
+            )}
+          </ModalImage>
+        </ImageModal>
+      )}
     </ProjectDetailContainer>
   );
 };

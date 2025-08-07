@@ -13,7 +13,9 @@
     "migrate:status": "node api/utils/migrations.js status",
     "migrate:reset": "node api/utils/migrations.js reset",
     "db:backup": "node api/utils/migrations.js backup",
-    "db:stats": "node api/utils/migrations.js stats"
+    "db:stats": "node api/utils/migrations.js stats",
+    "migrate:projects": "node migrate-projects.js",
+    "migrate:projects:force": "node migrate-projects.js --force"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.51.0",

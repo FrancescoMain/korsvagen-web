@@ -51,6 +51,7 @@ import certificationsRoutes from "./routes/certifications.js";
 import aboutContentRoutes from "./routes/about-content.js";
 import teamRoutes from "./routes/team.js";
 import servicesRoutes from "./routes/services.js";
+import projectsRoutes from "./routes/projects.js";
 
 // Inizializza l'app Express
 const app = express();
@@ -262,10 +263,12 @@ app.use("/api/team", teamRoutes);
 // Services - gestione servizi aziendali
 app.use("/api/services", servicesRoutes);
 
+// Projects - gestione portfolio progetti (public and admin)
+app.use("/api/projects", projectsRoutes);
+
 // Placeholder per futuri endpoint che saranno aggiunti nelle fasi successive:
 // - /api/users (gestione utenti)
 // - /api/content (contenuti CMS)
-// - /api/projects (portfolio)
 // - /api/news (blog/news)
 
 /**

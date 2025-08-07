@@ -52,6 +52,11 @@ const navigationItems: NavigationItem[] = [
     path: "/dashboard/services",
   },
   {
+    title: "Gestione Progetti",
+    icon: <FileText size={20} />,
+    path: "/dashboard/projects",
+  },
+  {
     title: "Contact",
     icon: <FileText size={20} />,
     path: "/dashboard/pages/contact",
