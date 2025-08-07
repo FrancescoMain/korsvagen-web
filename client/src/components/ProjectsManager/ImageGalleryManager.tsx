@@ -38,29 +38,33 @@ interface DragItem {
 }
 
 const Overlay = styled.div`
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.7);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1001;
-  padding: 1rem;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  background: rgba(0, 0, 0, 0.8) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 9999 !important;
+  padding: 1rem !important;
+  visibility: visible !important;
+  opacity: 1 !important;
 `;
 
 const Modal = styled.div`
-  background: white;
+  background: white !important;
   border-radius: 16px;
-  width: 100%;
-  max-width: 1200px;
-  max-height: 95vh;
+  width: 100% !important;
+  max-width: 1200px !important;
+  max-height: 95vh !important;
   overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  display: flex !important;
+  flex-direction: column !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3) !important;
+  z-index: 10000 !important;
+  position: relative !important;
 `;
 
 const Header = styled.div`
@@ -411,6 +415,7 @@ const ImageGalleryManager: React.FC<ImageGalleryManagerProps> = ({
 }) => {
   console.log("ImageGalleryManager rendering for project:", project.title);
   const {
+    fetchProject,
     uploadProjectImages,
     updateProjectImage,
     deleteProjectImage,
@@ -425,13 +430,30 @@ const ImageGalleryManager: React.FC<ImageGalleryManagerProps> = ({
   const [draggedItem, setDraggedItem] = useState<DragItem | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
 
-  // Load project images
+  // Load project images from API
   useEffect(() => {
-    if (project.images) {
-      const sortedImages = [...project.images].sort((a, b) => a.display_order - b.display_order);
-      setImages(sortedImages);
-    }
-  }, [project.images]);
+    const loadImages = async () => {
+      try {
+        setLoading(true);
+        
+        // Fetch full project details with images
+        const projectDetail = await fetchProject(project.id);
+        if (projectDetail && projectDetail.images) {
+          const sortedImages = [...projectDetail.images].sort((a, b) => a.display_order - b.display_order);
+          setImages(sortedImages);
+        } else {
+          setImages([]);
+        }
+      } catch (error) {
+        console.error("Error loading project images:", error);
+        setImages([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadImages();
+  }, [project.id, fetchProject]);
 
   // Handle file upload
   const handleFileUpload = useCallback(async (files: FileList) => {
