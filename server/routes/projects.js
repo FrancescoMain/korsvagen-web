@@ -283,67 +283,6 @@ router.get("/labels", async (req, res) => {
   }
 });
 
-/**
- * GET /api/projects/:idOrSlug
- * Public endpoint - Returns single project with all images
- * Accepts both numeric ID and slug
- */
-router.get("/:idOrSlug", async (req, res) => {
-  try {
-    const { idOrSlug } = req.params;
-    
-    logger.info("Fetching project detail", { idOrSlug });
-
-    // Determine if it's an ID (numeric) or slug
-    const isNumeric = /^\d+$/.test(idOrSlug);
-    
-    let query = supabaseClient
-      .from('projects_complete')
-      .select('*')
-      .eq('is_active', true);
-    
-    if (isNumeric) {
-      query = query.eq('id', parseInt(idOrSlug));
-    } else {
-      query = query.eq('slug', idOrSlug);
-    }
-
-    const { data: projects, error } = await query;
-
-    if (error) {
-      logger.error("Error fetching project detail:", error);
-      return res.status(500).json({
-        success: false,
-        message: "Error fetching project"
-      });
-    }
-
-    if (!projects || projects.length === 0) {
-      logger.warn("Project not found", { idOrSlug });
-      return res.status(404).json({
-        success: false,
-        message: "Project not found"
-      });
-    }
-
-    const project = projects[0];
-
-    logger.info(`Successfully fetched project: ${project.title}`);
-
-    res.json({
-      success: true,
-      data: project
-    });
-
-  } catch (error) {
-    logger.error("Unexpected error in GET /api/projects/:idOrSlug:", error);
-    res.status(500).json({
-      success: false,
-      message: "Internal server error"
-    });
-  }
-});
-
 // =====================================================
 // ADMIN API ENDPOINTS
 // =====================================================
@@ -1113,6 +1052,72 @@ router.put("/admin/reorder", requireAuth, async (req, res) => {
 
   } catch (error) {
     logger.error("Unexpected error in PUT /api/admin/projects/reorder:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error"
+    });
+  }
+});
+
+// =====================================================
+// PUBLIC PROJECT DETAIL ENDPOINT (MUST BE LAST!)
+// =====================================================
+
+/**
+ * GET /api/projects/:idOrSlug
+ * Public endpoint - Returns single project with all images
+ * Accepts both numeric ID and slug
+ * NOTE: This route must be at the end to avoid conflicts with specific routes
+ */
+router.get("/:idOrSlug", async (req, res) => {
+  try {
+    const { idOrSlug } = req.params;
+    
+    logger.info("Fetching project detail", { idOrSlug });
+
+    // Determine if it's an ID (numeric) or slug
+    const isNumeric = /^\d+$/.test(idOrSlug);
+    
+    let query = supabaseClient
+      .from('projects_complete')
+      .select('*')
+      .eq('is_active', true);
+    
+    if (isNumeric) {
+      query = query.eq('id', parseInt(idOrSlug));
+    } else {
+      query = query.eq('slug', idOrSlug);
+    }
+
+    const { data: projects, error } = await query;
+
+    if (error) {
+      logger.error("Error fetching project detail:", error);
+      return res.status(500).json({
+        success: false,
+        message: "Error fetching project"
+      });
+    }
+
+    if (!projects || projects.length === 0) {
+      logger.warn("Project not found", { idOrSlug });
+      return res.status(404).json({
+        success: false,
+        message: "Project not found"
+      });
+    }
+
+    const project = projects[0];
+
+    logger.info(`Successfully fetched project: ${project.title}`);
+
+    res.json({
+      success: true,
+      data: project
+    });
+
+  } catch (error) {
+    logger.error("Unexpected error in GET /api/projects/:idOrSlug:", error);
     res.status(500).json({
       success: false,
       message: "Internal server error"
