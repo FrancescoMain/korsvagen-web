@@ -413,7 +413,6 @@ const ImageGalleryManager: React.FC<ImageGalleryManagerProps> = ({
   onClose,
   onUpdate,
 }) => {
-  console.log("ImageGalleryManager rendering for project:", project.title);
   const {
     fetchProject,
     uploadProjectImages,
@@ -453,7 +452,7 @@ const ImageGalleryManager: React.FC<ImageGalleryManagerProps> = ({
     };
 
     loadImages();
-  }, [project.id, fetchProject]);
+  }, [project.id]); // Removed fetchProject dependency to prevent infinite loop
 
   // Handle file upload
   const handleFileUpload = useCallback(async (files: FileList) => {

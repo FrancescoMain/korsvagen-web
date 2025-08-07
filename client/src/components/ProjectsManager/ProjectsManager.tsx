@@ -436,7 +436,6 @@ const ProjectsManager: React.FC = () => {
 
   const handleManageImages = (project: Project) => {
     console.log("Opening image gallery for project:", project.title);
-    alert(`Opening image gallery for: ${project.title}`);
     setImageGalleryProject(project);
   };
 
@@ -650,14 +649,11 @@ const ProjectsManager: React.FC = () => {
 
       {/* Image Gallery Manager Modal */}
       {imageGalleryProject && (
-        <>
-          {console.log("Rendering ImageGalleryManager modal", imageGalleryProject)}
-          <ImageGalleryManager
-            project={imageGalleryProject}
-            onClose={() => setImageGalleryProject(null)}
-            onUpdate={refreshProjects}
-          />
-        </>
+        <ImageGalleryManager
+          project={imageGalleryProject}
+          onClose={() => setImageGalleryProject(null)}
+          onUpdate={refreshProjects}
+        />
       )}
     </Container>
   );
