@@ -8,7 +8,7 @@
  * - Cache e aggiornamenti real-time
  */
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useProjectsCache } from './useProjectsCache';
 import toast from 'react-hot-toast';
@@ -91,8 +91,12 @@ export const useProjects = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Base API URL
-  const API_BASE = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3001';
+  // Base API URL - use production URL in production
+  const API_BASE = useMemo(() => {
+    return process.env.REACT_APP_API_URL || 
+           process.env.REACT_APP_API_BASE_URL || 
+           (window.location.hostname === 'localhost' ? 'http://localhost:3001' : 'https://korsvagen-web-be.vercel.app');
+  }, []);
 
   // Helper function to make authenticated requests
   const makeRequest = useCallback(async (

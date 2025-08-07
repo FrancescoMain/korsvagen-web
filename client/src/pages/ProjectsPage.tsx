@@ -339,13 +339,18 @@ const ProjectsPage: React.FC = () => {
 
   // Load projects and categories
   useEffect(() => {
+    let isCancelled = false;
+    
     const loadData = async () => {
       try {
+        if (isCancelled) return;
         setPageLoading(true);
         
         // Load categories/labels
         try {
           const labels = await fetchProjectLabels();
+          if (isCancelled) return;
+          
           const dynamicCategories = [
             { key: "tutti", label: "Tutti i Progetti" },
             ...labels.map(label => ({
@@ -358,25 +363,35 @@ const ProjectsPage: React.FC = () => {
           console.warn("Could not load project labels, using defaults");
         }
 
+        if (isCancelled) return;
+
         // Load projects
         const projectsData = await fetchPublicProjects({
           label: activeFilter === "tutti" ? undefined : activeFilter,
           limit: 50 // Load more projects for the public page
         });
         
+        if (isCancelled) return;
         setProjects(projectsData.projects || []);
 
       } catch (error: any) {
+        if (isCancelled) return;
         console.error("Error loading projects:", error);
         toast.error("Errore nel caricamento dei progetti");
         setProjects([]);
       } finally {
-        setPageLoading(false);
+        if (!isCancelled) {
+          setPageLoading(false);
+        }
       }
     };
 
     loadData();
-  }, [activeFilter, fetchPublicProjects, fetchProjectLabels]);
+    
+    return () => {
+      isCancelled = true;
+    };
+  }, [activeFilter]); // Removed function dependencies to prevent infinite loops
 
   const handleProjectClick = (projectId: number) => {
     navigate(`/progetti/${projectId}`);
