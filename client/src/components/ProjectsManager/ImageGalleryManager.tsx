@@ -222,16 +222,19 @@ const ImageItem = styled.div<{ isDragging?: boolean }>`
 `;
 
 const ImagePreview = styled.div`
-  width: 100%;
-  height: 200px;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  position: relative;
-  background-color: #f0f0f0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  width: 100% !important;
+  height: 200px !important;
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+  position: relative !important;
+  background-color: #f0f0f0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border: 1px solid #ddd !important;
+  border-radius: 8px !important;
+  overflow: hidden !important;
 
   .loading-indicator {
     color: #666;
@@ -733,6 +736,23 @@ const ImageGalleryManager: React.FC<ImageGalleryManagerProps> = ({
                     )}
                     <div className="drag-handle">
                       <Move size={14} />
+                    </div>
+                    {/* Fallback content for debugging */}
+                    <div style={{ 
+                      position: 'absolute', 
+                      bottom: '4px', 
+                      left: '4px', 
+                      background: 'rgba(0,0,0,0.7)', 
+                      color: 'white', 
+                      padding: '2px 6px', 
+                      borderRadius: '4px', 
+                      fontSize: '10px',
+                      maxWidth: 'calc(100% - 8px)',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap'
+                    }}>
+                      {image.title || 'Image'}
                     </div>
                   </ImagePreview>
 
