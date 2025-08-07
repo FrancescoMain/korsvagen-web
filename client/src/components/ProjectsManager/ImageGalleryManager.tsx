@@ -726,7 +726,7 @@ const ImageGalleryManager: React.FC<ImageGalleryManagerProps> = ({
               {images.map((image, index) => (
                 <ImageItem key={image.id}>
                   <ImagePreview
-                    style={{ backgroundImage: `url(${image.image_url})` }}
+                    style={{ backgroundImage: `url(${image.url || image.image_url})` }}
                   >
                     {image.is_cover && (
                       <div className="cover-badge">

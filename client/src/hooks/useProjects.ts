@@ -46,8 +46,10 @@ export interface Project {
 export interface ProjectImage {
   id: number;
   project_id: number;
-  image_url: string;
+  image_url?: string; // Legacy field
+  url?: string; // Current API field
   image_public_id: string;
+  public_id?: string; // Current API field
   title: string;
   alt_text?: string;
   display_order: number;
