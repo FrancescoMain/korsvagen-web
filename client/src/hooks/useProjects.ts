@@ -93,9 +93,17 @@ export const useProjects = () => {
 
   // Base API URL - use production URL in production
   const API_BASE = useMemo(() => {
-    return process.env.REACT_APP_API_URL || 
-           process.env.REACT_APP_API_BASE_URL || 
-           (window.location.hostname === 'localhost' ? 'http://localhost:3001' : 'https://korsvagen-web-be.vercel.app');
+    // Get base URL without /api suffix
+    let apiUrl = process.env.REACT_APP_API_URL || 
+                 process.env.REACT_APP_API_BASE_URL || 
+                 (window.location.hostname === 'localhost' ? 'http://localhost:3001' : 'https://korsvagen-web-be.vercel.app');
+    
+    // Remove trailing /api if present to avoid double /api/api
+    if (apiUrl.endsWith('/api')) {
+      apiUrl = apiUrl.slice(0, -4);
+    }
+    
+    return apiUrl;
   }, []);
 
   // Helper function to make authenticated requests
