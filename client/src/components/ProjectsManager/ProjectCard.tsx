@@ -350,6 +350,12 @@ const ActionButton = styled.button<{ variant?: 'primary' | 'secondary' | 'danger
           color: white;
           &:hover { background: #b8941f; }
         `;
+      case 'secondary':
+        return `
+          background: #6c757d;
+          color: white;
+          &:hover { background: #5a6268; }
+        `;
       case 'success':
         return `
           background: #28a745;
@@ -511,7 +517,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
             <Edit3 size={16} />
           </ActionButton>
           
-          <ActionButton onClick={onManageImages} title="Gestisci immagini">
+          <ActionButton variant="secondary" onClick={onManageImages} title="Gestisci immagini">
             <Image size={16} />
           </ActionButton>
           

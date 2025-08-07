@@ -435,6 +435,7 @@ const ProjectsManager: React.FC = () => {
   };
 
   const handleManageImages = (project: Project) => {
+    console.log("Opening image gallery for project:", project.title);
     setImageGalleryProject(project);
   };
 
