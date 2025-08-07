@@ -445,6 +445,67 @@ router.post("/", requireAuth, requireRole(["admin", "editor", "super_admin"]),
 );
 
 /**
+ * PUT /api/team/reorder
+ * Riordina membri del team
+ */
+router.put("/reorder", requireAuth, requireRole(["admin", "editor", "super_admin"]),
+  validateReorder, async (req, res) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({
+          success: false,
+          message: "Dati non validi",
+          errors: errors.array()
+        });
+      }
+
+      const { memberIds } = req.body;
+      logger.info(`Admin ${req.user.email} riordina ${memberIds.length} membri team`);
+
+      // Aggiorna ordine per ogni membro
+      const updates = memberIds.map((memberId, index) => 
+        supabaseClient
+          .from("team_members")
+          .update({ 
+            display_order: index + 1,
+            updated_by: req.user.id 
+          })
+          .eq("id", memberId)
+      );
+
+      const results = await Promise.all(updates);
+
+      // Verifica errori
+      const updateErrors = results.filter(result => result.error);
+      if (updateErrors.length > 0) {
+        logger.error("Errori durante riordinamento:", updateErrors);
+        return res.status(500).json({
+          success: false,
+          message: "Errore durante il riordinamento",
+          code: "REORDER_ERROR"
+        });
+      }
+
+      logger.info("Membri team riordinati con successo");
+
+      res.json({
+        success: true,
+        message: "Ordine membri aggiornato con successo"
+      });
+
+    } catch (error) {
+      logger.error("Errore riordinamento membri team:", error);
+      res.status(500).json({
+        success: false,
+        message: "Errore interno del server",
+        code: "TEAM_REORDER_ERROR"
+      });
+    }
+  }
+);
+
+/**
  * PUT /api/team/:id
  * Aggiorna membro del team
  */
@@ -1043,66 +1104,6 @@ router.delete("/:id/cv", requireAuth, requireRole(["admin", "editor", "super_adm
   }
 );
 
-/**
- * PUT /api/team/reorder
- * Riordina membri del team
- */
-router.put("/reorder", requireAuth, requireRole(["admin", "editor", "super_admin"]),
-  validateReorder, async (req, res) => {
-    try {
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        return res.status(400).json({
-          success: false,
-          message: "Dati non validi",
-          errors: errors.array()
-        });
-      }
-
-      const { memberIds } = req.body;
-      logger.info(`Admin ${req.user.email} riordina ${memberIds.length} membri team`);
-
-      // Aggiorna ordine per ogni membro
-      const updates = memberIds.map((memberId, index) => 
-        supabaseClient
-          .from("team_members")
-          .update({ 
-            display_order: index + 1,
-            updated_by: req.user.id 
-          })
-          .eq("id", memberId)
-      );
-
-      const results = await Promise.all(updates);
-
-      // Verifica errori
-      const updateErrors = results.filter(result => result.error);
-      if (updateErrors.length > 0) {
-        logger.error("Errori durante riordinamento:", updateErrors);
-        return res.status(500).json({
-          success: false,
-          message: "Errore durante il riordinamento",
-          code: "REORDER_ERROR"
-        });
-      }
-
-      logger.info("Membri team riordinati con successo");
-
-      res.json({
-        success: true,
-        message: "Ordine membri aggiornato con successo"
-      });
-
-    } catch (error) {
-      logger.error("Errore riordinamento membri team:", error);
-      res.status(500).json({
-        success: false,
-        message: "Errore interno del server",
-        code: "TEAM_REORDER_ERROR"
-      });
-    }
-  }
-);
 
 /**
  * POST /api/team/:id/image
