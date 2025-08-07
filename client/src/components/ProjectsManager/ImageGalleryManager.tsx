@@ -409,6 +409,7 @@ const ImageGalleryManager: React.FC<ImageGalleryManagerProps> = ({
   onClose,
   onUpdate,
 }) => {
+  console.log("ImageGalleryManager rendering for project:", project.title);
   const {
     uploadProjectImages,
     updateProjectImage,

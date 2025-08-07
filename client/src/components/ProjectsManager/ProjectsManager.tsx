@@ -650,11 +650,14 @@ const ProjectsManager: React.FC = () => {
 
       {/* Image Gallery Manager Modal */}
       {imageGalleryProject && (
-        <ImageGalleryManager
-          project={imageGalleryProject}
-          onClose={() => setImageGalleryProject(null)}
-          onUpdate={refreshProjects}
-        />
+        <>
+          {console.log("Rendering ImageGalleryManager modal", imageGalleryProject)}
+          <ImageGalleryManager
+            project={imageGalleryProject}
+            onClose={() => setImageGalleryProject(null)}
+            onUpdate={refreshProjects}
+          />
+        </>
       )}
     </Container>
   );
