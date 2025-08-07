@@ -118,8 +118,8 @@ const validateReorder = [
     .isArray({ min: 1 })
     .withMessage("memberIds deve essere un array non vuoto"),
   body("memberIds.*")
-    .isUUID()
-    .withMessage("Ogni ID deve essere un UUID valido"),
+    .notEmpty()
+    .withMessage("Ogni ID deve essere fornito"),
 ];
 
 /**
