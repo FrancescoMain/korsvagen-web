@@ -746,6 +746,66 @@ router.post("/admin/:id/images", requireAuth, upload.array('images', 10), async 
 });
 
 /**
+ * PUT /api/admin/projects/:id/images/reorder
+ * Admin endpoint - Reorder project images (MUST BE BEFORE /:imageId route)
+ * Body: { imageOrders: [{ id: 1, display_order: 1 }, ...] }
+ */
+router.put("/admin/:id/images/reorder", requireAuth, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { imageOrders } = req.body;
+    
+    if (!Array.isArray(imageOrders)) {
+      return res.status(400).json({
+        success: false,
+        message: "imageOrders must be an array"
+      });
+    }
+
+    logger.info("Admin reordering project images", { 
+      userId: req.user.id, 
+      projectId: id,
+      orderCount: imageOrders.length
+    });
+
+    // Update each image's display_order
+    const updatePromises = imageOrders.map(({ id: imageId, display_order }) => 
+      supabaseClient
+        .from('project_images')
+        .update({ display_order: parseInt(display_order) })
+        .eq('id', parseInt(imageId))
+        .eq('project_id', parseInt(id))
+    );
+
+    const results = await Promise.all(updatePromises);
+    
+    // Check for errors
+    const errors = results.filter(result => result.error);
+    if (errors.length > 0) {
+      logger.error("Error reordering images:", errors);
+      return res.status(500).json({
+        success: false,
+        message: "Error reordering some images"
+      });
+    }
+
+    logger.info("Admin successfully reordered project images");
+
+    res.json({
+      success: true,
+      message: "Images reordered successfully"
+    });
+
+  } catch (error) {
+    logger.error("Unexpected error in PUT /api/admin/projects/:id/images/reorder:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error"
+    });
+  }
+});
+
+/**
  * PUT /api/admin/projects/:id/images/:imageId
  * Admin endpoint - Update single image details
  */
@@ -935,66 +995,6 @@ router.delete("/admin/:id/images/:imageId", requireAuth, async (req, res) => {
 
   } catch (error) {
     logger.error("Unexpected error in DELETE /api/admin/projects/:id/images/:imageId:", error);
-    res.status(500).json({
-      success: false,
-      message: "Internal server error"
-    });
-  }
-});
-
-/**
- * PUT /api/admin/projects/:id/images/reorder
- * Admin endpoint - Reorder project images
- * Body: { imageOrders: [{ id: 1, display_order: 1 }, ...] }
- */
-router.put("/admin/:id/images/reorder", requireAuth, async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { imageOrders } = req.body;
-    
-    if (!Array.isArray(imageOrders)) {
-      return res.status(400).json({
-        success: false,
-        message: "imageOrders must be an array"
-      });
-    }
-
-    logger.info("Admin reordering project images", { 
-      userId: req.user.id, 
-      projectId: id,
-      orderCount: imageOrders.length
-    });
-
-    // Update each image's display_order
-    const updatePromises = imageOrders.map(({ id: imageId, display_order }) => 
-      supabaseClient
-        .from('project_images')
-        .update({ display_order: parseInt(display_order) })
-        .eq('id', parseInt(imageId))
-        .eq('project_id', parseInt(id))
-    );
-
-    const results = await Promise.all(updatePromises);
-    
-    // Check for errors
-    const errors = results.filter(result => result.error);
-    if (errors.length > 0) {
-      logger.error("Error reordering images:", errors);
-      return res.status(500).json({
-        success: false,
-        message: "Error reordering some images"
-      });
-    }
-
-    logger.info("Admin successfully reordered project images");
-
-    res.json({
-      success: true,
-      message: "Images reordered successfully"
-    });
-
-  } catch (error) {
-    logger.error("Unexpected error in PUT /api/admin/projects/:id/images/reorder:", error);
     res.status(500).json({
       success: false,
       message: "Internal server error"

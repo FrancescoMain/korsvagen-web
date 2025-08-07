@@ -439,8 +439,10 @@ const ImageGalleryManager: React.FC<ImageGalleryManagerProps> = ({
         const projectDetail = await fetchProject(project.id);
         if (projectDetail && projectDetail.images) {
           const sortedImages = [...projectDetail.images].sort((a, b) => a.display_order - b.display_order);
+          console.log("Loaded project images:", sortedImages);
           setImages(sortedImages);
         } else {
+          console.log("No images found for project");
           setImages([]);
         }
       } catch (error) {
