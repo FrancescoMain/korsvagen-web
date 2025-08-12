@@ -714,31 +714,19 @@ router.get("/applications/:id/cv", async (req, res) => {
     
     logger.info(`✅ CV download for ${application.first_name} ${application.last_name} -> ${application.cv_url}`);
     
-    // Force PDF format and attachment download by modifying Cloudinary URL
-    let modifiedUrl = application.cv_url;
+    // Set proper headers before redirect to hint at PDF content
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': `attachment; filename="${fileName}"`,
+    });
     
-    // If it's a Cloudinary URL, add format parameter and .pdf extension
-    if (modifiedUrl.includes('cloudinary.com')) {
-      // Add .pdf extension to the URL itself
-      if (!modifiedUrl.endsWith('.pdf')) {
-        modifiedUrl = modifiedUrl + '.pdf';
-      }
-      
-      // Add format parameter to ensure PDF content-type
-      const hasParams = modifiedUrl.includes('?');
-      modifiedUrl = hasParams 
-        ? `${modifiedUrl}&f_pdf&fl_attachment=${encodeURIComponent(fileName)}`
-        : `${modifiedUrl}?f_pdf&fl_attachment=${encodeURIComponent(fileName)}`;
-    } else {
-      // Fallback for non-Cloudinary URLs
-      const hasParams = modifiedUrl.includes('?');
-      modifiedUrl = hasParams 
-        ? `${modifiedUrl}&fl_attachment=${encodeURIComponent(fileName)}`
-        : `${modifiedUrl}?fl_attachment=${encodeURIComponent(fileName)}`;
-    }
+    // Use simple attachment parameter like team section
+    const downloadUrl = application.cv_url.includes('?') 
+      ? `${application.cv_url}&fl_attachment=${encodeURIComponent(fileName)}`
+      : `${application.cv_url}?fl_attachment=${encodeURIComponent(fileName)}`;
     
-    logger.info(`🔗 Redirecting to: ${modifiedUrl}`);
-    res.redirect(302, modifiedUrl);
+    logger.info(`🔗 Redirecting to: ${downloadUrl}`);
+    res.redirect(302, downloadUrl);
     
   } catch (error) {
     logger.error("❌ Error downloading application CV:", error);
