@@ -480,10 +480,10 @@ router.delete("/admin/:id", requireAuth, async (req, res) => {
     
     logger.info(`🔒 Admin deleting job position ID: ${id}`);
     
-    // Check if job exists and get applications count
+    // Check if job exists
     const { data: job, error: jobError } = await supabaseClient
       .from("job_positions")
-      .select("id, title, applications_count")
+      .select("id, title")
       .eq("id", id)
       .single();
     
@@ -494,14 +494,8 @@ router.delete("/admin/:id", requireAuth, async (req, res) => {
       });
     }
     
-    // Check if there are applications
-    if (job.applications_count > 0) {
-      logger.warn(`⚠️  Cannot delete job position with applications: ${job.title} (${job.applications_count} applications)`);
-      return res.status(400).json({
-        error: "Cannot delete job position that has received applications. Set it as inactive instead.",
-        details: `This position has ${job.applications_count} application(s)`
-      });
-    }
+    // TODO: Check if there are applications when applications_count column is added
+    // For now, allow deletion without checking applications
     
     // Delete job position
     const { error: deleteError } = await supabaseClient
@@ -756,8 +750,7 @@ router.get("/", async (req, res) => {
         experience_level,
         description,
         benefits,
-        salary_range,
-        applications_count AS current_applications_count
+        salary_range
       `)
       .eq("is_active", true)
       .order("display_order", { ascending: true })
