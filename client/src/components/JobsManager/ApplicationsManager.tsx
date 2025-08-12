@@ -403,7 +403,9 @@ const ApplicationsManager: React.FC<Props> = ({ applications, jobs, onRefresh })
 
   const handleStatusChange = async (applicationId: number, newStatus: string) => {
     try {
-      const response = await fetch(`/api/jobs/applications/${applicationId}/status`, {
+      // Use same API base URL as other functions
+      const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://korsvagen-web-be.vercel.app/api';
+      const response = await fetch(`${API_BASE_URL}/jobs/applications/${applicationId}/status`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -428,7 +430,9 @@ const ApplicationsManager: React.FC<Props> = ({ applications, jobs, onRefresh })
     }
 
     try {
-      const response = await fetch(`/api/jobs/applications/${applicationId}`, {
+      // Use same API base URL as download CV function
+      const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://korsvagen-web-be.vercel.app/api';
+      const response = await fetch(`${API_BASE_URL}/jobs/applications/${applicationId}`, {
         method: 'DELETE',
         credentials: 'include',
       });
