@@ -172,6 +172,19 @@ router.get("/test", (req, res) => {
 // =============================================
 
 /**
+ * GET /api/jobs/admin/test
+ * Test endpoint to verify admin routing without auth
+ */
+router.get("/admin/test", (req, res) => {
+  res.json({ 
+    success: true, 
+    message: "Admin routing is working!",
+    timestamp: new Date().toISOString(),
+    route: "/admin/test"
+  });
+});
+
+/**
  * GET /api/jobs/admin
  * Lista completa delle posizioni per amministratori
  */
