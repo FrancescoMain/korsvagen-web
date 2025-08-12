@@ -471,10 +471,11 @@ const ApplicationsManager: React.FC<Props> = ({ applications, jobs, onRefresh })
       // Trova l'applicazione per ottenere il nome
       const application = applications.find(app => app.id === applicationId);
       let fileName = application 
-        ? `CV_${application.first_name}_${application.last_name}`
+        ? `CV_${application.first_name.replace(/\s+/g, '_')}_${application.last_name.replace(/\s+/g, '_')}`
         : `CV_Application_${applicationId}`;
       
-      // Forza estensione .pdf
+      // Pulisci caratteri speciali e forza estensione .pdf
+      fileName = fileName.replace(/[^\w\-_.]/g, '_');
       if (!fileName.toLowerCase().endsWith('.pdf')) {
         fileName += '.pdf';
       }

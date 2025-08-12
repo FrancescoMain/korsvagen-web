@@ -34,7 +34,8 @@
       "Bash(mv:*)",
       "Bash(timeout 10 npm start)",
       "Bash(timeout 30 npx tsc --noEmit --target es5 src/hooks/useJobs.ts)",
-      "Bash(timeout 30 npx tsc --noEmit --target es5 client/src/hooks/useJobs.ts)"
+      "Bash(timeout 30 npx tsc --noEmit --target es5 client/src/hooks/useJobs.ts)",
+      "Bash(cp:*)"
     ],
     "deny": []
   }
