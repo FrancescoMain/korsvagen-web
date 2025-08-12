@@ -490,7 +490,8 @@ const ApplicationsManager: React.FC<Props> = ({ applications, jobs, onRefresh })
       console.error('Errore download CV:', error);
       // Fallback al metodo diretto se fetch fallisce
       const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://korsvagen-web-be.vercel.app/api';
-      const downloadUrl = `${API_BASE_URL}/jobs/applications/${applicationId}/cv`;
+      const token = localStorage.getItem('korsvagen_auth_token') || sessionStorage.getItem('korsvagen_auth_token');
+      const downloadUrl = `${API_BASE_URL}/jobs/applications/${applicationId}/cv${token ? `?token=${encodeURIComponent(token)}` : ''}`;
       window.open(downloadUrl, '_blank');
     }
   };

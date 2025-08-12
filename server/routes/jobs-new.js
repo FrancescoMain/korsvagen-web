@@ -30,7 +30,7 @@
 
 import express from "express";
 import { supabaseClient, supabaseAdmin } from "../config/supabase.js";
-import { requireAuth } from "../utils/auth.js";
+import { requireAuth, verifyToken } from "../utils/auth.js";
 import { logger } from "../utils/logger.js";
 import multer from "multer";
 import { v2 as cloudinary } from "cloudinary";
@@ -646,9 +646,49 @@ router.get("/applications", requireAuth, async (req, res) => {
  * GET /api/jobs/applications/:id/cv
  * Download CV candidato (admin only)
  */
-router.get("/applications/:id/cv", requireAuth, async (req, res) => {
+router.get("/applications/:id/cv", async (req, res) => {
   try {
     const { id } = req.params;
+    
+    // Manual authentication - check both JWT token and cookies
+    let isAuthenticated = false;
+    let user = null;
+    
+    // Try Authorization header first (for fetch requests)
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      const token = authHeader.substring(7);
+      try {
+        const decoded = verifyToken(token);
+        if (decoded && decoded.sub) {
+          isAuthenticated = true;
+          user = decoded;
+        }
+      } catch (tokenError) {
+        logger.warn("Invalid JWT token in Authorization header");
+      }
+    }
+    
+    // Try token from query parameter (for browser redirects)
+    if (!isAuthenticated && req.query.token) {
+      try {
+        const decoded = verifyToken(req.query.token);
+        if (decoded && decoded.sub) {
+          isAuthenticated = true;
+          user = decoded;
+        }
+      } catch (queryError) {
+        logger.warn("Invalid token in query parameter");
+      }
+    }
+    
+    if (!isAuthenticated) {
+      return res.status(401).json({
+        success: false,
+        error: "Token di accesso richiesto",
+        code: "AUTH_TOKEN_REQUIRED"
+      });
+    }
     
     logger.info(`🔒 Admin requesting CV download for application ID: ${id}`);
     
