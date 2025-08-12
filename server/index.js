@@ -86,6 +86,9 @@ app.use(
 // CORS: Configurazione per permettere richieste dal frontend
 const corsOptions = {
   origin: function (origin, callback) {
+    // Log di ogni richiesta CORS per debug
+    logger.info(`🌐 CORS request from origin: ${origin || 'NO_ORIGIN'}`);
+    
     const allowedOrigins = process.env.CORS_ORIGIN?.split(",") || [
       "http://localhost:3000",
       "http://localhost:3002",
@@ -94,13 +97,18 @@ const corsOptions = {
       "https://korsvagen.it",
     ];
 
+    // Log degli origins permessi per debug
+    logger.info(`📝 Allowed origins: ${allowedOrigins.join(", ")}`);
+
     // Permetti richieste senza origin (es. favicon, health checks, Postman)
     if (!origin) {
+      logger.info(`✅ CORS allowing request without origin`);
       return callback(null, true);
     }
 
     // Permetti tutti gli origins allowedOrigins
     if (origin && allowedOrigins.includes(origin)) {
+      logger.info(`✅ CORS allowing allowed origin: ${origin}`);
       callback(null, true);
     } 
     // Permetti preview URLs di Vercel (pattern: https://korsvagen-*.vercel.app)
@@ -114,9 +122,9 @@ const corsOptions = {
       callback(null, true);
     }
     else {
-      logger.info(`🚫 CORS blocked origin: ${origin}`);
-      logger.info(`📝 Allowed origins: ${allowedOrigins.join(", ")}`);
-      callback(new Error("Not allowed by CORS"));
+      logger.error(`🚫 CORS BLOCKED origin: ${origin}`);
+      logger.error(`📝 Expected one of: ${allowedOrigins.join(", ")}`);
+      callback(new Error(`CORS policy: Origin ${origin} not allowed`));
     }
   },
   credentials: true,
@@ -228,6 +236,30 @@ app.get("/api/test", (req, res) => {
     timestamp: new Date().toISOString(),
     method: req.method,
     path: req.path,
+    origin: req.headers.origin,
+    userAgent: req.headers['user-agent'],
+  });
+});
+
+// Endpoint specifico per test CORS
+app.get("/api/cors-test", (req, res) => {
+  res.json({
+    success: true,
+    message: "CORS test endpoint",
+    origin: req.headers.origin,
+    allowedOrigins: process.env.CORS_ORIGIN?.split(",") || [
+      "http://localhost:3000",
+      "http://localhost:3002", 
+      "https://korsvagen-web.vercel.app",
+      "https://www.korsvagen.it",
+      "https://korsvagen.it",
+    ],
+    headers: {
+      origin: req.headers.origin,
+      referer: req.headers.referer,
+      host: req.headers.host,
+    },
+    timestamp: new Date().toISOString(),
   });
 });
 

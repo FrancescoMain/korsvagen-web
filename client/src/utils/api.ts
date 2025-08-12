@@ -1,13 +1,38 @@
 import axios from "axios";
 
 // API base URL configuration
-export const API_BASE_URL = process.env.NODE_ENV === 'production' 
-  ? 'https://korsvagen-be.vercel.app/api'  // Backend dedicato in produzione
-  : '/api'; // Proxy locale in development
+// TEMPORARY: Durante il debug, usiamo una configurazione più esplicita
+const getApiBaseUrl = () => {
+  // Se siamo in development, usa il proxy locale
+  if (process.env.NODE_ENV === 'development') {
+    return '/api';
+  }
+  
+  // Se siamo in produzione, controlla il dominio attuale
+  if (typeof window !== 'undefined') {
+    const currentHost = window.location.hostname;
+    
+    // Se siamo su korsvagen.it, usa il backend dedicato
+    if (currentHost === 'korsvagen.it' || currentHost === 'www.korsvagen.it') {
+      return 'https://korsvagen-be.vercel.app/api';
+    }
+    
+    // Se siamo su Vercel (deployment preview), usa il backend dedicato
+    if (currentHost.includes('vercel.app')) {
+      return 'https://korsvagen-be.vercel.app/api';
+    }
+  }
+  
+  // Fallback per produzione
+  return 'https://korsvagen-be.vercel.app/api';
+};
+
+export const API_BASE_URL = getApiBaseUrl();
 
 // Log della configurazione API
 console.log(`🌐 API Configuration:`, {
   environment: process.env.NODE_ENV,
+  hostname: typeof window !== 'undefined' ? window.location.hostname : 'SSR',
   baseURL: API_BASE_URL,
   proxy: process.env.NODE_ENV !== 'production' ? 'http://localhost:3001' : 'N/A'
 });
