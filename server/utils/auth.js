@@ -206,7 +206,16 @@ export function verifyToken(token, isRefreshToken = false) {
 
     return decoded;
   } catch (error) {
-    logger.debug("Errore verifica token:", error.message);
+    logger.warn("🔍 Token verification failed:", {
+      errorName: error.name,
+      errorMessage: error.message,
+      tokenPrefix: token ? token.substring(0, 20) + "..." : "NO_TOKEN",
+      tokenLength: token?.length,
+      isRefreshToken,
+      hasSecret: !!secret,
+      issuer: JWT_CONFIG.issuer,
+      audience: JWT_CONFIG.audience
+    });
 
     // Classifica l'errore per gestione specifica
     if (error.name === "TokenExpiredError") {
@@ -238,7 +247,27 @@ export function requireAuth(req, res, next) {
       token = req.cookies.accessToken;
     }
 
+    // Debug logging per investigare il problema del token
+    logger.debug("🔍 Token auth debug:", {
+      hasAuthHeader: !!req.headers.authorization,
+      authHeaderLength: req.headers.authorization?.length,
+      hasCookieToken: !!req.cookies?.accessToken,
+      tokenFound: !!token,
+      tokenPrefix: token ? token.substring(0, 20) + "..." : "NO_TOKEN",
+      url: req.url,
+      method: req.method
+    });
+
     if (!token) {
+      logger.warn("❌ Token di accesso mancante", {
+        url: req.url,
+        method: req.method,
+        headers: {
+          authorization: req.headers.authorization ? "PRESENTE" : "MANCANTE",
+          cookie: req.headers.cookie ? "PRESENTE" : "MANCANTE"
+        }
+      });
+      
       return res.status(401).json({
         success: false,
         error: "Token di accesso richiesto",
