@@ -984,8 +984,7 @@ router.post("/:slug/apply", upload.single('cv'), async (req, res) => {
           cloudinary.uploader.upload_stream(
             {
               resource_type: "raw",
-              folder: "korsvagen/job_applications/cvs",
-              public_id: `cv_${job.id}_${Date.now()}_${first_name}_${last_name}.pdf`,
+              public_id: `job-cvs/cv_${job.id}_${Date.now()}_${first_name}_${last_name}.pdf`,
               type: "upload",
               invalidate: true,
               overwrite: true,
