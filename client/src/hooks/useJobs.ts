@@ -7,6 +7,7 @@
 
 import { useState, useCallback } from 'react';
 import { API_BASE_URL } from '../utils/api';
+import { useAuth } from '../contexts/AuthContext';
 
 export interface JobPosition {
   id: number;
@@ -58,6 +59,7 @@ export interface JobsStats {
 }
 
 export const useJobs = () => {
+  const { token } = useAuth();
   const [jobs, setJobs] = useState<JobPosition[]>([]);
   const [applications, setApplications] = useState<Application[]>([]);
   const [stats, setStats] = useState<JobsStats>({
@@ -89,6 +91,10 @@ export const useJobs = () => {
 
       const response = await fetch(`${API_BASE_URL}/jobs/admin?${params.toString()}`, {
         credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token && { Authorization: `Bearer ${token}` }),
+        },
       });
 
       if (!response.ok) {
@@ -124,7 +130,7 @@ export const useJobs = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [token]);
 
   // Fetch public jobs
   const fetchPublicJobs = useCallback(async (filters?: {
@@ -159,7 +165,7 @@ export const useJobs = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [token]);
 
   // Fetch single job by slug
   const fetchJobBySlug = useCallback(async (slug: string): Promise<JobPosition | null> => {
@@ -191,7 +197,7 @@ export const useJobs = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [token]);
 
   // Create new job
   const createJob = useCallback(async (jobData: Partial<JobPosition>): Promise<JobPosition | null> => {
@@ -203,6 +209,7 @@ export const useJobs = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          ...(token && { Authorization: `Bearer ${token}` }),
         },
         credentials: 'include',
         body: JSON.stringify(jobData),
@@ -238,7 +245,7 @@ export const useJobs = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [token]);
 
   // Update job
   const updateJob = useCallback(async (id: number, jobData: Partial<JobPosition>): Promise<JobPosition | null> => {
@@ -250,6 +257,7 @@ export const useJobs = () => {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
+          ...(token && { Authorization: `Bearer ${token}` }),
         },
         credentials: 'include',
         body: JSON.stringify(jobData),
@@ -280,7 +288,7 @@ export const useJobs = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [token]);
 
   // Delete job
   const deleteJob = useCallback(async (id: number): Promise<boolean> => {
@@ -291,6 +299,10 @@ export const useJobs = () => {
       const response = await fetch(`${API_BASE_URL}/jobs/admin/${id}`, {
         method: 'DELETE',
         credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token && { Authorization: `Bearer ${token}` }),
+        },
       });
 
       if (!response.ok) {
@@ -338,6 +350,7 @@ export const useJobs = () => {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
+          ...(token && { Authorization: `Bearer ${token}` }),
         },
         credentials: 'include',
         body: JSON.stringify({ positions }),
@@ -375,7 +388,7 @@ export const useJobs = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [token]);
 
   // Fetch applications
   const fetchApplications = useCallback(async (filters?: {
@@ -398,6 +411,10 @@ export const useJobs = () => {
 
       const response = await fetch(`${API_BASE_URL}/jobs/applications?${params.toString()}`, {
         credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token && { Authorization: `Bearer ${token}` }),
+        },
       });
 
       if (!response.ok) {
@@ -426,7 +443,7 @@ export const useJobs = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [token]);
 
   // Submit application (public)
   const submitApplication = useCallback(async (
@@ -457,7 +474,7 @@ export const useJobs = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [token]);
 
   // Fetch metadata (departments, locations)
   const fetchDepartments = useCallback(async (): Promise<string[]> => {
@@ -477,7 +494,7 @@ export const useJobs = () => {
       console.error('Error fetching departments:', err);
       return [];
     }
-  }, []);
+  }, [token]);
 
   const fetchLocations = useCallback(async (): Promise<string[]> => {
     try {
@@ -496,7 +513,7 @@ export const useJobs = () => {
       console.error('Error fetching locations:', err);
       return [];
     }
-  }, []);
+  }, [token]);
 
   return {
     // State
