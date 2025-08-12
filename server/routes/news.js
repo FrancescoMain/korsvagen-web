@@ -23,7 +23,7 @@
 import express from 'express';
 import { supabaseClient } from '../config/supabase.js';
 import { cloudinaryConfig, cloudinary } from '../config/cloudinary.js';
-import { verifyToken } from '../utils/auth.js';
+import { requireAuth } from '../utils/auth.js';
 import { logger } from '../utils/logger.js';
 import multer from 'multer';
 
@@ -367,7 +367,7 @@ router.get('/:slug/related', async (req, res) => {
  * GET /api/news/admin/list
  * Lista completa articoli per admin (inclusi non pubblicati)
  */
-router.get('/admin/list', verifyToken, async (req, res) => {
+router.get('/admin/list', requireAuth, async (req, res) => {
   try {
     const {
       category,
@@ -436,7 +436,7 @@ router.get('/admin/list', verifyToken, async (req, res) => {
  * POST /api/news/admin
  * Crea nuovo articolo
  */
-router.post('/admin', verifyToken, async (req, res) => {
+router.post('/admin', requireAuth, async (req, res) => {
   try {
     const newsData = req.body;
 
@@ -521,7 +521,7 @@ router.post('/admin', verifyToken, async (req, res) => {
  * GET /api/news/admin/:id
  * Dettaglio articolo per modifica (admin)
  */
-router.get('/admin/:id', verifyToken, async (req, res) => {
+router.get('/admin/:id', requireAuth, async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -558,7 +558,7 @@ router.get('/admin/:id', verifyToken, async (req, res) => {
  * PUT /api/news/admin/:id
  * Aggiorna articolo esistente
  */
-router.put('/admin/:id', verifyToken, async (req, res) => {
+router.put('/admin/:id', requireAuth, async (req, res) => {
   try {
     const { id } = req.params;
     const updateData = req.body;
@@ -663,7 +663,7 @@ router.put('/admin/:id', verifyToken, async (req, res) => {
  * DELETE /api/news/admin/:id
  * Elimina articolo
  */
-router.delete('/admin/:id', verifyToken, async (req, res) => {
+router.delete('/admin/:id', requireAuth, async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -728,7 +728,7 @@ router.delete('/admin/:id', verifyToken, async (req, res) => {
  * POST /api/news/admin/:id/image
  * Upload immagine per articolo
  */
-router.post('/admin/:id/image', verifyToken, upload.single('image'), async (req, res) => {
+router.post('/admin/:id/image', requireAuth, upload.single('image'), async (req, res) => {
   try {
     const { id } = req.params;
     
@@ -827,7 +827,7 @@ router.post('/admin/:id/image', verifyToken, upload.single('image'), async (req,
  * DELETE /api/news/admin/:id/image
  * Elimina immagine articolo
  */
-router.delete('/admin/:id/image', verifyToken, async (req, res) => {
+router.delete('/admin/:id/image', requireAuth, async (req, res) => {
   try {
     const { id } = req.params;
 
