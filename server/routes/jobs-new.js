@@ -29,7 +29,7 @@
  */
 
 import express from "express";
-import { supabaseClient } from "../config/supabase.js";
+import { supabaseClient, supabaseAdmin } from "../config/supabase.js";
 import { requireAuth } from "../utils/auth.js";
 import { logger } from "../utils/logger.js";
 import multer from "multer";
@@ -207,7 +207,7 @@ router.get("/admin", requireAuth, async (req, res) => {
     
     logger.info(`🔒 Admin fetching job positions with filters: ${JSON.stringify(req.query)}`);
     
-    let query = supabaseClient
+    let query = supabaseAdmin
       .from("job_positions")
       .select("*")
       .order("display_order", { ascending: true })
@@ -283,7 +283,7 @@ router.post("/admin", requireAuth, async (req, res) => {
     }
     
     // Check if slug is unique
-    const { data: existingJob } = await supabaseClient
+    const { data: existingJob } = await supabaseAdmin
       .from("job_positions")
       .select("id")
       .eq("slug", slug)
@@ -297,7 +297,7 @@ router.post("/admin", requireAuth, async (req, res) => {
     }
     
     // Create job position
-    const { data: newJob, error } = await supabaseClient
+    const { data: newJob, error } = await supabaseAdmin
       .from("job_positions")
       .insert({
         ...req.body,
@@ -344,7 +344,7 @@ router.get("/admin/:id", requireAuth, async (req, res) => {
     
     logger.info(`🔒 Admin fetching job position detail for ID: ${id}`);
     
-    const { data: job, error } = await supabaseClient
+    const { data: job, error } = await supabaseAdmin
       .from("job_positions")
       .select("*")
       .eq("id", id)
@@ -390,7 +390,7 @@ router.put("/admin/:id", requireAuth, async (req, res) => {
     }
     
     // Check if job exists
-    const { data: existingJob, error: existingError } = await supabaseClient
+    const { data: existingJob, error: existingError } = await supabaseAdmin
       .from("job_positions")
       .select("id, slug")
       .eq("id", id)
@@ -411,7 +411,7 @@ router.put("/admin/:id", requireAuth, async (req, res) => {
     
     // Check slug uniqueness if changed
     if (slug && slug !== existingJob.slug) {
-      const { data: slugCheck } = await supabaseClient
+      const { data: slugCheck } = await supabaseAdmin
         .from("job_positions")
         .select("id")
         .eq("slug", slug)
@@ -443,7 +443,7 @@ router.put("/admin/:id", requireAuth, async (req, res) => {
     if (req.body.display_order !== undefined) updateData.display_order = parseInt(req.body.display_order) || 0;
     
     // Update job position
-    const { data: updatedJob, error } = await supabaseClient
+    const { data: updatedJob, error } = await supabaseAdmin
       .from("job_positions")
       .update(updateData)
       .eq("id", id)
@@ -481,7 +481,7 @@ router.delete("/admin/:id", requireAuth, async (req, res) => {
     logger.info(`🔒 Admin deleting job position ID: ${id}`);
     
     // Check if job exists
-    const { data: job, error: jobError } = await supabaseClient
+    const { data: job, error: jobError } = await supabaseAdmin
       .from("job_positions")
       .select("id, title")
       .eq("id", id)
@@ -498,7 +498,7 @@ router.delete("/admin/:id", requireAuth, async (req, res) => {
     // For now, allow deletion without checking applications
     
     // Delete job position
-    const { error: deleteError } = await supabaseClient
+    const { error: deleteError } = await supabaseAdmin
       .from("job_positions")
       .delete()
       .eq("id", id);
@@ -544,7 +544,7 @@ router.put("/admin/reorder", requireAuth, async (req, res) => {
     
     // Update display order for each position
     const updates = positions.map((position, index) => 
-      supabaseClient
+      supabaseAdmin
         .from("job_positions")
         .update({ display_order: index + 1 })
         .eq("id", position.id)
