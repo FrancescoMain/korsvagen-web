@@ -445,16 +445,55 @@ const ApplicationsManager: React.FC<Props> = ({ applications, jobs, onRefresh })
 
   const handleDownloadCV = async (applicationId: number) => {
     try {
-      // Use same approach as team CV download - simple redirect with authentication
+      // Use same approach as team CV download - fetch + blob + forced .pdf filename
       const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://korsvagen-web-be.vercel.app/api';
       const token = localStorage.getItem('korsvagen_auth_token') || sessionStorage.getItem('korsvagen_auth_token');
       const downloadUrl = `${API_BASE_URL}/jobs/applications/${applicationId}/cv${token ? `?token=${encodeURIComponent(token)}` : ''}`;
       
-      // Direct redirect approach like team section
-      window.location.href = downloadUrl;
+      // Fetch il file per controllare il nome e estensione
+      const response = await fetch(downloadUrl, {
+        credentials: 'include',
+        headers: token ? {
+          'Authorization': `Bearer ${token}`
+        } : {}
+      });
+      
+      if (!response.ok) {
+        throw new Error('Errore nel download del CV');
+      }
+      
+      // Crea blob dal contenuto
+      const blob = await response.blob();
+      
+      // Crea URL temporaneo
+      const url = window.URL.createObjectURL(blob);
+      
+      // Trova l'applicazione per ottenere il nome
+      const application = applications.find(app => app.id === applicationId);
+      const fileName = application 
+        ? `CV_${application.first_name.replace(/\s+/g, '_')}_${application.last_name.replace(/\s+/g, '_')}.pdf`
+        : `CV_Application_${applicationId}.pdf`;
+      
+      // Crea link temporaneo con nome file corretto
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = fileName;
+      
+      // Esegui download
+      document.body.appendChild(link);
+      link.click();
+      
+      // Pulizia
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
       
     } catch (error) {
       console.error('Errore download CV:', error);
+      // Fallback al metodo diretto se fetch fallisce
+      const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://korsvagen-web-be.vercel.app/api';
+      const token = localStorage.getItem('korsvagen_auth_token') || sessionStorage.getItem('korsvagen_auth_token');
+      const downloadUrl = `${API_BASE_URL}/jobs/applications/${applicationId}/cv${token ? `?token=${encodeURIComponent(token)}` : ''}`;
+      window.location.href = downloadUrl;
     }
   };
 
