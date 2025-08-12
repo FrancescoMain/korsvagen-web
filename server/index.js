@@ -61,6 +61,45 @@ const PORT = process.env.PORT || 3001;
 // Configurazione per Vercel - Trust proxy
 app.set('trust proxy', 1);
 
+// EMERGENCY CORS FIX - Middleware prioritario per CORS
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  
+  // Log dettagliato per debug
+  logger.info(`🚨 EMERGENCY CORS: ${req.method} ${req.path} from ${origin || 'NO_ORIGIN'}`);
+  
+  // Lista origins permessi
+  const allowedOrigins = [
+    'https://www.korsvagen.it',
+    'https://korsvagen.it',
+    'http://localhost:3000',
+    'http://localhost:3002'
+  ];
+  
+  // Se l'origin è nella lista permessi, aggiungi headers CORS
+  if (!origin || allowedOrigins.includes(origin)) {
+    if (origin) {
+      res.header('Access-Control-Allow-Origin', origin);
+    }
+    res.header('Access-Control-Allow-Credentials', 'true');
+    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS,PATCH');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With, Accept, Origin, Cache-Control, Pragma');
+    res.header('Access-Control-Expose-Headers', 'Set-Cookie, Access-Control-Allow-Credentials');
+    
+    logger.info(`✅ EMERGENCY CORS headers set for origin: ${origin || 'NO_ORIGIN'}`);
+    
+    // Se è una richiesta OPTIONS (preflight), rispondi immediatamente
+    if (req.method === 'OPTIONS') {
+      logger.info(`🔧 EMERGENCY CORS: Handling OPTIONS preflight for ${origin}`);
+      return res.status(204).end();
+    }
+  } else {
+    logger.error(`🚫 EMERGENCY CORS: Blocking origin ${origin}`);
+  }
+  
+  next();
+});
+
 /**
  * CONFIGURAZIONE MIDDLEWARE GLOBALI
  *
@@ -262,6 +301,20 @@ app.get("/api/test", (req, res) => {
     path: req.path,
     origin: req.headers.origin,
     userAgent: req.headers['user-agent'],
+  });
+});
+
+// Endpoint di test per CORS emergency fix
+app.post("/api/cors-emergency-test", (req, res) => {
+  logger.info(`🧪 CORS Emergency Test: POST from ${req.headers.origin}`);
+  
+  res.json({
+    success: true,
+    message: "CORS Emergency Test - POST request worked!",
+    origin: req.headers.origin,
+    method: req.method,
+    headers: req.headers,
+    timestamp: new Date().toISOString(),
   });
 });
 
