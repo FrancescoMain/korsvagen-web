@@ -980,6 +980,9 @@ router.post("/:slug/apply", upload.single('cv'), async (req, res) => {
               resource_type: "raw",
               folder: "korsvagen/job_applications/cvs",
               public_id: `cv_${job.id}_${Date.now()}_${first_name}_${last_name}`,
+              type: "upload",
+              invalidate: true,
+              overwrite: true,
               allowed_formats: ["pdf", "doc", "docx"]
             },
             (error, result) => {
