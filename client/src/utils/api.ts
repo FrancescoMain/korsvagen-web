@@ -14,17 +14,17 @@ const getApiBaseUrl = () => {
     
     // Se siamo su korsvagen.it, usa il backend dedicato
     if (currentHost === 'korsvagen.it' || currentHost === 'www.korsvagen.it') {
-      return 'https://korsvagen-be.vercel.app/api';
+      return 'https://korsvagen-web-be.vercel.app/api';
     }
     
     // Se siamo su Vercel (deployment preview), usa il backend dedicato
     if (currentHost.includes('vercel.app')) {
-      return 'https://korsvagen-be.vercel.app/api';
+      return 'https://korsvagen-web-be.vercel.app/api';
     }
   }
   
   // Fallback per produzione
-  return 'https://korsvagen-be.vercel.app/api';
+  return 'https://korsvagen-web-be.vercel.app/api';
 };
 
 export const API_BASE_URL = getApiBaseUrl();
