@@ -461,17 +461,23 @@ const ApplicationsManager: React.FC<Props> = ({ applications, jobs, onRefresh })
         throw new Error('Errore nel download del CV');
       }
       
-      // Crea blob dal contenuto
+      // Crea blob dal contenuto con tipo PDF esplicito
       const blob = await response.blob();
+      const pdfBlob = new Blob([blob], { type: 'application/pdf' });
       
       // Crea URL temporaneo
-      const url = window.URL.createObjectURL(blob);
+      const url = window.URL.createObjectURL(pdfBlob);
       
       // Trova l'applicazione per ottenere il nome
       const application = applications.find(app => app.id === applicationId);
-      const fileName = application 
-        ? `CV_${application.first_name}_${application.last_name}.pdf`
-        : `CV_Application_${applicationId}.pdf`;
+      let fileName = application 
+        ? `CV_${application.first_name}_${application.last_name}`
+        : `CV_Application_${applicationId}`;
+      
+      // Forza estensione .pdf
+      if (!fileName.toLowerCase().endsWith('.pdf')) {
+        fileName += '.pdf';
+      }
       
       // Crea link temporaneo con nome file corretto
       const link = document.createElement('a');

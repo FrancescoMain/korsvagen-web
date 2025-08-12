@@ -831,13 +831,9 @@ const CareersPage: React.FC = () => {
     const file = e.target.files?.[0] || null;
     if (file) {
       // Verify file type
-      const allowedTypes = [
-        "application/pdf",
-        "application/msword",
-        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-      ];
+      const allowedTypes = ["application/pdf"];
       if (!allowedTypes.includes(file.type)) {
-        toast.error("Formato file non supportato. Si prega di caricare un file PDF o Word.");
+        toast.error("Formato file non supportato. Si prega di caricare solo file PDF.");
         return;
       }
       // Verify file size (max 5MB)
@@ -1122,7 +1118,7 @@ const CareersPage: React.FC = () => {
                       <input
                         type="file"
                         id="cv-upload"
-                        accept=".pdf,.doc,.docx"
+                        accept=".pdf"
                         onChange={handleFileChange}
                         required
                       />
@@ -1134,7 +1130,7 @@ const CareersPage: React.FC = () => {
                           ) : (
                             <>
                               <div className="file-name">Seleziona file CV</div>
-                              <div className="file-hint">PDF, DOC, DOCX - max 5MB</div>
+                              <div className="file-hint">Solo PDF - max 5MB</div>
                             </>
                           )}
                         </div>

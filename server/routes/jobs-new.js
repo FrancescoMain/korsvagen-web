@@ -44,17 +44,13 @@ const upload = multer({
     fileSize: 5 * 1024 * 1024, // 5MB limit for CVs
   },
   fileFilter: (req, file, cb) => {
-    // Accept PDF, DOC, DOCX files
-    const allowedTypes = [
-      'application/pdf',
-      'application/msword',
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-    ];
+    // Accept only PDF files
+    const allowedTypes = ['application/pdf'];
     
     if (allowedTypes.includes(file.mimetype)) {
       cb(null, true);
     } else {
-      cb(new Error('Only PDF, DOC, and DOCX files are allowed for CVs'), false);
+      cb(new Error('Only PDF files are allowed for CVs'), false);
     }
   }
 });
