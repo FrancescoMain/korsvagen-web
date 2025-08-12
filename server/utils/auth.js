@@ -228,8 +228,8 @@ export function verifyToken(token, isRefreshToken = false) {
       tokenType: typeof token,
       isRefreshToken,
       hasSecret: !!secret,
-      issuer: JWT_CONFIG.issuer,
-      audience: JWT_CONFIG.audience
+      issuer: "korsvagen-web",
+      audience: "korsvagen-users"
     });
 
     // Classifica l'errore per gestione specifica

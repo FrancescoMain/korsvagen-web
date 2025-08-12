@@ -81,7 +81,21 @@ function formatLogMessage(level, message, meta = {}) {
   }
 
   // In production, usa formato JSON per parsing automatico
-  return JSON.stringify(logEntry);
+  // Safe stringify per evitare errori con circular references
+  const getCircularReplacer = () => {
+    const seen = new WeakSet();
+    return (key, value) => {
+      if (typeof value === "object" && value !== null) {
+        if (seen.has(value)) {
+          return "[Circular]";
+        }
+        seen.add(value);
+      }
+      return value;
+    };
+  };
+  
+  return JSON.stringify(logEntry, getCircularReplacer());
 }
 
 /**
