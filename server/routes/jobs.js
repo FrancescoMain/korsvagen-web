@@ -138,7 +138,7 @@ const validateJobData = (data, isUpdate = false) => {
 router.get("/test", (req, res) => {
   res.json({ 
     success: true, 
-    message: "Jobs API is working!",
+    message: "Jobs API is working! (Route fix v2)",
     timestamp: new Date().toISOString(),
     endpoints: {
       public: [
