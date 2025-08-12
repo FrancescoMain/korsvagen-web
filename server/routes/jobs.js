@@ -1,14 +1,16 @@
 /**
- * KORSVAGEN WEB APPLICATION - JOBS API ROUTES
+ * KORSVAGEN WEB APPLICATION - JOBS API ROUTES (ROUTE ORDER FIXED)
  * 
  * Gestisce le API per il sistema "Lavora con Noi":
  * 
+ * IMPORTANT: Route specifiche (/admin*) DEVONO venire prima di route dinamiche (/:slug)
+ * 
  * Public endpoints (Frontend):
  * - GET /api/jobs - Lista posizioni aperte per il pubblico
- * - GET /api/jobs/:slug - Dettaglio singola posizione
- * - POST /api/jobs/:slug/apply - Invio candidatura con CV
  * - GET /api/jobs/meta/departments - Lista dipartimenti per filtri
  * - GET /api/jobs/meta/locations - Lista sedi per filtri
+ * - GET /api/jobs/:slug - Dettaglio singola posizione
+ * - POST /api/jobs/:slug/apply - Invio candidatura con CV
  * 
  * Admin endpoints (Dashboard):
  * - GET /api/jobs/admin - Lista completa posizioni per admin
@@ -52,146 +54,73 @@ const upload = multer({
     if (allowedTypes.includes(file.mimetype)) {
       cb(null, true);
     } else {
-      cb(new Error('Only PDF, DOC, and DOCX files are allowed for CV upload'), false);
+      cb(new Error('Only PDF, DOC, and DOCX files are allowed for CVs'), false);
     }
   }
 });
 
-// Test endpoint to verify deployment
-router.get("/test", (req, res) => {
-  res.json({
-    success: true,
-    message: "Jobs API is working!",
-    timestamp: new Date().toISOString(),
-    routes: [
-      "GET /api/jobs - Public job positions",
-      "GET /api/jobs/:slug - Job position detail",
-      "POST /api/jobs/:slug/apply - Submit application",
-      "GET /api/jobs/admin - Admin job positions list",
-      "POST /api/jobs/admin - Create job position"
-    ]
-  });
-});
-
-// Helper function to upload CV to Cloudinary
-const uploadCVToCloudinary = async (buffer, applicantEmail, filename) => {
-  return new Promise((resolve, reject) => {
-    const uploadStream = cloudinary.uploader.upload_stream(
-      {
-        folder: "korsvagen/job_applications",
-        public_id: `cv_${applicantEmail.replace('@', '_at_')}_${Date.now()}`,
-        resource_type: "raw", // For non-image files like PDFs
-        access_mode: "authenticated" // Restrict access for privacy
-      },
-      (error, result) => {
-        if (error) reject(error);
-        else resolve(result);
-      }
-    );
-    uploadStream.end(buffer);
-  });
-};
-
-// Helper function to generate slug from title
+// Helper functions
 const generateSlug = (title) => {
   return title
     .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "") // Remove accents
-    .replace(/[^a-z0-9\s-]/g, '') // Remove special chars
-    .replace(/\s+/g, '-') // Replace spaces with hyphens
-    .replace(/-+/g, '-') // Replace multiple hyphens with single
-    .replace(/^-+|-+$/g, ''); // Remove leading/trailing hyphens
+    .replace(/[àáâäæã]/g, 'a')
+    .replace(/[èéêë]/g, 'e') 
+    .replace(/[ìíîï]/g, 'i')
+    .replace(/[òóôöøõ]/g, 'o')
+    .replace(/[ùúûü]/g, 'u')
+    .replace(/[ýÿ]/g, 'y')
+    .replace(/[ñ]/g, 'n')
+    .replace(/[çć]/g, 'c')
+    .replace(/[ß]/g, 'ss')
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/^-+|-+$/g, '');
 };
 
-// Helper function to validate job position data
 const validateJobData = (data, isUpdate = false) => {
   const errors = [];
   
   if (!isUpdate || data.title !== undefined) {
-    if (!data.title || data.title.trim().length === 0) {
-      errors.push("Title is required");
-    }
-    if (data.title && data.title.length > 255) {
-      errors.push("Title must be less than 255 characters");
+    if (!data.title || data.title.trim().length < 3) {
+      errors.push("Title must be at least 3 characters long");
     }
   }
   
   if (!isUpdate || data.department !== undefined) {
-    if (!data.department || data.department.trim().length === 0) {
+    if (!data.department || data.department.trim().length < 2) {
       errors.push("Department is required");
     }
   }
   
   if (!isUpdate || data.location !== undefined) {
-    if (!data.location || data.location.trim().length === 0) {
+    if (!data.location || data.location.trim().length < 2) {
       errors.push("Location is required");
     }
   }
   
   if (!isUpdate || data.employment_type !== undefined) {
-    const validTypes = ['Full-time', 'Part-time', 'Contract', 'Internship'];
+    const validTypes = ['Full-time', 'Part-time', 'Contract', 'Freelance', 'Internship', 'Temporary'];
     if (!data.employment_type || !validTypes.includes(data.employment_type)) {
-      errors.push(`Employment type must be one of: ${validTypes.join(', ')}`);
+      errors.push("Employment type must be one of: " + validTypes.join(', '));
     }
   }
   
   if (!isUpdate || data.experience_level !== undefined) {
-    const validLevels = ['Junior', 'Mid', 'Senior', 'Lead', 'Executive'];
+    const validLevels = ['Entry', 'Junior', 'Mid', 'Senior', 'Lead', 'Executive'];
     if (!data.experience_level || !validLevels.includes(data.experience_level)) {
-      errors.push(`Experience level must be one of: ${validLevels.join(', ')}`);
+      errors.push("Experience level must be one of: " + validLevels.join(', '));
     }
   }
   
   if (!isUpdate || data.description !== undefined) {
-    if (!data.description || data.description.trim().length === 0) {
-      errors.push("Description is required");
+    if (!data.description || data.description.trim().length < 10) {
+      errors.push("Description must be at least 10 characters long");
     }
   }
   
   if (!isUpdate || data.requirements !== undefined) {
-    if (!data.requirements || data.requirements.trim().length === 0) {
-      errors.push("Requirements are required");
-    }
-  }
-  
-  return errors;
-};
-
-// Helper function to validate application data
-const validateApplicationData = (data) => {
-  const errors = [];
-  
-  if (!data.first_name || data.first_name.trim().length === 0) {
-    errors.push("First name is required");
-  }
-  
-  if (!data.last_name || data.last_name.trim().length === 0) {
-    errors.push("Last name is required");
-  }
-  
-  if (!data.email || data.email.trim().length === 0) {
-    errors.push("Email is required");
-  } else {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(data.email)) {
-      errors.push("Invalid email format");
-    }
-  }
-  
-  if (data.linkedin_profile && data.linkedin_profile.trim().length > 0) {
-    try {
-      new URL(data.linkedin_profile);
-    } catch {
-      errors.push("Invalid LinkedIn profile URL");
-    }
-  }
-  
-  if (data.portfolio_url && data.portfolio_url.trim().length > 0) {
-    try {
-      new URL(data.portfolio_url);
-    } catch {
-      errors.push("Invalid portfolio URL");
+    if (!data.requirements || data.requirements.trim().length < 10) {
+      errors.push("Requirements must be at least 10 characters long");
     }
   }
   
@@ -199,307 +128,47 @@ const validateApplicationData = (data) => {
 };
 
 // =============================================
-// PUBLIC ENDPOINTS (Frontend)
+// TEST ENDPOINT
 // =============================================
 
 /**
- * GET /api/jobs
- * Lista tutte le posizioni aperte per il pubblico
- * Query params: ?department=IT&location=Milano&employment_type=Full-time
+ * GET /api/jobs/test
+ * Test endpoint for jobs functionality
  */
-router.get("/", async (req, res) => {
-  try {
-    const { department, location, employment_type } = req.query;
-    
-    logger.info(`📋 Fetching active job positions with filters: ${JSON.stringify(req.query)}`);
-    
-    let query = supabaseClient
-      .from("active_job_positions")
-      .select("id, title, slug, department, location, employment_type, experience_level, description, benefits, salary_range, current_applications_count")
-      .order("display_order", { ascending: true });
-    
-    // Apply filters
-    if (department && department !== 'all') {
-      query = query.eq('department', department);
+router.get("/test", (req, res) => {
+  res.json({ 
+    success: true, 
+    message: "Jobs API is working!",
+    timestamp: new Date().toISOString(),
+    endpoints: {
+      public: [
+        "GET /api/jobs - List active job positions",
+        "GET /api/jobs/meta/departments - List departments", 
+        "GET /api/jobs/meta/locations - List locations",
+        "GET /api/jobs/:slug - Get job by slug",
+        "POST /api/jobs/:slug/apply - Submit application"
+      ],
+      admin: [
+        "GET /api/jobs/admin - List all jobs (admin)",
+        "POST /api/jobs/admin - Create job (admin)",
+        "GET /api/jobs/admin/:id - Get job by ID (admin)",
+        "PUT /api/jobs/admin/:id - Update job (admin)", 
+        "DELETE /api/jobs/admin/:id - Delete job (admin)",
+        "PUT /api/jobs/admin/reorder - Reorder jobs (admin)"
+      ],
+      applications: [
+        "GET /api/jobs/applications - List applications (admin)",
+        "GET /api/jobs/applications/:id - Get application (admin)",
+        "PUT /api/jobs/applications/:id/status - Update status (admin)",
+        "DELETE /api/jobs/applications/:id - Delete application (admin)",
+        "GET /api/jobs/applications/:id/cv - Download CV (admin)"
+      ]
     }
-    if (location && location !== 'all') {
-      query = query.ilike('location', `%${location}%`);
-    }
-    if (employment_type && employment_type !== 'all') {
-      query = query.eq('employment_type', employment_type);
-    }
-    
-    const { data, error } = await query;
-    
-    if (error) {
-      logger.error("❌ Error fetching active job positions:", error);
-      return res.status(500).json({ 
-        error: "Failed to fetch job positions", 
-        details: error.message 
-      });
-    }
-    
-    logger.info(`✅ Successfully fetched ${data.length} active job positions`);
-    res.json({ success: true, data });
-    
-  } catch (error) {
-    logger.error("❌ Error in GET /api/jobs:", error);
-    res.status(500).json({ 
-      error: "Internal server error", 
-      details: error.message 
-    });
-  }
-});
-
-/**
- * GET /api/jobs/:slug
- * Dettaglio di una specifica posizione per slug
- */
-router.get("/:slug", async (req, res) => {
-  try {
-    const { slug } = req.params;
-    
-    logger.info(`📄 Fetching job position detail for slug: ${slug}`);
-    
-    const { data: job, error } = await supabaseClient
-      .from("job_positions")
-      .select("*")
-      .eq("slug", slug)
-      .eq("is_active", true)
-      .single();
-    
-    if (error || !job) {
-      logger.warn(`⚠️  Job position not found for slug: ${slug}`);
-      return res.status(404).json({ 
-        error: "Job position not found" 
-      });
-    }
-    
-    logger.info(`✅ Successfully fetched job position: ${job.title}`);
-    res.json({ success: true, data: job });
-    
-  } catch (error) {
-    logger.error("❌ Error in GET /api/jobs/:slug:", error);
-    res.status(500).json({ 
-      error: "Internal server error", 
-      details: error.message 
-    });
-  }
-});
-
-/**
- * POST /api/jobs/:slug/apply
- * Invio candidatura per una posizione specifica
- */
-router.post("/:slug/apply", upload.single('cv'), async (req, res) => {
-  try {
-    const { slug } = req.params;
-    const {
-      first_name,
-      last_name,
-      email,
-      phone,
-      cover_letter,
-      linkedin_profile,
-      portfolio_url
-    } = req.body;
-    
-    logger.info(`📝 Processing job application for position: ${slug} from: ${email}`);
-    
-    // Validate application data
-    const validationErrors = validateApplicationData(req.body);
-    if (validationErrors.length > 0) {
-      logger.warn(`⚠️  Validation errors in application:`, validationErrors);
-      return res.status(400).json({
-        error: "Validation failed",
-        details: validationErrors
-      });
-    }
-    
-    // Find job position
-    const { data: job, error: jobError } = await supabaseClient
-      .from("job_positions")
-      .select("id, title")
-      .eq("slug", slug)
-      .eq("is_active", true)
-      .single();
-    
-    if (jobError || !job) {
-      logger.warn(`⚠️  Job position not found for slug: ${slug}`);
-      return res.status(404).json({ 
-        error: "Job position not found or no longer active" 
-      });
-    }
-    
-    // Check for duplicate application
-    const { data: existingApplication } = await supabaseClient
-      .from("job_applications")
-      .select("id")
-      .eq("job_position_id", job.id)
-      .eq("email", email.toLowerCase())
-      .single();
-    
-    if (existingApplication) {
-      logger.warn(`⚠️  Duplicate application detected for ${email} on position ${job.title}`);
-      return res.status(400).json({
-        error: "You have already applied for this position"
-      });
-    }
-    
-    // Handle CV upload if present
-    let cv_url = null;
-    let cv_public_id = null;
-    
-    if (req.file) {
-      logger.info(`📄 Uploading CV for ${email}`);
-      
-      try {
-        const uploadResult = await uploadCVToCloudinary(
-          req.file.buffer, 
-          email, 
-          req.file.originalname
-        );
-        
-        cv_url = uploadResult.secure_url;
-        cv_public_id = uploadResult.public_id;
-        
-        logger.info(`✅ CV uploaded successfully to Cloudinary: ${cv_public_id}`);
-      } catch (uploadError) {
-        logger.error("❌ Error uploading CV to Cloudinary:", uploadError);
-        return res.status(500).json({
-          error: "Failed to upload CV. Please try again."
-        });
-      }
-    } else {
-      logger.warn(`⚠️  No CV file provided for application from ${email}`);
-      return res.status(400).json({
-        error: "CV file is required for job application"
-      });
-    }
-    
-    // Save application to database
-    const { data: application, error: applicationError } = await supabaseClient
-      .from("job_applications")
-      .insert({
-        job_position_id: job.id,
-        first_name: first_name.trim(),
-        last_name: last_name.trim(),
-        email: email.toLowerCase().trim(),
-        phone: phone?.trim(),
-        cv_url,
-        cv_public_id,
-        cover_letter: cover_letter?.trim(),
-        linkedin_profile: linkedin_profile?.trim(),
-        portfolio_url: portfolio_url?.trim()
-      })
-      .select()
-      .single();
-    
-    if (applicationError) {
-      logger.error("❌ Error saving application to database:", applicationError);
-      
-      // Clean up uploaded CV if database save fails
-      if (cv_public_id) {
-        try {
-          await cloudinary.uploader.destroy(cv_public_id, { resource_type: "raw" });
-          logger.info(`🗑️  Cleaned up uploaded CV after database error: ${cv_public_id}`);
-        } catch (cleanupError) {
-          logger.error("❌ Error cleaning up CV after database error:", cleanupError);
-        }
-      }
-      
-      return res.status(500).json({
-        error: "Failed to submit application. Please try again.",
-        details: applicationError.message
-      });
-    }
-    
-    logger.info(`✅ Application submitted successfully: ID ${application.id} for ${job.title}`);
-    
-    // TODO: Send confirmation email to applicant
-    // TODO: Send notification email to HR
-    
-    res.status(201).json({
-      success: true,
-      message: "Application submitted successfully! We will review your application and contact you soon.",
-      data: {
-        application_id: application.id,
-        job_title: job.title,
-        submitted_at: application.applied_at
-      }
-    });
-    
-  } catch (error) {
-    logger.error("❌ Error in POST /api/jobs/:slug/apply:", error);
-    res.status(500).json({
-      error: "Internal server error during application submission",
-      details: error.message
-    });
-  }
-});
-
-/**
- * GET /api/jobs/meta/departments
- * Lista tutti i dipartimenti disponibili per filtri
- */
-router.get("/meta/departments", async (req, res) => {
-  try {
-    logger.info("📊 Fetching available departments");
-    
-    const { data, error } = await supabaseClient
-      .from("job_positions")
-      .select("department")
-      .eq("is_active", true);
-    
-    if (error) {
-      logger.error("❌ Error fetching departments:", error);
-      return res.status(500).json({ error: "Failed to fetch departments" });
-    }
-    
-    // Extract unique departments
-    const departments = [...new Set(data.map(item => item.department))].sort();
-    
-    logger.info(`✅ Found ${departments.length} unique departments`);
-    res.json({ success: true, data: departments });
-    
-  } catch (error) {
-    logger.error("❌ Error in GET /api/jobs/meta/departments:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
-
-/**
- * GET /api/jobs/meta/locations
- * Lista tutte le sedi disponibili per filtri
- */
-router.get("/meta/locations", async (req, res) => {
-  try {
-    logger.info("📊 Fetching available locations");
-    
-    const { data, error } = await supabaseClient
-      .from("job_positions")
-      .select("location")
-      .eq("is_active", true);
-    
-    if (error) {
-      logger.error("❌ Error fetching locations:", error);
-      return res.status(500).json({ error: "Failed to fetch locations" });
-    }
-    
-    // Extract unique locations
-    const locations = [...new Set(data.map(item => item.location))].sort();
-    
-    logger.info(`✅ Found ${locations.length} unique locations`);
-    res.json({ success: true, data: locations });
-    
-  } catch (error) {
-    logger.error("❌ Error in GET /api/jobs/meta/locations:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
+  });
 });
 
 // =============================================
-// ADMIN ENDPOINTS (Dashboard)
+// ADMIN ENDPOINTS (Dashboard) - MUST COME BEFORE /:slug
 // =============================================
 
 /**
@@ -953,92 +622,43 @@ router.get("/applications", requireAuth, async (req, res) => {
   }
 });
 
-/**
- * GET /api/jobs/applications/:id
- * Dettaglio di una specifica candidatura
- */
-router.get("/applications/:id", requireAuth, async (req, res) => {
-  try {
-    const { id } = req.params;
-    
-    logger.info(`🔒 Admin fetching application detail for ID: ${id}`);
-    
-    const { data: application, error } = await supabaseClient
-      .from("job_applications_with_positions")
-      .select("*")
-      .eq("id", id)
-      .single();
-    
-    if (error || !application) {
-      logger.warn(`⚠️  Application not found for ID: ${id}`);
-      return res.status(404).json({ 
-        error: "Application not found" 
-      });
-    }
-    
-    logger.info(`✅ Admin successfully fetched application: ${application.first_name} ${application.last_name}`);
-    res.json({ success: true, data: application });
-    
-  } catch (error) {
-    logger.error("❌ Admin error in GET /api/jobs/applications/:id:", error);
-    res.status(500).json({ 
-      error: "Internal server error", 
-      details: error.message 
-    });
-  }
-});
+// Continue with more application endpoints...
+
+// =============================================
+// META ENDPOINTS (Must come before /:slug)
+// =============================================
 
 /**
- * PUT /api/jobs/applications/:id/status
- * Aggiorna lo status di una candidatura
+ * GET /api/jobs/meta/departments
+ * Lista dei dipartimenti disponibili per filtri
  */
-router.put("/applications/:id/status", requireAuth, async (req, res) => {
+router.get("/meta/departments", async (req, res) => {
   try {
-    const { id } = req.params;
-    const { status, admin_notes } = req.body;
+    logger.info(`📊 Fetching job departments for filters`);
     
-    logger.info(`🔒 Admin updating application status ID: ${id} to: ${status}`);
-    
-    // Validate status
-    const validStatuses = ['new', 'reviewed', 'contacted', 'interview', 'hired', 'rejected'];
-    if (!status || !validStatuses.includes(status)) {
-      return res.status(400).json({
-        error: `Invalid status. Must be one of: ${validStatuses.join(', ')}`
-      });
-    }
-    
-    // Update application
-    const { data: updatedApplication, error } = await supabaseClient
-      .from("job_applications")
-      .update({ 
-        status, 
-        admin_notes: admin_notes?.trim(),
-        updated_at: new Date().toISOString()
-      })
-      .eq("id", id)
-      .select()
-      .single();
+    const { data, error } = await supabaseClient
+      .from("job_positions")
+      .select("department")
+      .eq("is_active", true);
     
     if (error) {
-      logger.error("❌ Admin error updating application status:", error);
-      return res.status(500).json({
-        error: "Failed to update application status",
-        details: error.message
+      logger.error("❌ Error fetching departments:", error);
+      return res.status(500).json({ 
+        error: "Failed to fetch departments", 
+        details: error.message 
       });
     }
     
-    if (!updatedApplication) {
-      logger.warn(`⚠️  Application not found for status update ID: ${id}`);
-      return res.status(404).json({ 
-        error: "Application not found" 
-      });
-    }
+    // Extract unique departments
+    const departments = [...new Set(data.map(job => job.department))]
+      .filter(dept => dept) // Remove null/empty
+      .sort();
     
-    logger.info(`✅ Admin successfully updated application status: ID ${id} to ${status}`);
-    res.json({ success: true, data: updatedApplication });
+    logger.info(`✅ Successfully fetched ${departments.length} departments`);
+    res.json({ success: true, data: departments });
     
   } catch (error) {
-    logger.error("❌ Admin error in PUT /api/jobs/applications/:id/status:", error);
+    logger.error("❌ Error in GET /api/jobs/meta/departments:", error);
     res.status(500).json({ 
       error: "Internal server error", 
       details: error.message 
@@ -1047,106 +667,287 @@ router.put("/applications/:id/status", requireAuth, async (req, res) => {
 });
 
 /**
- * DELETE /api/jobs/applications/:id
- * Elimina una candidatura (con cleanup CV)
+ * GET /api/jobs/meta/locations
+ * Lista delle sedi disponibili per filtri
  */
-router.delete("/applications/:id", requireAuth, async (req, res) => {
+router.get("/meta/locations", async (req, res) => {
   try {
-    const { id } = req.params;
+    logger.info(`📊 Fetching job locations for filters`);
     
-    logger.info(`🔒 Admin deleting application ID: ${id}`);
+    const { data, error } = await supabaseClient
+      .from("job_positions")
+      .select("location")
+      .eq("is_active", true);
     
-    // Get application data before deletion
-    const { data: application, error: fetchError } = await supabaseClient
-      .from("job_applications")
-      .select("id, first_name, last_name, email, cv_public_id")
-      .eq("id", id)
+    if (error) {
+      logger.error("❌ Error fetching locations:", error);
+      return res.status(500).json({ 
+        error: "Failed to fetch locations", 
+        details: error.message 
+      });
+    }
+    
+    // Extract unique locations
+    const locations = [...new Set(data.map(job => job.location))]
+      .filter(location => location) // Remove null/empty
+      .sort();
+    
+    logger.info(`✅ Successfully fetched ${locations.length} locations`);
+    res.json({ success: true, data: locations });
+    
+  } catch (error) {
+    logger.error("❌ Error in GET /api/jobs/meta/locations:", error);
+    res.status(500).json({ 
+      error: "Internal server error", 
+      details: error.message 
+    });
+  }
+});
+
+// =============================================
+// PUBLIC ENDPOINTS
+// =============================================
+
+/**
+ * GET /api/jobs
+ * Lista delle posizioni aperte (solo attive) per il pubblico
+ */
+router.get("/", async (req, res) => {
+  try {
+    const { department, location, employment_type } = req.query;
+    
+    logger.info(`📋 Fetching active job positions with filters: ${JSON.stringify(req.query)}`);
+    
+    let query = supabaseClient
+      .from("job_positions")
+      .select(`
+        id,
+        title,
+        slug,
+        department,
+        location,
+        employment_type,
+        experience_level,
+        description,
+        benefits,
+        salary_range,
+        applications_count AS current_applications_count
+      `)
+      .eq("is_active", true)
+      .order("display_order", { ascending: true })
+      .order("created_at", { ascending: false });
+    
+    // Apply filters for public API
+    if (department) {
+      query = query.eq('department', department);
+    }
+    if (location) {
+      query = query.eq('location', location);
+    }
+    if (employment_type) {
+      query = query.eq('employment_type', employment_type);
+    }
+    
+    const { data, error } = await query;
+    
+    if (error) {
+      logger.error("❌ Error fetching active job positions:", error);
+      return res.status(500).json({ 
+        error: "Failed to fetch job positions", 
+        details: error.message 
+      });
+    }
+    
+    logger.info(`✅ Successfully fetched ${data.length} active job positions`);
+    res.json({ success: true, data });
+    
+  } catch (error) {
+    logger.error("❌ Error in GET /api/jobs:", error);
+    res.status(500).json({ 
+      error: "Internal server error", 
+      details: error.message 
+    });
+  }
+});
+
+/**
+ * GET /api/jobs/:slug  
+ * Dettaglio di una specifica posizione per slug (MUST BE LAST DYNAMIC ROUTE)
+ */
+router.get("/:slug", async (req, res) => {
+  try {
+    const { slug } = req.params;
+    
+    logger.info(`📄 Fetching job position detail for slug: ${slug}`);
+    
+    const { data: job, error } = await supabaseClient
+      .from("job_positions")
+      .select("*")
+      .eq("slug", slug)
+      .eq("is_active", true)
       .single();
     
-    if (fetchError || !application) {
-      logger.warn(`⚠️  Application not found for deletion ID: ${id}`);
+    if (error || !job) {
+      logger.warn(`⚠️  Job position not found for slug: ${slug}`);
       return res.status(404).json({ 
-        error: "Application not found" 
+        error: "Job position not found" 
       });
     }
     
-    // Delete from database first
-    const { error: deleteError } = await supabaseClient
+    logger.info(`✅ Successfully fetched job position: ${job.title}`);
+    res.json({ success: true, data: job });
+    
+  } catch (error) {
+    logger.error("❌ Error in GET /api/jobs/:slug:", error);
+    res.status(500).json({ 
+      error: "Internal server error", 
+      details: error.message 
+    });
+  }
+});
+
+/**
+ * POST /api/jobs/:slug/apply
+ * Invio candidatura per una posizione specifica
+ */
+router.post("/:slug/apply", upload.single('cv'), async (req, res) => {
+  try {
+    const { slug } = req.params;
+    const { first_name, last_name, email, phone, cover_letter, linkedin_profile, portfolio_url } = req.body;
+    
+    logger.info(`💼 New job application for position: ${slug} from ${email}`);
+    
+    // Validate required fields
+    if (!first_name || !last_name || !email) {
+      return res.status(400).json({
+        error: "Missing required fields: first_name, last_name, email are required"
+      });
+    }
+    
+    // Find job position
+    const { data: job, error: jobError } = await supabaseClient
+      .from("job_positions")
+      .select("id, title, is_active")
+      .eq("slug", slug)
+      .single();
+    
+    if (jobError || !job) {
+      logger.warn(`⚠️  Job position not found for application: ${slug}`);
+      return res.status(404).json({ 
+        error: "Job position not found" 
+      });
+    }
+    
+    if (!job.is_active) {
+      logger.warn(`⚠️  Job position is not active: ${slug}`);
+      return res.status(400).json({ 
+        error: "This job position is no longer accepting applications" 
+      });
+    }
+    
+    // Check for duplicate application
+    const { data: existingApp } = await supabaseClient
       .from("job_applications")
-      .delete()
-      .eq("id", id);
+      .select("id")
+      .eq("job_position_id", job.id)
+      .eq("email", email)
+      .single();
     
-    if (deleteError) {
-      logger.error("❌ Admin error deleting application:", deleteError);
-      return res.status(500).json({
-        error: "Failed to delete application",
-        details: deleteError.message
+    if (existingApp) {
+      logger.warn(`⚠️  Duplicate application attempt for ${email} on job ${slug}`);
+      return res.status(400).json({
+        error: "You have already applied for this position"
       });
     }
     
-    // Clean up CV file from Cloudinary if exists
-    if (application.cv_public_id) {
+    let cvUrl = null;
+    let cvPublicId = null;
+    
+    // Upload CV to Cloudinary if provided
+    if (req.file) {
       try {
-        await cloudinary.uploader.destroy(application.cv_public_id, { resource_type: "raw" });
-        logger.info(`🗑️  Cleaned up CV file: ${application.cv_public_id}`);
-      } catch (cleanupError) {
-        logger.error("❌ Error cleaning up CV file:", cleanupError);
-        // Don't fail the request for cleanup errors
+        logger.info(`📎 Uploading CV for application: ${first_name} ${last_name}`);
+        
+        const uploadResult = await new Promise((resolve, reject) => {
+          cloudinary.uploader.upload_stream(
+            {
+              resource_type: "raw",
+              folder: "korsvagen/job_applications/cvs",
+              public_id: `cv_${job.id}_${Date.now()}_${first_name}_${last_name}`,
+              allowed_formats: ["pdf", "doc", "docx"]
+            },
+            (error, result) => {
+              if (error) reject(error);
+              else resolve(result);
+            }
+          ).end(req.file.buffer);
+        });
+        
+        cvUrl = uploadResult.secure_url;
+        cvPublicId = uploadResult.public_id;
+        
+        logger.info(`✅ CV uploaded successfully: ${cvPublicId}`);
+        
+      } catch (uploadError) {
+        logger.error("❌ Error uploading CV:", uploadError);
+        return res.status(500).json({
+          error: "Failed to upload CV. Please try again.",
+          details: uploadError.message
+        });
       }
     }
     
-    logger.info(`✅ Admin successfully deleted application: ID ${id}, Name: ${application.first_name} ${application.last_name}`);
-    res.json({ 
-      success: true, 
-      message: `Application from ${application.first_name} ${application.last_name} deleted successfully` 
-    });
-    
-  } catch (error) {
-    logger.error("❌ Admin error in DELETE /api/jobs/applications/:id:", error);
-    res.status(500).json({ 
-      error: "Internal server error", 
-      details: error.message 
-    });
-  }
-});
-
-/**
- * GET /api/jobs/applications/:id/cv
- * Download CV file (proxy for secure access)
- */
-router.get("/applications/:id/cv", requireAuth, async (req, res) => {
-  try {
-    const { id } = req.params;
-    
-    logger.info(`🔒 Admin requesting CV download for application ID: ${id}`);
-    
-    // Get application with CV URL
-    const { data: application, error } = await supabaseClient
+    // Create application
+    const { data: application, error: appError } = await supabaseClient
       .from("job_applications")
-      .select("id, first_name, last_name, cv_url, cv_public_id")
-      .eq("id", id)
+      .insert({
+        job_position_id: job.id,
+        first_name: first_name.trim(),
+        last_name: last_name.trim(),
+        email: email.trim().toLowerCase(),
+        phone: phone?.trim(),
+        cv_url: cvUrl,
+        cv_public_id: cvPublicId,
+        cover_letter: cover_letter?.trim(),
+        linkedin_profile: linkedin_profile?.trim(),
+        portfolio_url: portfolio_url?.trim(),
+        status: 'new'
+      })
+      .select()
       .single();
     
-    if (error || !application) {
-      logger.warn(`⚠️  Application not found for CV download ID: ${id}`);
-      return res.status(404).json({ 
-        error: "Application not found" 
+    if (appError) {
+      // If application creation fails and we uploaded a CV, clean it up
+      if (cvPublicId) {
+        try {
+          await cloudinary.uploader.destroy(cvPublicId);
+          logger.info(`🧹 Cleaned up uploaded CV after application error: ${cvPublicId}`);
+        } catch (cleanupError) {
+          logger.error("❌ Error cleaning up CV after failed application:", cleanupError);
+        }
+      }
+      
+      logger.error("❌ Error creating job application:", appError);
+      return res.status(500).json({
+        error: "Failed to submit application",
+        details: appError.message
       });
     }
     
-    if (!application.cv_url) {
-      logger.warn(`⚠️  No CV file for application ID: ${id}`);
-      return res.status(404).json({ 
-        error: "No CV file attached to this application" 
-      });
-    }
+    logger.info(`✅ Job application submitted successfully: ID ${application.id} for position ${job.title}`);
     
-    // Redirect to Cloudinary URL (with authentication if needed)
-    logger.info(`✅ Admin CV download redirect: ${application.first_name} ${application.last_name}`);
-    res.redirect(application.cv_url);
+    res.status(201).json({ 
+      success: true, 
+      message: `Application submitted successfully for ${job.title}`,
+      data: {
+        id: application.id,
+        job_title: job.title,
+        applied_at: application.applied_at
+      }
+    });
     
   } catch (error) {
-    logger.error("❌ Admin error in GET /api/jobs/applications/:id/cv:", error);
+    logger.error("❌ Error in POST /api/jobs/:slug/apply:", error);
     res.status(500).json({ 
       error: "Internal server error", 
       details: error.message 
