@@ -316,28 +316,34 @@ const CheckboxLabel = styled.label`
   }
 `;
 
-const ImageUploadArea = styled.div`
-  border: 2px dashed #e9ecef;
+const ImageUploadArea = styled.div<{ $isDragOver?: boolean; $disabled?: boolean }>`
+  border: 2px dashed ${props => 
+    props.$isDragOver ? '#4caf50' : 
+    props.$disabled ? '#ccc' : '#e9ecef'
+  };
   border-radius: 8px;
   padding: 2rem;
   text-align: center;
-  background: #fafafa;
+  background: ${props => 
+    props.$isDragOver ? 'rgba(76, 175, 80, 0.1)' : 
+    props.$disabled ? '#f5f5f5' : '#fafafa'
+  };
   transition: all 0.2s ease;
-  cursor: pointer;
+  cursor: ${props => props.$disabled ? 'not-allowed' : 'pointer'};
 
   &:hover {
-    border-color: #4caf50;
-    background: rgba(76, 175, 80, 0.05);
+    border-color: ${props => props.$disabled ? '#ccc' : '#4caf50'};
+    background: ${props => props.$disabled ? '#f5f5f5' : 'rgba(76, 175, 80, 0.05)'};
   }
 
   .icon {
     margin-bottom: 1rem;
-    color: #ccc;
+    color: ${props => props.$disabled ? '#ccc' : props.$isDragOver ? '#4caf50' : '#999'};
   }
 
   p {
     margin: 0 0 1rem 0;
-    color: #666;
+    color: ${props => props.$disabled ? '#999' : '#666'};
     font-size: 0.9rem;
   }
 
@@ -403,6 +409,7 @@ const NewsForm: React.FC<NewsFormProps> = ({
 
   const [loading, setLoading] = useState(false);
   const [imageUploading, setImageUploading] = useState(false);
+  const [isDragOver, setIsDragOver] = useState(false);
   const [currentImage, setCurrentImage] = useState<string>('');
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -563,6 +570,46 @@ const NewsForm: React.FC<NewsFormProps> = ({
       console.error('Errore rimozione immagine:', error);
       toast.error(error.message || 'Errore nella rimozione dell\'immagine');
     }
+  };
+
+  // Handle drag and drop
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+    
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+      const file = files[0];
+      if (file.type.startsWith('image/')) {
+        handleImageUpload(file);
+      } else {
+        toast.error('Seleziona un file immagine valido');
+      }
+    }
+  };
+
+  // Handle click to select file
+  const handleImageAreaClick = () => {
+    if (imageUploading || !article?.id) return;
+    
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (file) handleImageUpload(file);
+    };
+    input.click();
   };
 
   const getPreviewUrl = () => {
@@ -760,23 +807,23 @@ const NewsForm: React.FC<NewsFormProps> = ({
               </CurrentImage>
             )}
 
-            <ImageUploadArea>
+            <ImageUploadArea
+              $isDragOver={isDragOver}
+              $disabled={imageUploading || !article?.id}
+              onClick={handleImageAreaClick}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+            >
               <Upload className="icon" size={32} />
               <p>
                 {imageUploading 
                   ? 'Caricamento in corso...' 
+                  : isDragOver 
+                  ? 'Rilascia l\'immagine qui'
                   : 'Trascina un\'immagine qui o clicca per selezionare'
                 }
               </p>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) handleImageUpload(file);
-                }}
-                disabled={imageUploading || !article?.id}
-              />
               {!article?.id && (
                 <HelpText>Salva prima l'articolo per caricare un'immagine</HelpText>
               )}

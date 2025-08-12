@@ -834,7 +834,7 @@ router.delete('/admin/:id/image', requireAuth, async (req, res) => {
     // Recupera info immagine
     const { data: article } = await supabaseClient
       .from('news')
-      .select('id, title, image_public_id')
+      .select('id, title, image_public_id, image_url')
       .eq('id', id)
       .single();
 
@@ -846,7 +846,19 @@ router.delete('/admin/:id/image', requireAuth, async (req, res) => {
       });
     }
 
-    if (!article.image_public_id) {
+    // Controlla se c'è un'immagine da eliminare
+    let publicIdToDelete = article.image_public_id;
+    
+    // Se non c'è public_id ma c'è image_url, prova a estrarre il public_id dall'URL
+    if (!publicIdToDelete && article.image_url) {
+      const match = article.image_url.match(/\/v\d+\/(.+)\./);
+      if (match) {
+        publicIdToDelete = match[1];
+        logger.info(`Estratto public_id dall'URL: ${publicIdToDelete}`);
+      }
+    }
+
+    if (!publicIdToDelete && !article.image_url) {
       return res.status(400).json({
         success: false,
         error: 'Nessuna immagine da eliminare',
@@ -855,10 +867,13 @@ router.delete('/admin/:id/image', requireAuth, async (req, res) => {
     }
 
     // Elimina immagine da Cloudinary
-    try {
-      await cloudinary.uploader.destroy(article.image_public_id);
-    } catch (cloudinaryError) {
-      logger.warn('Errore eliminazione immagine Cloudinary:', cloudinaryError);
+    if (publicIdToDelete) {
+      try {
+        await cloudinary.uploader.destroy(publicIdToDelete);
+        logger.info(`Immagine eliminata da Cloudinary: ${publicIdToDelete}`);
+      } catch (cloudinaryError) {
+        logger.warn('Errore eliminazione immagine Cloudinary:', cloudinaryError);
+      }
     }
 
     // Rimuovi riferimenti immagine dal database
