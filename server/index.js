@@ -89,13 +89,20 @@ const corsOptions = {
     // Log di ogni richiesta CORS per debug
     logger.info(`🌐 CORS request from origin: ${origin || 'NO_ORIGIN'}`);
     
-    const allowedOrigins = process.env.CORS_ORIGIN?.split(",") || [
+    // Combina origins da environment variable e defaults
+    const envOrigins = process.env.CORS_ORIGIN?.split(",").map(o => o.trim()) || [];
+    const defaultOrigins = [
       "http://localhost:3000",
       "http://localhost:3002",
       "https://korsvagen-web.vercel.app",
       "https://www.korsvagen.it",
       "https://korsvagen.it",
     ];
+    
+    // Se abbiamo origins da ENV, li usiamo con i defaults, altrimenti solo i defaults
+    const allowedOrigins = envOrigins.length > 0 
+      ? [...new Set([...envOrigins, ...defaultOrigins])]  // Rimuovi duplicati
+      : defaultOrigins;
 
     // Log degli origins permessi per debug
     logger.info(`📝 Allowed origins: ${allowedOrigins.join(", ")}`);
@@ -128,7 +135,7 @@ const corsOptions = {
     }
   },
   credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
   allowedHeaders: [
     "Content-Type",
     "Authorization",
@@ -136,14 +143,31 @@ const corsOptions = {
     "Origin",
     "X-Requested-With",
     "Accept",
+    "Access-Control-Allow-Credentials",
+    "Access-Control-Allow-Headers",
+    "Access-Control-Allow-Methods",
+    "Access-Control-Allow-Origin",
+    "Cache-Control",
+    "Pragma"
+  ],
+  exposedHeaders: [
+    "Set-Cookie",
+    "Access-Control-Allow-Credentials"
   ],
   preflightContinue: false,
-  optionsSuccessStatus: 200,
+  optionsSuccessStatus: 204, // Alcuni browser preferiscono 204 per OPTIONS
 };
 app.use(cors(corsOptions));
 
 // Handler esplicito per richieste OPTIONS preflight
-app.options("*", cors(corsOptions));
+app.options("*", (req, res) => {
+  logger.info(`🔧 OPTIONS preflight request from: ${req.headers.origin}`);
+  logger.info(`🔧 Request headers: ${JSON.stringify(req.headers)}`);
+  
+  cors(corsOptions)(req, res, () => {
+    res.status(200).end();
+  });
+});
 
 // Rate Limiting: Prevenzione attacchi DDoS
 const generalLimiter = rateLimit({
@@ -243,24 +267,51 @@ app.get("/api/test", (req, res) => {
 
 // Endpoint specifico per test CORS
 app.get("/api/cors-test", (req, res) => {
+  // Replica la stessa logica di CORS dal middleware
+  const envOrigins = process.env.CORS_ORIGIN?.split(",").map(o => o.trim()) || [];
+  const defaultOrigins = [
+    "http://localhost:3000",
+    "http://localhost:3002",
+    "https://korsvagen-web.vercel.app",
+    "https://www.korsvagen.it",
+    "https://korsvagen.it",
+  ];
+  
+  const allowedOrigins = envOrigins.length > 0 
+    ? [...new Set([...envOrigins, ...defaultOrigins])]
+    : defaultOrigins;
+
+  const isOriginAllowed = !req.headers.origin || allowedOrigins.includes(req.headers.origin);
+
   res.json({
     success: true,
     message: "CORS test endpoint",
     origin: req.headers.origin,
-    allowedOrigins: process.env.CORS_ORIGIN?.split(",") || [
-      "http://localhost:3000",
-      "http://localhost:3002", 
-      "https://korsvagen-web.vercel.app",
-      "https://www.korsvagen.it",
-      "https://korsvagen.it",
-    ],
+    isOriginAllowed,
+    envOrigins,
+    defaultOrigins,
+    finalAllowedOrigins: allowedOrigins,
+    environment: {
+      NODE_ENV: process.env.NODE_ENV,
+      CORS_ORIGIN: process.env.CORS_ORIGIN,
+    },
     headers: {
       origin: req.headers.origin,
       referer: req.headers.referer,
       host: req.headers.host,
+      'user-agent': req.headers['user-agent'],
     },
     timestamp: new Date().toISOString(),
   });
+});
+
+// Middleware di debug per richieste auth
+app.use("/api/auth", (req, res, next) => {
+  logger.info(`🔐 Auth request: ${req.method} ${req.path}`);
+  logger.info(`🔐 Origin: ${req.headers.origin || 'NO_ORIGIN'}`);
+  logger.info(`🔐 User-Agent: ${req.headers['user-agent']}`);
+  logger.info(`🔐 Headers: ${JSON.stringify(req.headers)}`);
+  next();
 });
 
 // Autenticazione - login, logout, refresh token
