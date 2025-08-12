@@ -185,11 +185,11 @@ export function generateRefreshToken(payload) {
  * @returns {Object} Payload decodificato
  */
 export function verifyToken(token, isRefreshToken = false) {
-  try {
-    const secret = isRefreshToken
-      ? JWT_CONFIG.refreshSecret
-      : JWT_CONFIG.secret;
+  const secret = isRefreshToken
+    ? JWT_CONFIG.refreshSecret
+    : JWT_CONFIG.secret;
 
+  try {
     if (!secret) {
       throw new Error("Secret non configurato per questo tipo di token");
     }
