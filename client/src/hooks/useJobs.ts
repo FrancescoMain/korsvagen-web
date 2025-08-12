@@ -6,6 +6,7 @@
  */
 
 import { useState, useCallback } from 'react';
+import { API_BASE_URL } from '../utils/api';
 
 export interface JobPosition {
   id: number;
@@ -86,7 +87,7 @@ export const useJobs = () => {
       if (filters?.page) params.append('page', filters.page.toString());
       if (filters?.limit) params.append('limit', filters.limit.toString());
 
-      const response = await fetch(`/api/jobs/admin?${params.toString()}`, {
+      const response = await fetch(`${API_BASE_URL}/jobs/admin?${params.toString()}`, {
         credentials: 'include',
       });
 
@@ -140,7 +141,7 @@ export const useJobs = () => {
       if (filters?.location) params.append('location', filters.location);
       if (filters?.employment_type) params.append('employment_type', filters.employment_type);
 
-      const response = await fetch(`/api/jobs?${params.toString()}`);
+      const response = await fetch(`${API_BASE_URL}/jobs?${params.toString()}`);
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -166,7 +167,7 @@ export const useJobs = () => {
     setError(null);
 
     try {
-      const response = await fetch(`/api/jobs/${slug}`);
+      const response = await fetch(`${API_BASE_URL}/jobs/${slug}`);
 
       if (!response.ok) {
         if (response.status === 404) {
@@ -198,7 +199,7 @@ export const useJobs = () => {
     setError(null);
 
     try {
-      const response = await fetch('/api/jobs/admin', {
+      const response = await fetch(`${API_BASE_URL}/jobs/admin`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -245,7 +246,7 @@ export const useJobs = () => {
     setError(null);
 
     try {
-      const response = await fetch(`/api/jobs/admin/${id}`, {
+      const response = await fetch(`${API_BASE_URL}/jobs/admin/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -287,7 +288,7 @@ export const useJobs = () => {
     setError(null);
 
     try {
-      const response = await fetch(`/api/jobs/admin/${id}`, {
+      const response = await fetch(`${API_BASE_URL}/jobs/admin/${id}`, {
         method: 'DELETE',
         credentials: 'include',
       });
@@ -333,7 +334,7 @@ export const useJobs = () => {
     setError(null);
 
     try {
-      const response = await fetch('/api/jobs/admin/reorder', {
+      const response = await fetch(`${API_BASE_URL}/jobs/admin/reorder`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -395,7 +396,7 @@ export const useJobs = () => {
       if (filters?.limit) params.append('limit', filters.limit.toString());
       if (filters?.search) params.append('search', filters.search);
 
-      const response = await fetch(`/api/jobs/applications?${params.toString()}`, {
+      const response = await fetch(`${API_BASE_URL}/jobs/applications?${params.toString()}`, {
         credentials: 'include',
       });
 
@@ -436,7 +437,7 @@ export const useJobs = () => {
     setError(null);
 
     try {
-      const response = await fetch(`/api/jobs/${slug}/apply`, {
+      const response = await fetch(`${API_BASE_URL}/jobs/${slug}/apply`, {
         method: 'POST',
         body: applicationData,
       });
@@ -461,7 +462,7 @@ export const useJobs = () => {
   // Fetch metadata (departments, locations)
   const fetchDepartments = useCallback(async (): Promise<string[]> => {
     try {
-      const response = await fetch('/api/jobs/meta/departments');
+      const response = await fetch(`${API_BASE_URL}/jobs/meta/departments`);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -480,7 +481,7 @@ export const useJobs = () => {
 
   const fetchLocations = useCallback(async (): Promise<string[]> => {
     try {
-      const response = await fetch('/api/jobs/meta/locations');
+      const response = await fetch(`${API_BASE_URL}/jobs/meta/locations`);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
