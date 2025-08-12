@@ -12,6 +12,7 @@ import {
   Users,
   Cog,
   Newspaper,
+  Briefcase,
 } from "lucide-react";
 
 interface NavigationItem {
@@ -61,6 +62,11 @@ const navigationItems: NavigationItem[] = [
     title: "Gestione News",
     icon: <Newspaper size={20} />,
     path: "/dashboard/news",
+  },
+  {
+    title: "Lavora con Noi",
+    icon: <Briefcase size={20} />,
+    path: "/dashboard/jobs",
   },
   {
     title: "Contact",

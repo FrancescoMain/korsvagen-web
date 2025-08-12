@@ -53,6 +53,7 @@ import teamRoutes from "./routes/team.js";
 import servicesRoutes from "./routes/services.js";
 import projectsRoutes from "./routes/projects.js";
 import newsRoutes from "./routes/news.js";
+import jobsRoutes from "./routes/jobs.js";
 
 // Inizializza l'app Express
 const app = express();
@@ -405,6 +406,9 @@ app.use("/api/projects", projectsRoutes);
 
 // News - sistema di gestione news dinamico (public and admin)
 app.use("/api/news", newsRoutes);
+
+// Jobs - sistema di gestione "Lavora con Noi" dinamico (public and admin)
+app.use("/api/jobs", jobsRoutes);
 
 // Placeholder per futuri endpoint che saranno aggiunti nelle fasi successive:
 // - /api/users (gestione utenti)

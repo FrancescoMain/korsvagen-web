@@ -35,7 +35,7 @@ import { ReviewsManagement } from "./pages/ReviewsManagement";
 import AboutManagement from "./pages/AboutManagement";
 import TeamManagement from "./pages/TeamManagement";
 import ServicesManagement from "./pages/ServicesManagement";
-import { ProjectsManagement } from "./pages";
+import { ProjectsManagement, JobsManagement } from "./pages";
 import { NewsManager } from "./components/NewsManager";
 import "./styles/dashboard.css";
 
@@ -73,6 +73,7 @@ function App() {
               <Route path="/il-nostro-team" element={<TeamPage />} />
               <Route path="/contatti" element={<ContactPage />} />
               <Route path="/lavora-con-noi" element={<CareersPage />} />
+              <Route path="/lavora-con-noi/:slug" element={<CareersPage />} />
               <Route
                 path="/work-in-progress"
                 element={<WorkInProgressPage />}
@@ -100,6 +101,7 @@ function App() {
                 <Route path="services" element={<ServicesManagement />} />
                 <Route path="projects" element={<ProjectsManagement />} />
                 <Route path="news" element={<NewsManager />} />
+                <Route path="jobs" element={<JobsManagement />} />
                 <Route path="settings" element={<Settings />} />
               </Route>
 

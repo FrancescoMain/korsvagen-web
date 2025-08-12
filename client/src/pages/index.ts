@@ -10,5 +10,6 @@ export { default as CareersPage } from "./CareersPage";
 export { default as TeamPage } from "./TeamPage";
 export { default as ServicesManagement } from "./ServicesManagement";
 export { default as ProjectsManagement } from "./ProjectsManagement";
+export { default as JobsManagement } from "./JobsManagement";
 export { default as WorkInProgressPage } from "../WorkInProgressPage";
 export { default as PageEditorPage } from "./PageEditorPage";
