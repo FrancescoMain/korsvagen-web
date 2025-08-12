@@ -984,11 +984,12 @@ router.post("/:slug/apply", upload.single('cv'), async (req, res) => {
           cloudinary.uploader.upload_stream(
             {
               resource_type: "raw",
-              public_id: `job-cvs/cv_${job.id}_${Date.now()}_${first_name}_${last_name}.pdf`,
+              public_id: `job-cvs/${first_name.toLowerCase().replace(/\s+/g, '-')}-${last_name.toLowerCase().replace(/\s+/g, '-')}-${Date.now()}`,
+              use_filename: false,
+              unique_filename: false,
               type: "upload",
               invalidate: true,
-              overwrite: true,
-              allowed_formats: ["pdf", "doc", "docx"]
+              overwrite: true
             },
             (error, result) => {
               if (error) reject(error);
