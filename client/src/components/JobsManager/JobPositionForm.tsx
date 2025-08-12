@@ -342,7 +342,7 @@ const JobPositionForm: React.FC<Props> = ({ job, departments, onSave, onCancel }
       .replace(/[^a-z0-9\s-]/g, '') // Remove special chars
       .replace(/\s+/g, '-') // Replace spaces with hyphens
       .replace(/-+/g, '-') // Replace multiple hyphens with single
-      .trim('-'); // Remove leading/trailing hyphens
+      .replace(/^-+|-+$/g, ''); // Remove leading/trailing hyphens
   };
 
   useEffect(() => {

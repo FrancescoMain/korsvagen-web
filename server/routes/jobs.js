@@ -101,7 +101,7 @@ const generateSlug = (title) => {
     .replace(/[^a-z0-9\s-]/g, '') // Remove special chars
     .replace(/\s+/g, '-') // Replace spaces with hyphens
     .replace(/-+/g, '-') // Replace multiple hyphens with single
-    .trim('-'); // Remove leading/trailing hyphens
+    .replace(/^-+|-+$/g, ''); // Remove leading/trailing hyphens
 };
 
 // Helper function to validate job position data
