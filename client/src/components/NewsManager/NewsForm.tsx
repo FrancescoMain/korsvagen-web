@@ -8,6 +8,7 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import toast from "react-hot-toast";
+import { api } from "../../utils/api";
 import {
   ArrowLeft,
   Save,
@@ -510,24 +511,10 @@ const NewsForm: React.FC<NewsFormProps> = ({
     setLoading(true);
 
     try {
-      const url = article 
-        ? `/api/news/admin/${article.id}`
-        : '/api/news/admin';
-
-      const method = article ? 'PUT' : 'POST';
-
-      const response = await fetch(url, {
-        method,
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include',
-        body: JSON.stringify(formData)
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Errore nel salvataggio');
+      if (article) {
+        await api.news.update(article.id, formData);
+      } else {
+        await api.news.create(formData);
       }
 
       onSuccess();
@@ -552,22 +539,13 @@ const NewsForm: React.FC<NewsFormProps> = ({
       const formData = new FormData();
       formData.append('image', file);
 
-      const response = await fetch(`/api/news/admin/${article.id}/image`, {
-        method: 'POST',
-        credentials: 'include',
-        body: formData
-      });
-
-      if (!response.ok) {
-        throw new Error('Errore nel caricamento dell\'immagine');
-      }
-
-      const data = await response.json();
-      setCurrentImage(data.data.image_url);
+      const response = await api.news.uploadImage(article.id, formData);
+      
+      setCurrentImage(response.data.data.image_url);
       toast.success('Immagine caricata con successo');
     } catch (error: any) {
       console.error('Errore upload immagine:', error);
-      toast.error('Errore nel caricamento dell\'immagine');
+      toast.error(error.message || 'Errore nel caricamento dell\'immagine');
     } finally {
       setImageUploading(false);
     }
@@ -578,20 +556,12 @@ const NewsForm: React.FC<NewsFormProps> = ({
     if (!article?.id || !currentImage) return;
 
     try {
-      const response = await fetch(`/api/news/admin/${article.id}/image`, {
-        method: 'DELETE',
-        credentials: 'include'
-      });
-
-      if (!response.ok) {
-        throw new Error('Errore nella rimozione dell\'immagine');
-      }
-
+      await api.news.deleteImage(article.id);
       setCurrentImage('');
       toast.success('Immagine rimossa con successo');
     } catch (error: any) {
       console.error('Errore rimozione immagine:', error);
-      toast.error('Errore nella rimozione dell\'immagine');
+      toast.error(error.message || 'Errore nella rimozione dell\'immagine');
     }
   };
 

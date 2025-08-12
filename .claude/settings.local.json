@@ -27,7 +27,8 @@
       "Bash(timeout 10 npm run build:*)",
       "Bash(timeout 30 npm run build --prefix client)",
       "Bash(npm install)",
-      "Bash(timeout 15 npm run build)"
+      "Bash(timeout 15 npm run build)",
+      "Bash(curl:*)"
     ],
     "deny": []
   }

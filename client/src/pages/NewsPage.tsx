@@ -1,6 +1,7 @@
 import React from "react";
 import { useNavigateWithScroll } from "../hooks/useNavigateWithScroll";
 import styled from "styled-components";
+import { api } from "../utils/api";
 import Header from "../components/layout/Header";
 import Footer from "../components/layout/Footer";
 import ContactCTA from "../components/common/ContactCTA";
@@ -424,26 +425,16 @@ const NewsPage: React.FC = () => {
         setLoading(true);
         setError("");
 
-        const params = new URLSearchParams();
+        const params: any = {};
         if (selectedCategory !== "all") {
-          params.append("category", selectedCategory);
+          params.category = selectedCategory;
         }
 
-        const response = await fetch(`/api/news?${params}`);
-        if (!response.ok) {
-          throw new Error("Errore nel caricamento delle news");
-        }
-
-        const data = await response.json();
-        if (data.success) {
-          setNews(data.data || []);
-        } else {
-          throw new Error(data.error || "Errore sconosciuto");
-        }
-      } catch (error) {
+        const response = await api.news.getList(params);
+        setNews(response.data.data || []);
+      } catch (error: any) {
         console.error("Errore caricamento news:", error);
-        setError("Errore nel caricamento delle news. Riprova più tardi.");
-        // Fallback ai dati statici in caso di errore
+        setError(error.message || "Errore nel caricamento delle news. Riprova più tardi.");
         setNews([]);
       } finally {
         setLoading(false);
@@ -457,14 +448,9 @@ const NewsPage: React.FC = () => {
   React.useEffect(() => {
     const loadCategories = async () => {
       try {
-        const response = await fetch("/api/news/categories");
-        if (response.ok) {
-          const data = await response.json();
-          if (data.success) {
-            setCategories(["all", ...data.data]);
-          }
-        }
-      } catch (error) {
+        const response = await api.news.getCategories();
+        setCategories(["all", ...response.data.data]);
+      } catch (error: any) {
         console.error("Errore caricamento categorie:", error);
         // Fallback categorie di default
         setCategories(["all", "Progetti", "Azienda", "Partnership", "Certificazioni", "Premi"]);

@@ -2,6 +2,7 @@ import React from "react";
 import { useParams } from "react-router-dom";
 import { useNavigateWithScroll } from "../hooks/useNavigateWithScroll";
 import styled from "styled-components";
+import { api } from "../utils/api";
 import Header from "../components/layout/Header";
 import Footer from "../components/layout/Footer";
 import ContactCTA from "../components/common/ContactCTA";
@@ -567,31 +568,12 @@ const NewsDetailPage: React.FC = () => {
 
         // Carica articolo e articoli correlati in parallelo
         const [articleResponse, relatedResponse] = await Promise.all([
-          fetch(`/api/news/${slug}`),
-          fetch(`/api/news/${slug}/related`)
+          api.news.getDetail(slug),
+          api.news.getRelated(slug).catch(() => ({ data: { data: [] } })) // Fallback se articoli correlati falliscono
         ]);
 
-        if (!articleResponse.ok) {
-          if (articleResponse.status === 404) {
-            throw new Error("Articolo non trovato");
-          }
-          throw new Error("Errore nel caricamento dell'articolo");
-        }
-
-        const articleData = await articleResponse.json();
-        if (articleData.success) {
-          setArticle(articleData.data);
-        } else {
-          throw new Error(articleData.error || "Errore nel caricamento");
-        }
-
-        // Carica articoli correlati (anche se fallisce, non è critico)
-        if (relatedResponse.ok) {
-          const relatedData = await relatedResponse.json();
-          if (relatedData.success) {
-            setRelatedNews(relatedData.data || []);
-          }
-        }
+        setArticle(articleResponse.data.data);
+        setRelatedNews(relatedResponse.data.data || []);
       } catch (error: any) {
         console.error("Errore caricamento articolo:", error);
         setError(error.message || "Errore nel caricamento dell'articolo");

@@ -1,7 +1,16 @@
 import axios from "axios";
 
 // API base URL configuration
-export const API_BASE_URL = process.env.REACT_APP_API_URL || "/api";
+export const API_BASE_URL = process.env.NODE_ENV === 'production' 
+  ? 'https://korsvagen-be.vercel.app/api'  // Backend dedicato in produzione
+  : '/api'; // Proxy locale in development
+
+// Log della configurazione API
+console.log(`🌐 API Configuration:`, {
+  environment: process.env.NODE_ENV,
+  baseURL: API_BASE_URL,
+  proxy: process.env.NODE_ENV !== 'production' ? 'http://localhost:3001' : 'N/A'
+});
 
 // Create axios instance with default config
 export const apiClient = axios.create({
@@ -60,6 +69,21 @@ export const endpoints = {
     gallery: "/media/gallery",
     delete: "/media/delete",
     optimize: "/media/optimize",
+  },
+  news: {
+    // Public endpoints
+    list: "/news",
+    detail: "/news",
+    categories: "/news/categories",
+    related: "/news",
+    // Admin endpoints
+    adminList: "/news/admin/list",
+    adminCreate: "/news/admin",
+    adminDetail: "/news/admin",
+    adminUpdate: "/news/admin",
+    adminDelete: "/news/admin",
+    adminUploadImage: "/news/admin",
+    adminDeleteImage: "/news/admin",
   },
 };
 
@@ -125,5 +149,61 @@ export const api = {
       apiClient.delete(`${endpoints.media.delete}?mediaId=${mediaId}`),
 
     optimize: (data: any) => apiClient.post(endpoints.media.optimize, data),
+  },
+
+  // News endpoints
+  news: {
+    // Public endpoints
+    getList: (params?: { category?: string; limit?: number; page?: number; featured?: boolean }) => {
+      const query = new URLSearchParams();
+      if (params?.category) query.append('category', params.category);
+      if (params?.limit) query.append('limit', params.limit.toString());
+      if (params?.page) query.append('page', params.page.toString());
+      if (params?.featured) query.append('featured', 'true');
+      
+      const queryString = query.toString();
+      return apiClient.get(`${endpoints.news.list}${queryString ? `?${queryString}` : ''}`);
+    },
+
+    getDetail: (slug: string) =>
+      apiClient.get(`${endpoints.news.detail}/${slug}`),
+
+    getCategories: () =>
+      apiClient.get(endpoints.news.categories),
+
+    getRelated: (slug: string) =>
+      apiClient.get(`${endpoints.news.related}/${slug}/related`),
+
+    // Admin endpoints
+    getAdminList: (params?: { category?: string; published?: string; limit?: number; page?: number }) => {
+      const query = new URLSearchParams();
+      if (params?.category) query.append('category', params.category);
+      if (params?.published) query.append('published', params.published);
+      if (params?.limit) query.append('limit', params.limit.toString());
+      if (params?.page) query.append('page', params.page.toString());
+      
+      const queryString = query.toString();
+      return apiClient.get(`${endpoints.news.adminList}${queryString ? `?${queryString}` : ''}`);
+    },
+
+    create: (data: any) =>
+      apiClient.post(endpoints.news.adminCreate, data),
+
+    getAdminDetail: (id: number) =>
+      apiClient.get(`${endpoints.news.adminDetail}/${id}`),
+
+    update: (id: number, data: any) =>
+      apiClient.put(`${endpoints.news.adminUpdate}/${id}`, data),
+
+    delete: (id: number) =>
+      apiClient.delete(`${endpoints.news.adminDelete}/${id}`),
+
+    uploadImage: (id: number, formData: FormData) =>
+      apiClient.post(`${endpoints.news.adminUploadImage}/${id}/image`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      }),
+
+    deleteImage: (id: number) =>
+      apiClient.delete(`${endpoints.news.adminDeleteImage}/${id}/image`),
   },
 };

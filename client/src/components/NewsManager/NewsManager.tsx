@@ -8,6 +8,7 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import toast from "react-hot-toast";
+import { api } from "../../utils/api";
 import {
   Plus,
   Search,
@@ -319,25 +320,19 @@ const NewsManager: React.FC = () => {
   const loadArticles = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/news/admin/list', {
-        credentials: 'include'
-      });
-
-      if (!response.ok) {
-        throw new Error('Errore nel caricamento degli articoli');
-      }
-
-      const data = await response.json();
-      setArticles(data.data || []);
+      
+      const response = await api.news.getAdminList();
+      
+      setArticles(response.data.data || []);
 
       // Extract unique categories
-      const allCategories = data.data?.map((a: NewsArticle) => a.category) || [];
+      const allCategories = response.data.data?.map((a: NewsArticle) => a.category) || [];
       const uniqueCategories = Array.from(new Set(allCategories)) as string[];
       setCategories(uniqueCategories);
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Errore caricamento articoli:', error);
-      toast.error('Errore nel caricamento degli articoli');
+      toast.error(error.message || 'Errore nel caricamento degli articoli');
     } finally {
       setLoading(false);
     }
@@ -419,72 +414,40 @@ const NewsManager: React.FC = () => {
     }
 
     try {
-      const response = await fetch(`/api/news/admin/${id}`, {
-        method: 'DELETE',
-        credentials: 'include'
-      });
-
-      if (!response.ok) {
-        throw new Error('Errore nell\'eliminazione');
-      }
-
+      await api.news.delete(id);
       setArticles(prev => prev.filter(a => a.id !== id));
       toast.success('Articolo eliminato con successo');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Errore eliminazione:', error);
-      toast.error('Errore nell\'eliminazione dell\'articolo');
+      toast.error(error.message || 'Errore nell\'eliminazione dell\'articolo');
     }
   };
 
   const handleTogglePublish = async (id: number, currentStatus: boolean) => {
     try {
-      const response = await fetch(`/api/news/admin/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          is_published: !currentStatus
-        })
+      const response = await api.news.update(id, {
+        is_published: !currentStatus
       });
 
-      if (!response.ok) {
-        throw new Error('Errore nell\'aggiornamento');
-      }
-
-      const updatedArticle = await response.json();
-      setArticles(prev => prev.map(a => a.id === id ? updatedArticle.data : a));
+      setArticles(prev => prev.map(a => a.id === id ? response.data.data : a));
       toast.success(`Articolo ${!currentStatus ? 'pubblicato' : 'rimosso dalla pubblicazione'}`);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Errore toggle publish:', error);
-      toast.error('Errore nell\'aggiornamento dello stato');
+      toast.error(error.message || 'Errore nell\'aggiornamento dello stato');
     }
   };
 
   const handleToggleFeatured = async (id: number, currentStatus: boolean) => {
     try {
-      const response = await fetch(`/api/news/admin/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          is_featured: !currentStatus
-        })
+      const response = await api.news.update(id, {
+        is_featured: !currentStatus
       });
 
-      if (!response.ok) {
-        throw new Error('Errore nell\'aggiornamento');
-      }
-
-      const updatedArticle = await response.json();
-      setArticles(prev => prev.map(a => a.id === id ? updatedArticle.data : a));
+      setArticles(prev => prev.map(a => a.id === id ? response.data.data : a));
       toast.success(`Articolo ${!currentStatus ? 'messo in evidenza' : 'rimosso dalla evidenza'}`);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Errore toggle featured:', error);
-      toast.error('Errore nell\'aggiornamento dello stato');
+      toast.error(error.message || 'Errore nell\'aggiornamento dello stato');
     }
   };
 
