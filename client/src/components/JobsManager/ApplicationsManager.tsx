@@ -443,8 +443,56 @@ const ApplicationsManager: React.FC<Props> = ({ applications, jobs, onRefresh })
     }
   };
 
-  const handleDownloadCV = (applicationId: number) => {
-    window.open(`/api/jobs/applications/${applicationId}/cv`, '_blank');
+  const handleDownloadCV = async (applicationId: number) => {
+    try {
+      // Usa l'URL completo del backend configurato
+      const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://korsvagen-web-be.vercel.app/api';
+      const downloadUrl = `${API_BASE_URL}/jobs/applications/${applicationId}/cv`;
+      
+      // Fetch il file per controllare il nome e estensione
+      const response = await fetch(downloadUrl, {
+        credentials: 'include',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('korsvagen_auth_token') || sessionStorage.getItem('korsvagen_auth_token')}`
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error('Errore nel download del CV');
+      }
+      
+      // Crea blob dal contenuto
+      const blob = await response.blob();
+      
+      // Crea URL temporaneo
+      const url = window.URL.createObjectURL(blob);
+      
+      // Trova l'applicazione per ottenere il nome
+      const application = applications.find(app => app.id === applicationId);
+      const fileName = application 
+        ? `CV_${application.first_name}_${application.last_name}.pdf`
+        : `CV_Application_${applicationId}.pdf`;
+      
+      // Crea link temporaneo con nome file corretto
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = fileName;
+      
+      // Esegui download
+      document.body.appendChild(link);
+      link.click();
+      
+      // Pulizia
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
+    } catch (error) {
+      console.error('Errore download CV:', error);
+      // Fallback al metodo diretto se fetch fallisce
+      const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://korsvagen-web-be.vercel.app/api';
+      const downloadUrl = `${API_BASE_URL}/jobs/applications/${applicationId}/cv`;
+      window.open(downloadUrl, '_blank');
+    }
   };
 
   const toggleCardExpansion = (applicationId: number) => {

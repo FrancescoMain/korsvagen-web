@@ -676,15 +676,35 @@ router.get("/applications/:id/cv", requireAuth, async (req, res) => {
     // Generate filename for download
     const fileName = `CV_${application.first_name}_${application.last_name}.pdf`;
     
-    // Force download using Cloudinary parameters
-    const downloadUrl = application.cv_url.includes('?') 
-      ? `${application.cv_url}&fl_attachment=${encodeURIComponent(fileName)}`
-      : `${application.cv_url}?fl_attachment=${encodeURIComponent(fileName)}`;
+    logger.info(`✅ CV download for ${application.first_name} ${application.last_name} -> ${application.cv_url}`);
     
-    logger.info(`✅ CV download for ${application.first_name} ${application.last_name} -> ${downloadUrl}`);
+    // Set headers for file download
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': `attachment; filename="${fileName}"`,
+      'Cache-Control': 'no-cache'
+    });
     
-    // Redirect to Cloudinary with download parameters
-    res.redirect(302, downloadUrl);
+    // Stream the file from Cloudinary to client
+    try {
+      const fetch = (await import('node-fetch')).default;
+      const cloudinaryResponse = await fetch(application.cv_url);
+      
+      if (!cloudinaryResponse.ok) {
+        throw new Error(`Failed to fetch CV from Cloudinary: ${cloudinaryResponse.status}`);
+      }
+      
+      // Pipe the file stream directly to response
+      cloudinaryResponse.body.pipe(res);
+      
+    } catch (streamError) {
+      logger.error("❌ Error streaming CV file:", streamError);
+      // Fallback to redirect if streaming fails
+      const downloadUrl = application.cv_url.includes('?') 
+        ? `${application.cv_url}&fl_attachment=${encodeURIComponent(fileName)}`
+        : `${application.cv_url}?fl_attachment=${encodeURIComponent(fileName)}`;
+      res.redirect(302, downloadUrl);
+    }
     
   } catch (error) {
     logger.error("❌ Error downloading application CV:", error);
