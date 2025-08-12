@@ -737,6 +737,74 @@ router.get("/applications/:id/cv", async (req, res) => {
   }
 });
 
+/**
+ * DELETE /api/jobs/applications/:id
+ * Elimina candidatura (admin only)
+ */
+router.delete("/applications/:id", requireAuth, async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    logger.info(`🔒 Admin deleting job application ID: ${id}`);
+    
+    // Get application details before deletion (for CV cleanup)
+    const { data: application, error: fetchError } = await supabaseAdmin
+      .from("job_applications")
+      .select("id, first_name, last_name, cv_public_id")
+      .eq("id", id)
+      .single();
+    
+    if (fetchError || !application) {
+      logger.warn(`⚠️  Application not found for deletion: ${id}`);
+      return res.status(404).json({ 
+        error: "Application not found" 
+      });
+    }
+    
+    // Delete CV from Cloudinary if exists
+    if (application.cv_public_id) {
+      try {
+        logger.info(`🗑️  Deleting CV from Cloudinary: ${application.cv_public_id}`);
+        await cloudinary.uploader.destroy(application.cv_public_id, {
+          resource_type: "raw"
+        });
+        logger.info("✅ CV deleted from Cloudinary");
+      } catch (cloudinaryError) {
+        logger.error("❌ Error deleting CV from Cloudinary:", cloudinaryError);
+        // Don't block application deletion if CV cleanup fails
+      }
+    }
+    
+    // Delete application from database
+    const { error: deleteError } = await supabaseAdmin
+      .from("job_applications")
+      .delete()
+      .eq("id", id);
+    
+    if (deleteError) {
+      logger.error("❌ Error deleting job application:", deleteError);
+      return res.status(500).json({
+        error: "Failed to delete application",
+        details: deleteError.message
+      });
+    }
+    
+    logger.info(`✅ Application deleted successfully: ${application.first_name} ${application.last_name}`);
+    
+    res.json({ 
+      success: true, 
+      message: `Application for ${application.first_name} ${application.last_name} deleted successfully` 
+    });
+    
+  } catch (error) {
+    logger.error("❌ Error in DELETE /api/jobs/applications/:id:", error);
+    res.status(500).json({ 
+      error: "Internal server error", 
+      details: error.message 
+    });
+  }
+});
+
 // =============================================
 // META ENDPOINTS (Must come before /:slug)
 // =============================================
