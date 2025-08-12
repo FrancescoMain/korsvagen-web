@@ -25,6 +25,7 @@ import {
   requireAuth,
   generateAccessToken,
   generateRefreshToken,
+  verifyToken,
 } from "../utils/auth.js";
 import { logger } from "../utils/logger.js";
 
@@ -322,7 +323,8 @@ router.post("/refresh", async (req, res) => {
     // Verifica il refresh token
     let decoded;
     try {
-      decoded = jwt.verify(refreshToken, process.env.JWT_SECRET);
+      // Importa la funzione verifyToken per consistenza
+      decoded = verifyToken(refreshToken, true);
     } catch (jwtError) {
       return res.status(401).json({
         success: false,

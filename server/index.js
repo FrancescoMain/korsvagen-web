@@ -490,7 +490,7 @@ async function startServer() {
       );
       logger.info(
         `   - JWT Secret: ${
-          process.env.JWT_SECRET ? "✅ Configurato" : "❌ Mancante"
+          (process.env.JWT_SECRET || process.env.SUPABASE_JWT_SECRET) ? "✅ Configurato" : "❌ Mancante"
         }`
       );
     });

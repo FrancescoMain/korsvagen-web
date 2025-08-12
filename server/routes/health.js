@@ -138,7 +138,7 @@ router.get("/detailed", async (req, res) => {
       // Configurazioni (senza dati sensibili)
       config: {
         corsOrigin: process.env.CORS_ORIGIN ? "✅ Configurato" : "❌ Mancante",
-        jwtSecret: process.env.JWT_SECRET ? "✅ Configurato" : "❌ Mancante",
+        jwtSecret: (process.env.JWT_SECRET || process.env.SUPABASE_JWT_SECRET) ? "✅ Configurato" : "❌ Mancante",
         supabaseUrl: process.env.SUPABASE_URL
           ? "✅ Configurato"
           : "❌ Mancante",

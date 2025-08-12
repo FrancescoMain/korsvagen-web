@@ -20,10 +20,11 @@ import { supabaseClient } from "../config/supabase.js";
 
 /**
  * Configurazione JWT dalle variabili d'ambiente
+ * Supporta sia le variabili Supabase che quelle custom
  */
 const JWT_CONFIG = {
-  secret: process.env.JWT_SECRET,
-  refreshSecret: process.env.JWT_REFRESH_SECRET,
+  secret: process.env.JWT_SECRET || process.env.SUPABASE_JWT_SECRET,
+  refreshSecret: process.env.JWT_REFRESH_SECRET || process.env.SUPABASE_JWT_SECRET,
   expiresIn: process.env.JWT_EXPIRES_IN || "1h",
   refreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN || "7d",
   issuer: "korsvagen-web",
@@ -34,16 +35,29 @@ const JWT_CONFIG = {
  * Validazione configurazione JWT
  */
 function validateJWTConfig() {
+  // Debug per capire quale variabile viene usata
+  const jwtSource = process.env.JWT_SECRET ? 'JWT_SECRET' : 
+                   process.env.SUPABASE_JWT_SECRET ? 'SUPABASE_JWT_SECRET' : 'NONE';
+  
+  logger.info("🔑 JWT Configuration:", {
+    source: jwtSource,
+    hasSecret: !!JWT_CONFIG.secret,
+    secretLength: JWT_CONFIG.secret?.length || 0,
+    hasRefreshSecret: !!JWT_CONFIG.refreshSecret,
+    refreshSecretLength: JWT_CONFIG.refreshSecret?.length || 0
+  });
+
   if (!JWT_CONFIG.secret || JWT_CONFIG.secret.length < 32) {
     logger.warn(
-      "JWT_SECRET non configurato o troppo corto - autenticazione disabilitata per questa fase"
+      "JWT_SECRET non configurato o troppo corto - autenticazione disabilitata per questa fase. " +
+      "Verificare JWT_SECRET o SUPABASE_JWT_SECRET nelle variabili d'ambiente."
     );
     return false;
   }
 
   if (!JWT_CONFIG.refreshSecret || JWT_CONFIG.refreshSecret.length < 32) {
     logger.warn(
-      "JWT_REFRESH_SECRET non configurato, refresh tokens disabilitati"
+      "JWT_REFRESH_SECRET non configurato, usando JWT_SECRET/SUPABASE_JWT_SECRET per refresh tokens"
     );
   }
 
