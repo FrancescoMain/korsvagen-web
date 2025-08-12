@@ -591,7 +591,7 @@ router.get("/applications", requireAuth, async (req, res) => {
     
     logger.info(`🔒 Admin fetching job applications with filters: ${JSON.stringify(req.query)}`);
     
-    let query = supabaseClient
+    let query = supabaseAdmin
       .from("job_applications_with_positions")
       .select("*")
       .order("applied_at", { ascending: false });
@@ -865,7 +865,7 @@ router.post("/:slug/apply", upload.single('cv'), async (req, res) => {
     }
     
     // Check for duplicate application
-    const { data: existingApp } = await supabaseClient
+    const { data: existingApp } = await supabaseAdmin
       .from("job_applications")
       .select("id")
       .eq("job_position_id", job.id)
@@ -917,7 +917,7 @@ router.post("/:slug/apply", upload.single('cv'), async (req, res) => {
     }
     
     // Create application
-    const { data: application, error: appError } = await supabaseClient
+    const { data: application, error: appError } = await supabaseAdmin
       .from("job_applications")
       .insert({
         job_position_id: job.id,
