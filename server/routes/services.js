@@ -272,6 +272,61 @@ router.post("/admin", requireAuth, async (req, res) => {
 });
 
 /**
+ * PUT /api/services/admin/reorder
+ * Admin endpoint - Reorder services
+ */
+router.put("/admin/reorder", requireAuth, async (req, res) => {
+  try {
+    const { serviceIds } = req.body;
+    logger.info(`Admin ${req.user.username} reordering ${serviceIds?.length || 0} services`);
+
+    if (!Array.isArray(serviceIds) || serviceIds.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "È richiesto un array di ID servizi",
+        code: "INVALID_SERVICE_IDS"
+      });
+    }
+
+    // Update each service's display_order manually (similar to projects approach)
+    const updatePromises = serviceIds.map((serviceId, index) => 
+      supabaseClient
+        .from('services')
+        .update({ display_order: index + 1 })
+        .eq('id', serviceId)
+    );
+
+    const results = await Promise.all(updatePromises);
+    
+    // Check for errors
+    const errors = results.filter(result => result.error);
+    if (errors.length > 0) {
+      logger.error("Error reordering services:", errors);
+      return res.status(500).json({
+        success: false,
+        message: "Errore nel riordinamento di alcuni servizi",
+        code: "REORDER_SERVICES_ERROR"
+      });
+    }
+
+    logger.info(`Successfully reordered ${serviceIds.length} services`);
+
+    res.json({
+      success: true,
+      message: "Servizi riordinati con successo"
+    });
+
+  } catch (error) {
+    logger.error("Unexpected error in reorder services endpoint:", error);
+    res.status(500).json({
+      success: false,
+      message: "Errore interno del server",
+      code: "INTERNAL_SERVER_ERROR"
+    });
+  }
+});
+
+/**
  * PUT /api/services/admin/:id
  * Admin endpoint - Update existing service
  */
@@ -448,60 +503,6 @@ router.delete("/admin/:id", requireAuth, async (req, res) => {
   }
 });
 
-/**
- * PUT /api/services/admin/reorder
- * Admin endpoint - Reorder services
- */
-router.put("/admin/reorder", requireAuth, async (req, res) => {
-  try {
-    const { serviceIds } = req.body;
-    logger.info(`Admin ${req.user.username} reordering ${serviceIds?.length || 0} services`);
-
-    if (!Array.isArray(serviceIds) || serviceIds.length === 0) {
-      return res.status(400).json({
-        success: false,
-        message: "È richiesto un array di ID servizi",
-        code: "INVALID_SERVICE_IDS"
-      });
-    }
-
-    // Update each service's display_order manually (similar to projects approach)
-    const updatePromises = serviceIds.map((serviceId, index) => 
-      supabaseClient
-        .from('services')
-        .update({ display_order: index + 1 })
-        .eq('id', serviceId)
-    );
-
-    const results = await Promise.all(updatePromises);
-    
-    // Check for errors
-    const errors = results.filter(result => result.error);
-    if (errors.length > 0) {
-      logger.error("Error reordering services:", errors);
-      return res.status(500).json({
-        success: false,
-        message: "Errore nel riordinamento di alcuni servizi",
-        code: "REORDER_SERVICES_ERROR"
-      });
-    }
-
-    logger.info(`Successfully reordered ${serviceIds.length} services`);
-
-    res.json({
-      success: true,
-      message: "Servizi riordinati con successo"
-    });
-
-  } catch (error) {
-    logger.error("Unexpected error in reorder services endpoint:", error);
-    res.status(500).json({
-      success: false,
-      message: "Errore interno del server",
-      code: "INTERNAL_SERVER_ERROR"
-    });
-  }
-});
 
 /**
  * POST /api/services/admin/:id/image
