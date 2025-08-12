@@ -53,7 +53,7 @@ import teamRoutes from "./routes/team.js";
 import servicesRoutes from "./routes/services.js";
 import projectsRoutes from "./routes/projects.js";
 import newsRoutes from "./routes/news.js";
-import jobsRoutes from "./routes/jobs.js";
+import jobsRoutes from "./routes/jobs-new.js";
 
 // Inizializza l'app Express
 const app = express();
