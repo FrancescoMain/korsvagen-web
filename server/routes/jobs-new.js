@@ -642,7 +642,58 @@ router.get("/applications", requireAuth, async (req, res) => {
   }
 });
 
-// Continue with more application endpoints...
+/**
+ * GET /api/jobs/applications/:id/cv
+ * Download CV candidato (admin only)
+ */
+router.get("/applications/:id/cv", requireAuth, async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    logger.info(`🔒 Admin requesting CV download for application ID: ${id}`);
+    
+    // Get application details
+    const { data: application, error } = await supabaseAdmin
+      .from("job_applications")
+      .select("id, first_name, last_name, cv_url, cv_public_id")
+      .eq("id", id)
+      .single();
+    
+    if (error || !application) {
+      logger.warn(`⚠️  Application not found for CV download: ${id}`);
+      return res.status(404).json({ 
+        error: "Application not found" 
+      });
+    }
+    
+    if (!application.cv_url) {
+      logger.warn(`⚠️  No CV uploaded for application: ${id}`);
+      return res.status(404).json({ 
+        error: "No CV uploaded for this application" 
+      });
+    }
+    
+    // Generate filename for download
+    const fileName = `CV_${application.first_name}_${application.last_name}.pdf`;
+    
+    // Force download using Cloudinary parameters
+    const downloadUrl = application.cv_url.includes('?') 
+      ? `${application.cv_url}&fl_attachment=${encodeURIComponent(fileName)}`
+      : `${application.cv_url}?fl_attachment=${encodeURIComponent(fileName)}`;
+    
+    logger.info(`✅ CV download for ${application.first_name} ${application.last_name} -> ${downloadUrl}`);
+    
+    // Redirect to Cloudinary with download parameters
+    res.redirect(302, downloadUrl);
+    
+  } catch (error) {
+    logger.error("❌ Error downloading application CV:", error);
+    res.status(500).json({ 
+      error: "Internal server error", 
+      details: error.message 
+    });
+  }
+});
 
 // =============================================
 // META ENDPOINTS (Must come before /:slug)
