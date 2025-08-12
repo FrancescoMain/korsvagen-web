@@ -881,14 +881,16 @@ const CareersPage: React.FC = () => {
     }
   };
 
-  const parseRequirements = (requirements: string): string[] => {
+  const parseRequirements = (requirements: string | undefined | null): string[] => {
+    if (!requirements) return [];
     return requirements
       .split('\n')
       .filter(req => req.trim())
       .map(req => req.trim());
   };
 
-  const formatSalaryRange = (salary: string): string => {
+  const formatSalaryRange = (salary: string | undefined | null): string => {
+    if (!salary) return 'Da definire';
     return salary.replace(/€\s*/, '€ ').replace(/\s+/g, ' ');
   };
 
@@ -999,7 +1001,7 @@ const CareersPage: React.FC = () => {
                         </div>
                       </div>
 
-                      <p>{job.description}</p>
+                      <p>{job.description || 'Descrizione non disponibile'}</p>
 
                       <div className="requirements">
                         <h5>Requisiti:</h5>
