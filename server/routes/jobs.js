@@ -185,6 +185,19 @@ router.get("/admin/test", (req, res) => {
 });
 
 /**
+ * GET /api/jobs/debug-route-order  
+ * Debug endpoint to check route resolution order
+ */
+router.get("/debug-route-order", (req, res) => {
+  res.json({ 
+    success: true, 
+    message: "Debug route working - this should come before /:slug",
+    timestamp: new Date().toISOString(),
+    note: "If you see this, specific routes are working correctly"
+  });
+});
+
+/**
  * GET /api/jobs/admin
  * Lista completa delle posizioni per amministratori
  */
