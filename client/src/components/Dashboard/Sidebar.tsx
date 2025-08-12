@@ -11,6 +11,7 @@ import {
   MessageSquare,
   Users,
   Cog,
+  Newspaper,
 } from "lucide-react";
 
 interface NavigationItem {
@@ -55,6 +56,11 @@ const navigationItems: NavigationItem[] = [
     title: "Gestione Progetti",
     icon: <FileText size={20} />,
     path: "/dashboard/projects",
+  },
+  {
+    title: "Gestione News",
+    icon: <Newspaper size={20} />,
+    path: "/dashboard/news",
   },
   {
     title: "Contact",

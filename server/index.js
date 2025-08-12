@@ -52,6 +52,7 @@ import aboutContentRoutes from "./routes/about-content.js";
 import teamRoutes from "./routes/team.js";
 import servicesRoutes from "./routes/services.js";
 import projectsRoutes from "./routes/projects.js";
+import newsRoutes from "./routes/news.js";
 
 // Inizializza l'app Express
 const app = express();
@@ -266,10 +267,12 @@ app.use("/api/services", servicesRoutes);
 // Projects - gestione portfolio progetti (public and admin)
 app.use("/api/projects", projectsRoutes);
 
+// News - sistema di gestione news dinamico (public and admin)
+app.use("/api/news", newsRoutes);
+
 // Placeholder per futuri endpoint che saranno aggiunti nelle fasi successive:
 // - /api/users (gestione utenti)
 // - /api/content (contenuti CMS)
-// - /api/news (blog/news)
 
 /**
  * MIDDLEWARE DI GESTIONE ERRORI

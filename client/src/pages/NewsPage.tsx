@@ -397,108 +397,89 @@ const FilterSection = styled.div`
   }
 `;
 
+interface NewsArticle {
+  id: number;
+  title: string;
+  subtitle?: string;
+  slug: string;
+  category: string;
+  image_url?: string;
+  published_date: string;
+  is_featured: boolean;
+  views_count?: number;
+}
+
 const NewsPage: React.FC = () => {
   const navigate = useNavigateWithScroll();
   const [selectedCategory, setSelectedCategory] = React.useState<string>("all");
+  const [news, setNews] = React.useState<NewsArticle[]>([]);
+  const [categories, setCategories] = React.useState<string[]>([]);
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState<string>("");
 
-  const allNews = [
-    {
-      id: 1,
-      title: "KORSVAGEN vince il premio 'Innovazione nell'Edilizia 2024'",
-      excerpt:
-        "La nostra azienda è stata riconosciuta per l'utilizzo di tecnologie innovative nella costruzione sostenibile e per l'approccio eco-friendly ai progetti edilizi.",
-      date: "15 Dicembre 2024",
-      category: "Premi",
-      featured: true,
-      image:
-        "https://images.unsplash.com/photo-1504711434969-e33886168f5c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-      content: `
-        KORSVAGEN S.R.L. ha ricevuto il prestigioso premio "Innovazione nell'Edilizia 2024" durante la cerimonia tenutasi presso il Palazzo delle Stelline di Milano. 
-        
-        Il riconoscimento, assegnato dall'Associazione Nazionale Costruttori Edili, premia le aziende che si distinguono per l'utilizzo di tecnologie innovative e sostenibili nel settore delle costruzioni.
-        
-        "Questo premio rappresenta il riconoscimento del nostro impegno costante verso l'innovazione e la sostenibilità", ha dichiarato il CEO di KORSVAGEN durante la cerimonia. "Continueremo a investire in tecnologie all'avanguardia per offrire ai nostri clienti soluzioni sempre più efficienti e rispettose dell'ambiente."
-        
-        Tra i progetti che hanno contribuito al riconoscimento, spicca la recente realizzazione di un complesso residenziale a energia zero nel centro di Milano, che utilizza materiali eco-compatibili e sistemi di domotica avanzata.
-      `,
-    },
-    {
-      id: 2,
-      title: "Nuovo progetto di riqualificazione urbana a Milano",
-      excerpt:
-        "Iniziati i lavori per il progetto di riqualificazione del quartiere Isola, che prevede la costruzione di edifici residenziali ad alta efficienza energetica.",
-      date: "8 Dicembre 2024",
-      category: "Progetti",
-      image:
-        "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-      content: `
-        KORSVAGEN S.R.L. ha dato il via ai lavori per un ambizioso progetto di riqualificazione urbana nel quartiere Isola di Milano. 
-        
-        Il progetto prevede la costruzione di 150 unità abitative distribuite in tre edifici ad alta efficienza energetica, con certificazione LEED Gold.
-        
-        "Questo progetto rappresenta il nostro impegno verso lo sviluppo urbano sostenibile", ha spiegato il direttore tecnico. "Ogni edificio sarà dotato di pannelli solari, sistemi di raccolta dell'acqua piovana e giardini pensili per migliorare la qualità dell'aria urbana."
-        
-        I lavori, che hanno un valore complessivo di 45 milioni di euro, dovrebbero completarsi entro 24 mesi e daranno lavoro a oltre 200 professionisti del settore edile.
-      `,
-    },
-    {
-      id: 3,
-      title: "Partnership con istituti di ricerca per l'edilizia sostenibile",
-      excerpt:
-        "KORSVAGEN S.R.L. ha siglato accordi di collaborazione con il Politecnico di Milano per lo sviluppo di nuove tecnologie costruttive.",
-      date: "1 Dicembre 2024",
-      category: "Partnership",
-      image:
-        "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-      content: `
-        KORSVAGEN S.R.L. ha siglato un importante accordo di collaborazione con il Politecnico di Milano per lo sviluppo di nuove tecnologie costruttive sostenibili.
-        
-        La partnership prevede la creazione di un laboratorio di ricerca congiunto dove verranno sviluppati nuovi materiali biocompatibili e sistemi costruttivi innovativi.
-        
-        "La collaborazione con il mondo accademico è fondamentale per rimanere all'avanguardia nel settore", ha sottolineato il responsabile R&D di KORSVAGEN. "Insieme al Politecnico, vogliamo sviluppare soluzioni che possano rivoluzionare il modo di costruire, sempre nel rispetto dell'ambiente."
-        
-        Il progetto di ricerca, della durata di tre anni, si concentrerà principalmente su materiali da costruzione a base di canapa e sistemi di isolamento termico innovativi.
-      `,
-    },
-    {
-      id: 4,
-      title: "Certificazione ISO 14001 per la gestione ambientale",
-      excerpt:
-        "La nostra azienda ha ottenuto la certificazione ISO 14001, confermando il nostro impegno per la sostenibilità ambientale nei processi costruttivi.",
-      date: "25 Novembre 2024",
-      category: "Certificazioni",
-      image:
-        "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-      content: `
-        KORSVAGEN S.R.L. ha ottenuto la certificazione ISO 14001:2015 per la gestione ambientale, confermando il proprio impegno verso la sostenibilità.
-        
-        La certificazione, rilasciata da un ente accreditato internazionale, attesta che l'azienda ha implementato un sistema di gestione ambientale efficace e conforme agli standard internazionali.
-        
-        "Questa certificazione rappresenta un traguardo importante nel nostro percorso verso la sostenibilità", ha dichiarato il responsabile qualità. "Dimostra che tutti i nostri processi, dalla progettazione alla realizzazione, sono orientati alla riduzione dell'impatto ambientale."
-        
-        La certificazione copre tutti gli aspetti dell'attività aziendale, dalla gestione dei rifiuti di cantiere all'utilizzo di materiali eco-compatibili, dalla riduzione delle emissioni di CO2 al risparmio energetico.
-      `,
-    },
-  ];
+  // Carica articoli dal API
+  React.useEffect(() => {
+    const loadNews = async () => {
+      try {
+        setLoading(true);
+        setError("");
 
-  // Filtro le news in base alla categoria selezionata
-  const filteredNews =
-    selectedCategory === "all"
-      ? allNews
-      : allNews.filter((article) => article.category === selectedCategory);
+        const params = new URLSearchParams();
+        if (selectedCategory !== "all") {
+          params.append("category", selectedCategory);
+        }
 
-  // Ottengo le categorie uniche per la select
-  const categories = [
-    "all",
-    ...Array.from(new Set(allNews.map((article) => article.category))),
-  ];
+        const response = await fetch(`/api/news?${params}`);
+        if (!response.ok) {
+          throw new Error("Errore nel caricamento delle news");
+        }
+
+        const data = await response.json();
+        if (data.success) {
+          setNews(data.data || []);
+        } else {
+          throw new Error(data.error || "Errore sconosciuto");
+        }
+      } catch (error) {
+        console.error("Errore caricamento news:", error);
+        setError("Errore nel caricamento delle news. Riprova più tardi.");
+        // Fallback ai dati statici in caso di errore
+        setNews([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadNews();
+  }, [selectedCategory]);
+
+  // Carica categorie disponibili
+  React.useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const response = await fetch("/api/news/categories");
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success) {
+            setCategories(["all", ...data.data]);
+          }
+        }
+      } catch (error) {
+        console.error("Errore caricamento categorie:", error);
+        // Fallback categorie di default
+        setCategories(["all", "Progetti", "Azienda", "Partnership", "Certificazioni", "Premi"]);
+      }
+    };
+
+    loadCategories();
+  }, []);
 
   const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedCategory(e.target.value);
   };
 
-  const handleReadMore = (newsId: number) => {
-    navigate(`/news/${newsId}`);
+  const handleReadMore = (article: NewsArticle) => {
+    navigate(`/news/${article.slug}`);
   };
 
   return (
@@ -541,45 +522,64 @@ const NewsPage: React.FC = () => {
               </div>
             </FilterSection> */}
 
-            <NewsGrid>
-              {filteredNews.map((article) => (
-                <div
-                  key={article.id}
-                  className={`news-card ${article.featured ? "featured" : ""}`}
-                  onClick={() => handleReadMore(article.id)}
-                >
+            {loading ? (
+              <div style={{ textAlign: "center", padding: "4rem", color: "#666" }}>
+                Caricamento articoli...
+              </div>
+            ) : error ? (
+              <div style={{ textAlign: "center", padding: "4rem", color: "#f44336" }}>
+                {error}
+              </div>
+            ) : news.length === 0 ? (
+              <div style={{ textAlign: "center", padding: "4rem", color: "#666" }}>
+                <h3>Nessun articolo trovato</h3>
+                <p>
+                  {selectedCategory !== "all"
+                    ? "Non ci sono articoli per questa categoria"
+                    : "Non ci sono ancora articoli pubblicati"}
+                </p>
+              </div>
+            ) : (
+              <NewsGrid>
+                {news.map((article) => (
                   <div
-                    className="news-image"
-                    style={{
-                      backgroundImage: `url(${article.image})`,
-                    }}
+                    key={article.id}
+                    className={`news-card ${article.is_featured ? "featured" : ""}`}
+                    onClick={() => handleReadMore(article)}
                   >
-                    <div className="image-overlay">
-                      {!article.image && "Immagine articolo"}
-                    </div>
-                  </div>
-                  <div className="news-content">
-                    <div className="news-meta">
-                      <span className="date">{article.date}</span>
-                      <span className="category">{article.category}</span>
-                    </div>
-                    <h3 className={article.featured ? "featured" : ""}>
-                      {article.title}
-                    </h3>
-                    <p>{article.excerpt}</p>
-                    <button
-                      className="read-more-btn"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleReadMore(article.id);
+                    <div
+                      className="news-image"
+                      style={{
+                        backgroundImage: article.image_url ? `url(${article.image_url})` : undefined,
                       }}
                     >
-                      Leggi di più
-                    </button>
+                      <div className="image-overlay">
+                        {!article.image_url && "Immagine articolo"}
+                      </div>
+                    </div>
+                    <div className="news-content">
+                      <div className="news-meta">
+                        <span className="date">{article.published_date}</span>
+                        <span className="category">{article.category}</span>
+                      </div>
+                      <h3 className={article.is_featured ? "featured" : ""}>
+                        {article.title}
+                      </h3>
+                      {article.subtitle && <p>{article.subtitle}</p>}
+                      <button
+                        className="read-more-btn"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleReadMore(article);
+                        }}
+                      >
+                        Leggi di più
+                      </button>
+                    </div>
                   </div>
-                </div>
-              ))}
-            </NewsGrid>
+                ))}
+              </NewsGrid>
+            )}
           </Container>
         </NewsSection>
 
