@@ -471,14 +471,11 @@ const ApplicationsManager: React.FC<Props> = ({ applications, jobs, onRefresh })
       // Trova l'applicazione per ottenere il nome
       const application = applications.find(app => app.id === applicationId);
       let fileName = application 
-        ? `CV_${application.first_name.replace(/\s+/g, '_')}_${application.last_name.replace(/\s+/g, '_')}`
-        : `CV_Application_${applicationId}`;
+        ? `CV_${application.first_name.replace(/\s+/g, '_')}_${application.last_name.replace(/\s+/g, '_')}.pdf`
+        : `CV_Application_${applicationId}.pdf`;
       
-      // Pulisci caratteri speciali e forza estensione .pdf
+      // Pulisci caratteri speciali mantenendo l'estensione .pdf
       fileName = fileName.replace(/[^\w\-_.]/g, '_');
-      if (!fileName.toLowerCase().endsWith('.pdf')) {
-        fileName += '.pdf';
-      }
       
       // Crea link temporaneo con nome file corretto
       const link = document.createElement('a');
