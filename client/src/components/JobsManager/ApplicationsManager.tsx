@@ -452,7 +452,7 @@ const ApplicationsManager: React.FC<Props> = ({ applications, jobs, onRefresh })
       
       // Fetch il file per controllare il nome e estensione
       const response = await fetch(downloadUrl, {
-        credentials: 'include',
+        method: 'GET',
         headers: token ? {
           'Authorization': `Bearer ${token}`
         } : {}
