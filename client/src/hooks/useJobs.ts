@@ -112,7 +112,7 @@ export const useJobs = () => {
         // Extract unique departments
         const departments = data.data?.map((job: JobPosition) => job.department) || [];
         const uniqueDepartments = departments
-          .filter((dept, index, array) => array.indexOf(dept) === index)
+          .filter((dept: string, index: number, array: string[]) => array.indexOf(dept) === index)
           .sort();
         setDepartments(uniqueDepartments);
       }
