@@ -209,8 +209,9 @@ export function verifyToken(token, isRefreshToken = false) {
     logger.warn("🔍 Token verification failed:", {
       errorName: error.name,
       errorMessage: error.message,
-      tokenPrefix: token ? token.substring(0, 20) + "..." : "NO_TOKEN",
-      tokenLength: token?.length,
+      tokenPrefix: (typeof token === 'string' && token) ? token.substring(0, 20) + "..." : "NO_TOKEN",
+      tokenLength: (typeof token === 'string') ? token.length : 'NOT_STRING',
+      tokenType: typeof token,
       isRefreshToken,
       hasSecret: !!secret,
       issuer: JWT_CONFIG.issuer,
@@ -253,7 +254,8 @@ export function requireAuth(req, res, next) {
       authHeaderLength: req.headers.authorization?.length,
       hasCookieToken: !!req.cookies?.accessToken,
       tokenFound: !!token,
-      tokenPrefix: token ? token.substring(0, 20) + "..." : "NO_TOKEN",
+      tokenPrefix: (typeof token === 'string' && token) ? token.substring(0, 20) + "..." : "NO_TOKEN",
+      tokenType: typeof token,
       url: req.url,
       method: req.method
     });
