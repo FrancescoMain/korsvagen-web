@@ -388,7 +388,7 @@ const JobsManager: React.FC = () => {
   };
 
   const handleDeleteJob = async (id: number) => {
-    if (!confirm('Sei sicuro di voler eliminare questa posizione lavorativa?')) {
+    if (!window.confirm('Sei sicuro di voler eliminare questa posizione lavorativa?')) {
       return;
     }
     

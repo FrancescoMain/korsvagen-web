@@ -423,7 +423,7 @@ const ApplicationsManager: React.FC<Props> = ({ applications, jobs, onRefresh })
   };
 
   const handleDeleteApplication = async (applicationId: number) => {
-    if (!confirm('Sei sicuro di voler eliminare questa candidatura?')) {
+    if (!window.confirm('Sei sicuro di voler eliminare questa candidatura?')) {
       return;
     }
 
