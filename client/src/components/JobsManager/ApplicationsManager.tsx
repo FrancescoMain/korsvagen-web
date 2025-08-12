@@ -403,12 +403,15 @@ const ApplicationsManager: React.FC<Props> = ({ applications, jobs, onRefresh })
 
   const handleStatusChange = async (applicationId: number, newStatus: string) => {
     try {
-      // Use same API base URL as other functions
+      // Use same API base URL and auth as other functions
       const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://korsvagen-web-be.vercel.app/api';
+      const token = localStorage.getItem('korsvagen_auth_token') || sessionStorage.getItem('korsvagen_auth_token');
+      
       const response = await fetch(`${API_BASE_URL}/jobs/applications/${applicationId}/status`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
         },
         credentials: 'include',
         body: JSON.stringify({ status: newStatus }),
@@ -430,11 +433,16 @@ const ApplicationsManager: React.FC<Props> = ({ applications, jobs, onRefresh })
     }
 
     try {
-      // Use same API base URL as download CV function
+      // Use same API base URL and auth as download CV function
       const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://korsvagen-web-be.vercel.app/api';
+      const token = localStorage.getItem('korsvagen_auth_token') || sessionStorage.getItem('korsvagen_auth_token');
+      
       const response = await fetch(`${API_BASE_URL}/jobs/applications/${applicationId}`, {
         method: 'DELETE',
         credentials: 'include',
+        headers: token ? {
+          'Authorization': `Bearer ${token}`
+        } : {}
       });
 
       if (response.ok) {
