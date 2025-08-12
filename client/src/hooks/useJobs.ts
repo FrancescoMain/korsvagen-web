@@ -110,9 +110,10 @@ export const useJobs = () => {
         }));
 
         // Extract unique departments
-        const uniqueDepartments = [
-          ...new Set(data.data?.map((job: JobPosition) => job.department) || [])
-        ].sort();
+        const departments = data.data?.map((job: JobPosition) => job.department) || [];
+        const uniqueDepartments = departments
+          .filter((dept, index, array) => array.indexOf(dept) === index)
+          .sort();
         setDepartments(uniqueDepartments);
       }
     } catch (err) {
