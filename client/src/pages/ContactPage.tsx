@@ -483,21 +483,10 @@ const ContactPage: React.FC = () => {
     servizio: "",
     messaggio: "",
   });
-  const [loading, setLoading] = React.useState(false);
+  const [formLoading, setFormLoading] = React.useState(false);
   const [success, setSuccess] = React.useState(false);
   const [errors, setErrors] = React.useState<{[key: string]: string}>({});
 
-  const handleInputChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-    >
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
 
   const validateForm = () => {
     const newErrors: {[key: string]: string} = {};
@@ -529,7 +518,7 @@ const ContactPage: React.FC = () => {
       return;
     }
 
-    setLoading(true);
+    setFormLoading(true);
     setErrors({});
 
     try {
@@ -574,7 +563,7 @@ const ContactPage: React.FC = () => {
       console.error('Contact form error:', error);
       setErrors({ submit: "Errore di connessione. Riprova più tardi." });
     } finally {
-      setLoading(false);
+      setFormLoading(false);
     }
   };
 
@@ -728,8 +717,8 @@ const ContactPage: React.FC = () => {
                   </div>
                 )}
 
-                <button type="submit" className="submit-btn" disabled={loading}>
-                  {loading ? "Invio in corso..." : "Invia Richiesta"}
+                <button type="submit" className="submit-btn" disabled={formLoading}>
+                  {formLoading ? "Invio in corso..." : "Invia Richiesta"}
                 </button>
 
                 <p className="privacy-notice">
