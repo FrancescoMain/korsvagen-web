@@ -18,6 +18,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
+import { API_BASE_URL } from '../utils/api';
 import {
   MessageCircle,
   AlertTriangle,
@@ -487,10 +488,10 @@ const MessagesManagement: React.FC = () => {
       if (filters.search) params.set('search', filters.search);
       
       const [messagesResponse, statsResponse] = await Promise.all([
-        fetch(`/api/admin/messages?${params.toString()}`, {
+        fetch(`${API_BASE_URL}/admin/messages?${params.toString()}`, {
           credentials: 'include'
         }),
-        fetch('/api/admin/messages/stats', {
+        fetch(`${API_BASE_URL}/admin/messages/stats`, {
           credentials: 'include'
         })
       ]);
@@ -539,7 +540,7 @@ const MessagesManagement: React.FC = () => {
     if (selectedMessages.size === 0) return;
 
     try {
-      const response = await fetch('/api/admin/messages/bulk-update', {
+      const response = await fetch(`${API_BASE_URL}/admin/messages/bulk-update`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

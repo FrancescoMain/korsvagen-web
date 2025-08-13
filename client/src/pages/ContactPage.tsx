@@ -16,6 +16,7 @@ import Footer from "../components/layout/Footer";
 import PageHero from "../components/common/PageHero";
 import { useContactData, useSettings } from "../contexts/SettingsContext";
 import { contactData as fallbackData } from "../data/contactData";
+import { API_BASE_URL } from "../utils/api";
 
 const ContactContainer = styled.div`
   min-height: 100vh;
@@ -533,7 +534,7 @@ const ContactPage: React.FC = () => {
         company: undefined // Not collected in current form
       };
 
-      const response = await fetch('/api/contact', {
+      const response = await fetch(`${API_BASE_URL}/contact`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

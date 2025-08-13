@@ -76,12 +76,12 @@ const Button = styled.button<{ isExpanded: boolean }>`
   cursor: pointer;
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 12px;
+  justify-content: ${props => props.isExpanded ? 'center' : 'center'};
+  gap: ${props => props.isExpanded ? '12px' : '0'};
   font-weight: 600;
   font-size: 16px;
   font-family: 'Inter', 'Segoe UI', sans-serif;
-  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   transform: translateX(0);
   border-radius: ${props => props.isExpanded ? '50px' : '50%'};
   padding: ${props => props.isExpanded ? '16px 24px' : '16px'};
@@ -89,7 +89,6 @@ const Button = styled.button<{ isExpanded: boolean }>`
   min-height: 60px;
   width: ${props => props.isExpanded ? 'auto' : '60px'};
   height: ${props => props.isExpanded ? 'auto' : '60px'};
-  animation: ${props => props.isExpanded ? slideInFromRight : contractButton} 0.6s ease-out;
   box-shadow: 0 4px 20px rgba(220, 38, 38, 0.4);
 
   &:hover {
@@ -109,16 +108,19 @@ const Button = styled.button<{ isExpanded: boolean }>`
 
   @media (max-width: 768px) {
     font-size: 14px;
-    padding: ${props => props.isExpanded ? '12px 20px' : '12px'};
-    min-width: 50px;
-    min-height: 50px;
-    width: ${props => props.isExpanded ? 'auto' : '50px'};
-    height: ${props => props.isExpanded ? 'auto' : '50px'};
+    padding: ${props => props.isExpanded ? '12px 20px' : '14px'};
+    min-width: 52px;
+    min-height: 52px;
+    width: ${props => props.isExpanded ? 'auto' : '52px'};
+    height: ${props => props.isExpanded ? 'auto' : '52px'};
   }
 
   @media (max-width: 480px) {
-    bottom: 15px;
-    right: 15px;
+    padding: ${props => props.isExpanded ? '10px 16px' : '12px'};
+    min-width: 48px;
+    min-height: 48px;
+    width: ${props => props.isExpanded ? 'auto' : '48px'};
+    height: ${props => props.isExpanded ? 'auto' : '48px'};
   }
 `;
 
@@ -128,19 +130,29 @@ const Icon = styled.span`
   line-height: 1;
   min-width: 24px;
   color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
 
   @media (max-width: 768px) {
     font-size: 20px;
     min-width: 20px;
   }
+
+  @media (max-width: 480px) {
+    font-size: 18px;
+    min-width: 18px;
+  }
 `;
 
 const Text = styled.span<{ isExpanded: boolean }>`
   opacity: ${props => props.isExpanded ? 1 : 0};
-  width: ${props => props.isExpanded ? 'auto' : '0'};
+  max-width: ${props => props.isExpanded ? '200px' : '0'};
   overflow: hidden;
   white-space: nowrap;
-  transition: all 0.4s ease-in-out ${props => props.isExpanded ? '0.2s' : '0s'};
+  transition: opacity 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) ${props => props.isExpanded ? '0.1s' : '0s'}, 
+              max-width 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) ${props => props.isExpanded ? '0s' : '0.2s'};
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -148,6 +160,7 @@ const Text = styled.span<{ isExpanded: boolean }>`
 
   @media (max-width: 768px) {
     font-size: 12px;
+    max-width: ${props => props.isExpanded ? '150px' : '0'};
   }
 `;
 

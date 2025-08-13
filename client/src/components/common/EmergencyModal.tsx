@@ -14,6 +14,7 @@
 
 import React, { useState, useEffect } from 'react';
 import styled, { keyframes } from 'styled-components';
+import { API_BASE_URL } from '../../utils/api';
 
 interface EmergencyModalProps {
   isOpen: boolean;
@@ -427,7 +428,7 @@ const EmergencyModal: React.FC<EmergencyModalProps> = ({ isOpen, onClose }) => {
     setErrors({});
 
     try {
-      const response = await fetch('/api/contact/emergency', {
+      const response = await fetch(`${API_BASE_URL}/contact/emergency`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
