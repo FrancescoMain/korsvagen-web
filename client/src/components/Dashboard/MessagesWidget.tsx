@@ -29,7 +29,7 @@ import {
   ExternalLink
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
-import { API_BASE_URL } from '../../utils/api';
+import { apiClient } from '../../utils/api';
 
 interface MessageStats {
   total_messages: number;
@@ -334,22 +334,13 @@ const MessagesWidget: React.FC = () => {
       setError(null);
       
       const [statsResponse, messagesResponse] = await Promise.all([
-        fetch(`${API_BASE_URL}/admin/messages/stats`, {
-          credentials: 'include'
-        }),
-        fetch(`${API_BASE_URL}/admin/messages?limit=5`, {
-          credentials: 'include'
-        })
+        apiClient.get('/admin/messages/stats'),
+        apiClient.get('/admin/messages?limit=5')
       ]);
 
-      if (!statsResponse.ok || !messagesResponse.ok) {
-        throw new Error('Failed to fetch data');
-      }
-
-      const [statsData, messagesData] = await Promise.all([
-        statsResponse.json(),
-        messagesResponse.json()
-      ]);
+      // Axios responses contain data directly in .data property
+      const statsData = statsResponse.data;
+      const messagesData = messagesResponse.data;
 
       setStats(statsData.data);
       setRecentMessages(messagesData.data);

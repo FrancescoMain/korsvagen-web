@@ -18,7 +18,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
-import { API_BASE_URL } from '../utils/api';
+import { apiClient } from '../utils/api';
 import {
   MessageCircle,
   AlertTriangle,
@@ -488,23 +488,16 @@ const MessagesManagement: React.FC = () => {
       if (filters.search) params.set('search', filters.search);
       
       const [messagesResponse, statsResponse] = await Promise.all([
-        fetch(`${API_BASE_URL}/admin/messages?${params.toString()}`, {
-          credentials: 'include'
-        }),
-        fetch(`${API_BASE_URL}/admin/messages/stats`, {
-          credentials: 'include'
-        })
+        apiClient.get(`/admin/messages?${params.toString()}`),
+        apiClient.get('/admin/messages/stats')
       ]);
 
-      if (messagesResponse.ok && statsResponse.ok) {
-        const [messagesData, statsData] = await Promise.all([
-          messagesResponse.json(),
-          statsResponse.json()
-        ]);
+      // Axios responses contain data directly
+      const messagesData = messagesResponse.data;
+      const statsData = statsResponse.data;
         
-        setMessages(messagesData.data);
-        setStats(statsData.data);
-      }
+      setMessages(messagesData.data);
+      setStats(statsData.data);
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
@@ -540,20 +533,13 @@ const MessagesManagement: React.FC = () => {
     if (selectedMessages.size === 0) return;
 
     try {
-      const response = await fetch(`${API_BASE_URL}/admin/messages/bulk-update`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          message_ids: Array.from(selectedMessages),
-          action,
-          assigned_to: assignedTo
-        }),
+      const response = await apiClient.post('/admin/messages/bulk-update', {
+        message_ids: Array.from(selectedMessages),
+        action,
+        assigned_to: assignedTo
       });
 
-      if (response.ok) {
+      if (response.status === 200) {
         await fetchData();
         setSelectedMessages(new Set());
       }
