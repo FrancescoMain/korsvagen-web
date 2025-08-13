@@ -18,12 +18,12 @@ import express from "express";
 import { body, query, param, validationResult } from "express-validator";
 import { supabaseClient } from "../config/supabase.js";
 import { logger } from "../utils/logger.js";
-import { authenticateToken } from "../utils/auth.js";
+import { requireAuth } from "../utils/auth.js";
 
 const router = express.Router();
 
 // All routes require authentication
-router.use(authenticateToken);
+router.use(requireAuth);
 
 /**
  * ROUTE: GET /api/admin/messages
