@@ -29,6 +29,7 @@ import {
   ExternalLink
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
+import { API_BASE_URL } from '../../utils/api';
 
 interface MessageStats {
   total_messages: number;
@@ -333,10 +334,10 @@ const MessagesWidget: React.FC = () => {
       setError(null);
       
       const [statsResponse, messagesResponse] = await Promise.all([
-        fetch('/api/admin/messages/stats', {
+        fetch(`${API_BASE_URL}/admin/messages/stats`, {
           credentials: 'include'
         }),
-        fetch('/api/admin/messages?limit=5', {
+        fetch(`${API_BASE_URL}/admin/messages?limit=5`, {
           credentials: 'include'
         })
       ]);
