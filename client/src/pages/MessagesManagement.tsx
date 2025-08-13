@@ -781,7 +781,7 @@ const MessagesManagement: React.FC = () => {
                       </MessageInfo>
 
                       <MessageMeta>
-                        <div className="type-badge" className={message.type}>
+                        <div className={`type-badge ${message.type}`}>
                           {message.type === 'emergency' ? (
                             <>
                               <AlertTriangle size={10} />
