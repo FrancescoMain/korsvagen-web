@@ -4,6 +4,8 @@ import Header from "../components/layout/Header";
 import Footer from "../components/layout/Footer";
 import ContactCTA from "../components/common/ContactCTA";
 import Link from "../components/common/Link";
+import EmergencyButton from "../components/common/EmergencyButton";
+import EmergencyModal from "../components/common/EmergencyModal";
 import { usePageData } from "../hooks/usePageData";
 import { useReviews } from "../hooks/useReviews";
 
@@ -1655,6 +1657,7 @@ const HomePage: React.FC = () => {
   const [currentSlide, setCurrentSlide] = React.useState(0);
   const [currentProjectSlide, setCurrentProjectSlide] = React.useState(2); // Terzo elemento selezionato di default (design a specchi)
   const [currentReviewSlide, setCurrentReviewSlide] = React.useState(0);
+  const [showEmergencyModal, setShowEmergencyModal] = React.useState(false);
   
   // Load page data from backend with fallback
   const { pageData, loading, error } = usePageData("home");
@@ -2160,6 +2163,15 @@ const HomePage: React.FC = () => {
         <ContactCTA />
       </MainContent>
       <Footer />
+      
+      {/* Emergency Button - Always visible on homepage */}
+      <EmergencyButton onClick={() => setShowEmergencyModal(true)} />
+      
+      {/* Emergency Modal */}
+      <EmergencyModal 
+        isOpen={showEmergencyModal} 
+        onClose={() => setShowEmergencyModal(false)} 
+      />
     </HomeContainer>
   );
 };

@@ -14,3 +14,5 @@ export { default as ContactCTA } from "./common/ContactCTA";
 export { default as ProjectsCTA } from "./common/ProjectsCTA";
 export { default as Link } from "./common/Link";
 export { default as ScrollToTop } from "./common/ScrollToTop";
+export { default as EmergencyButton } from "./common/EmergencyButton";
+export { default as EmergencyModal } from "./common/EmergencyModal";

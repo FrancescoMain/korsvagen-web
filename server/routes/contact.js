@@ -1,17 +1,18 @@
 /**
  * KORSVAGEN WEB APPLICATION - CONTACT ROUTES
  *
- * Routes per gestire i form di contatto del sito web
- * e inviarli alla dashboard amministratori come messaggi.
+ * Comprehensive contact and emergency messaging system.
+ * Handles both normal contact form submissions and emergency requests.
  *
  * Features:
- * - Invio messaggi di contatto
- * - Validazione robusta dei dati
+ * - Normal contact form submissions
+ * - Emergency request handling
+ * - Comprehensive validation
  * - Rate limiting anti-spam
- * - Notifiche email opzionali
+ * - Priority-based message classification
  *
  * @author KORSVAGEN S.R.L.
- * @version 1.0.0
+ * @version 2.0.0 - Enhanced with emergency system
  */
 
 import express from "express";
@@ -23,10 +24,9 @@ import { logger } from "../utils/logger.js";
 const router = express.Router();
 
 /**
- * RATE LIMITER PER FORM DI CONTATTO
- *
- * Prevenzione spam con limiti più restrittivi
+ * RATE LIMITERS
  */
+// Standard contact form rate limiter
 const contactLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 ora
   max: 5, // Massimo 5 messaggi per IP all'ora
@@ -39,15 +39,35 @@ const contactLimiter = rateLimit({
   legacyHeaders: false,
 });
 
+// Emergency requests rate limiter (più permissivo)
+const emergencyLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 ora
+  max: 3, // Massimo 3 emergenze per IP all'ora
+  message: {
+    success: false,
+    message: "Limite emergenze raggiunto. Se si tratta di un'emergenza reale, contatta direttamente il numero telefonico.",
+    code: "EMERGENCY_RATE_LIMIT_EXCEEDED",
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 /**
  * VALIDATORI INPUT
  */
+// Validatori per messaggi di contatto normali
 const contactValidators = [
-  body("name")
+  body("first_name")
     .notEmpty()
     .withMessage("Nome è obbligatorio")
     .isLength({ min: 2, max: 100 })
     .withMessage("Nome deve essere tra 2 e 100 caratteri")
+    .trim()
+    .escape(),
+  body("last_name")
+    .optional()
+    .isLength({ max: 100 })
+    .withMessage("Cognome troppo lungo")
     .trim()
     .escape(),
   body("email")
@@ -58,13 +78,12 @@ const contactValidators = [
     .withMessage("Email troppo lunga"),
   body("phone")
     .optional()
-    .isMobilePhone("any")
+    .matches(/^[\+]?[0-9\s\-\(\)]{8,}$/)
     .withMessage("Numero di telefono non valido")
     .isLength({ max: 50 })
     .withMessage("Numero di telefono troppo lungo"),
   body("subject")
-    .notEmpty()
-    .withMessage("Oggetto è obbligatorio")
+    .optional()
     .isLength({ min: 5, max: 255 })
     .withMessage("Oggetto deve essere tra 5 e 255 caratteri")
     .trim()
@@ -75,25 +94,49 @@ const contactValidators = [
     .isLength({ min: 10, max: 2000 })
     .withMessage("Messaggio deve essere tra 10 e 2000 caratteri")
     .trim(),
-  body("type")
-    .optional()
-    .isIn(["contact", "quote", "partnership", "support", "other"])
-    .withMessage("Tipo di messaggio non valido"),
   body("company")
     .optional()
-    .isLength({ max: 100 })
+    .isLength({ max: 255 })
     .withMessage("Nome azienda troppo lungo")
     .trim()
     .escape(),
-  body("website").optional().isURL().withMessage("URL sito web non valido"),
+];
+
+// Validatori per richieste di emergenza
+const emergencyValidators = [
+  body("first_name")
+    .notEmpty()
+    .withMessage("Nome è obbligatorio")
+    .isLength({ min: 2, max: 100 })
+    .withMessage("Nome deve essere tra 2 e 100 caratteri")
+    .trim()
+    .escape(),
+  body("email")
+    .optional()
+    .isEmail()
+    .withMessage("Email non valida")
+    .normalizeEmail(),
+  body("phone")
+    .notEmpty()
+    .withMessage("Telefono è obbligatorio per le emergenze")
+    .matches(/^[\+]?[0-9\s\-\(\)]{8,}$/)
+    .withMessage("Formato telefono non valido")
+    .isLength({ max: 50 })
+    .withMessage("Numero di telefono troppo lungo"),
+  body("message")
+    .notEmpty()
+    .withMessage("Descrizione emergenza è obbligatoria")
+    .isLength({ min: 10, max: 1000 })
+    .withMessage("Descrizione deve essere tra 10 e 1000 caratteri")
+    .trim(),
 ];
 
 /**
- * ROUTE: POST /api/contact/send
+ * ROUTE: POST /api/contact
  *
  * Riceve e salva un messaggio di contatto dal form del sito
  */
-router.post("/send", contactLimiter, contactValidators, async (req, res) => {
+router.post("/", contactLimiter, contactValidators, async (req, res) => {
   try {
     // Validazione input
     const errors = validationResult(req);
@@ -106,42 +149,32 @@ router.post("/send", contactLimiter, contactValidators, async (req, res) => {
     }
 
     const {
-      name,
+      first_name,
+      last_name,
       email,
       phone,
       subject,
       message,
-      type = "contact",
       company,
-      website,
     } = req.body;
 
-    // Prepara i metadati aggiuntivi
-    const metadata = {
-      ip_address: req.ip || req.connection.remoteAddress,
-      user_agent: req.get("User-Agent") || null,
-      referer: req.get("Referer") || null,
-      language: req.get("Accept-Language") || null,
-      timestamp: new Date().toISOString(),
-    };
-
-    if (company) metadata.company = company;
-    if (website) metadata.website = website;
-
-    // Salva il messaggio nel database
+    // Salva il messaggio nel database usando la nuova struttura
     const { data: savedMessage, error } = await supabaseClient
-      .from("admin_messages")
+      .from("contact_messages")
       .insert({
-        type,
-        subject,
-        content: message,
-        sender_name: name,
-        sender_email: email,
-        sender_phone: phone || null,
-        metadata,
+        type: "contact",
+        first_name,
+        last_name: last_name || null,
+        email,
+        phone: phone || null,
+        company: company || null,
+        subject: subject || "Richiesta di contatto",
+        message,
         status: "new",
-        is_read: false,
-        is_important: type === "quote" || type === "partnership", // Segna come importante richieste di preventivo/partnership
+        priority: "normal",
+        source: "website",
+        user_agent: req.get("User-Agent") || null,
+        ip_address: req.ip || req.connection.remoteAddress,
       })
       .select()
       .single();
@@ -154,19 +187,15 @@ router.post("/send", contactLimiter, contactValidators, async (req, res) => {
     // Log dell'attività
     logger.info("Nuovo messaggio di contatto ricevuto:", {
       messageId: savedMessage.id,
-      sender: name,
+      sender: first_name + (last_name ? ` ${last_name}` : ''),
       email,
-      type,
       subject,
       ip: req.ip,
     });
 
-    // TODO: In futuro aggiungere invio email di notifica agli amministratori
-    // e email di conferma al mittente
-
     res.status(201).json({
       success: true,
-      message: "Messaggio inviato con successo. Ti risponderemo al più presto!",
+      message: "Messaggio inviato con successo! Ti risponderemo al più presto.",
       data: {
         id: savedMessage.id,
         timestamp: savedMessage.created_at,
@@ -177,9 +206,86 @@ router.post("/send", contactLimiter, contactValidators, async (req, res) => {
 
     res.status(500).json({
       success: false,
-      message:
-        "Si è verificato un errore durante l'invio del messaggio. Riprova più tardi.",
+      message: "Si è verificato un errore durante l'invio del messaggio. Riprova più tardi.",
       code: "INTERNAL_SERVER_ERROR",
+    });
+  }
+});
+
+/**
+ * ROUTE: POST /api/contact/emergency
+ *
+ * Riceve e salva una richiesta di emergenza
+ */
+router.post("/emergency", emergencyLimiter, emergencyValidators, async (req, res) => {
+  try {
+    // Validazione input
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        success: false,
+        message: "Dati della richiesta di emergenza non validi",
+        errors: errors.array(),
+      });
+    }
+
+    const { first_name, email, phone, message } = req.body;
+
+    // Salva la richiesta di emergenza
+    const { data: savedMessage, error } = await supabaseClient
+      .from("contact_messages")
+      .insert({
+        type: "emergency",
+        first_name,
+        email: email || null,
+        phone,
+        subject: "🚨 EMERGENZA - Richiesta immediata",
+        message,
+        status: "new",
+        priority: "emergency",
+        source: "emergency_button",
+        user_agent: req.get("User-Agent") || null,
+        ip_address: req.ip || req.connection.remoteAddress,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      logger.error("Errore salvataggio richiesta emergenza:", error);
+      throw new Error("Errore durante il salvataggio della richiesta di emergenza");
+    }
+
+    // Log urgente per le emergenze
+    logger.warn("🚨 NUOVA EMERGENZA RICEVUTA:", {
+      messageId: savedMessage.id,
+      sender: first_name,
+      phone,
+      email,
+      message: message.substring(0, 100) + '...',
+      ip: req.ip,
+      timestamp: new Date().toISOString(),
+    });
+
+    // TODO: Qui andrebbero implementate notifiche immediate:
+    // - Email agli amministratori
+    // - SMS/notifiche push
+    // - Integrazione con sistemi di alerting
+
+    res.status(201).json({
+      success: true,
+      message: "Richiesta emergenza ricevuta! Ti richiameremo entro 24 ore.",
+      data: {
+        id: savedMessage.id,
+        timestamp: savedMessage.created_at,
+      },
+    });
+  } catch (error) {
+    logger.error("Errore richiesta emergenza:", error);
+
+    res.status(500).json({
+      success: false,
+      message: "Errore durante l'invio della richiesta di emergenza. Contatta direttamente il numero telefonico.",
+      code: "EMERGENCY_ERROR",
     });
   }
 });

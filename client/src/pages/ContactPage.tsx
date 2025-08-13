@@ -483,6 +483,9 @@ const ContactPage: React.FC = () => {
     servizio: "",
     messaggio: "",
   });
+  const [loading, setLoading] = React.useState(false);
+  const [success, setSuccess] = React.useState(false);
+  const [errors, setErrors] = React.useState<{[key: string]: string}>({});
 
   const handleInputChange = (
     e: React.ChangeEvent<
@@ -496,11 +499,96 @@ const ContactPage: React.FC = () => {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const validateForm = () => {
+    const newErrors: {[key: string]: string} = {};
+
+    if (!formData.nome.trim()) {
+      newErrors.nome = "Nome è obbligatorio";
+    }
+
+    if (!formData.email.trim()) {
+      newErrors.email = "Email è obbligatoria";
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = "Email non valida";
+    }
+
+    if (!formData.messaggio.trim()) {
+      newErrors.messaggio = "Messaggio è obbligatorio";
+    } else if (formData.messaggio.trim().length < 10) {
+      newErrors.messaggio = "Messaggio troppo breve (minimo 10 caratteri)";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implementare invio form
-    console.log("Form data:", formData);
-    alert("Grazie per il tuo messaggio! Ti contatteremo presto.");
+
+    if (!validateForm()) {
+      return;
+    }
+
+    setLoading(true);
+    setErrors({});
+
+    try {
+      // Map form data to API format
+      const requestData = {
+        first_name: formData.nome,
+        last_name: formData.cognome || undefined,
+        email: formData.email,
+        phone: formData.telefono || undefined,
+        subject: formData.servizio ? `Richiesta servizio: ${formData.servizio}` : "Richiesta di contatto",
+        message: formData.messaggio,
+        company: undefined // Not collected in current form
+      };
+
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestData),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        setSuccess(true);
+        setFormData({
+          nome: "",
+          cognome: "",
+          email: "",
+          telefono: "",
+          servizio: "",
+          messaggio: "",
+        });
+
+        // Reset success message after 5 seconds
+        setTimeout(() => setSuccess(false), 5000);
+      } else {
+        setErrors({ submit: result.message || "Errore durante l'invio del messaggio" });
+      }
+    } catch (error) {
+      console.error('Contact form error:', error);
+      setErrors({ submit: "Errore di connessione. Riprova più tardi." });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+    
+    // Clear error when user starts typing
+    if (errors[name]) {
+      setErrors(prev => ({ ...prev, [name]: "" }));
+    }
   };
 
   return (
@@ -526,6 +614,21 @@ const ContactPage: React.FC = () => {
           <ContactGrid>
             <ContactForm>
               <h3>Inviaci un Messaggio</h3>
+              
+              {success && (
+                <div style={{ 
+                  background: '#d1fae5', 
+                  color: '#065f46', 
+                  padding: '16px 20px', 
+                  borderRadius: '8px', 
+                  marginBottom: '20px',
+                  border: '1px solid #a7f3d0',
+                  textAlign: 'center'
+                }}>
+                  ✓ Messaggio inviato con successo! Ti risponderemo presto.
+                </div>
+              )}
+              
               <form onSubmit={handleSubmit}>
                 <div className="form-row">
                   <div className="form-group">
@@ -536,8 +639,9 @@ const ContactPage: React.FC = () => {
                       name="nome"
                       value={formData.nome}
                       onChange={handleInputChange}
-                      required
+                      style={{borderColor: errors.nome ? '#ef4444' : ''}}
                     />
+                    {errors.nome && <span style={{color: '#ef4444', fontSize: '12px', marginTop: '4px', display: 'block'}}>{errors.nome}</span>}
                   </div>
                   <div className="form-group">
                     <label htmlFor="cognome">Cognome *</label>
@@ -547,7 +651,6 @@ const ContactPage: React.FC = () => {
                       name="cognome"
                       value={formData.cognome}
                       onChange={handleInputChange}
-                      required
                     />
                   </div>
                 </div>
@@ -561,8 +664,9 @@ const ContactPage: React.FC = () => {
                       name="email"
                       value={formData.email}
                       onChange={handleInputChange}
-                      required
+                      style={{borderColor: errors.email ? '#ef4444' : ''}}
                     />
+                    {errors.email && <span style={{color: '#ef4444', fontSize: '12px', marginTop: '4px', display: 'block'}}>{errors.email}</span>}
                   </div>
                   <div className="form-group">
                     <label htmlFor="telefono">Telefono</label>
@@ -604,12 +708,28 @@ const ContactPage: React.FC = () => {
                     value={formData.messaggio}
                     onChange={handleInputChange}
                     placeholder="Descrivi il tuo progetto o la tua richiesta..."
-                    required
+                    style={{borderColor: errors.messaggio ? '#ef4444' : ''}}
                   />
+                  {errors.messaggio && <span style={{color: '#ef4444', fontSize: '12px', marginTop: '4px', display: 'block'}}>{errors.messaggio}</span>}
                 </div>
 
-                <button type="submit" className="submit-btn">
-                  Invia Richiesta
+                {errors.submit && (
+                  <div style={{
+                    background: '#fef2f2',
+                    color: '#dc2626',
+                    padding: '12px 16px',
+                    borderRadius: '6px',
+                    marginBottom: '16px',
+                    border: '1px solid #fecaca',
+                    textAlign: 'center',
+                    fontSize: '14px'
+                  }}>
+                    {errors.submit}
+                  </div>
+                )}
+
+                <button type="submit" className="submit-btn" disabled={loading}>
+                  {loading ? "Invio in corso..." : "Invia Richiesta"}
                 </button>
 
                 <p className="privacy-notice">

@@ -37,6 +37,7 @@ import TeamManagement from "./pages/TeamManagement";
 import ServicesManagement from "./pages/ServicesManagement";
 import { ProjectsManagement, JobsManagement } from "./pages";
 import { NewsManager } from "./components/NewsManager";
+import MessagesManagement from "./pages/MessagesManagement";
 import "./styles/dashboard.css";
 
 function App() {
@@ -102,6 +103,7 @@ function App() {
                 <Route path="projects" element={<ProjectsManagement />} />
                 <Route path="news" element={<NewsManager />} />
                 <Route path="jobs" element={<JobsManagement />} />
+                <Route path="messages" element={<MessagesManagement />} />
                 <Route path="settings" element={<Settings />} />
               </Route>
 

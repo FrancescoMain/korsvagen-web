@@ -30,6 +30,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 import { useApi } from "../hooks/useApi";
+import MessagesWidget from "../components/Dashboard/MessagesWidget";
 
 /**
  * TYPES E INTERFACES
@@ -518,6 +519,9 @@ export const DashboardHome: React.FC = () => {
           </StatContent>
         </StatCard>
       </StatsGrid>
+
+      {/* Messages Widget */}
+      <MessagesWidget />
 
       <ContentGrid>
         <ActivityCard>
