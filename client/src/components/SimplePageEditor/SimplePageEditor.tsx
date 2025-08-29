@@ -117,6 +117,14 @@ export const SimplePageEditor: React.FC = () => {
   const [saving, setSaving] = useState(false);
   const [pageData, setPageData] = useState<PageData | null>(null);
 
+  // Redirect away from contact page since it's disabled
+  useEffect(() => {
+    if (pageId === "contact") {
+      navigate("/dashboard/pages", { replace: true });
+      return;
+    }
+  }, [pageId, navigate]);
+
   useEffect(() => {
     const loadPageData = async () => {
       setLoading(true);
@@ -144,8 +152,8 @@ export const SimplePageEditor: React.FC = () => {
         // Fallback ai dati di default
         const defaultData: PageData = {
           id: pageId || "home",
-          heroTitle: pageId === "about" ? "La Nostra Storia" : pageId === "contact" ? "Contattaci" : "KORSVAGEN",
-          heroSubtitle: pageId === "about" ? "Oltre 30 anni di eccellenza" : pageId === "contact" ? "Siamo qui per aiutarti" : "Costruzioni di qualità dal 1985",
+          heroTitle: pageId === "about" ? "La Nostra Storia" : "KORSVAGEN",
+          heroSubtitle: pageId === "about" ? "Oltre 30 anni di eccellenza" : "Costruzioni di qualità dal 1985",
           heroImage: "",
           sections: pageId === "home" ? {
             services: {
@@ -261,7 +269,7 @@ export const SimplePageEditor: React.FC = () => {
           <ArrowLeft size={16} />
           Torna alle Pagine
         </BackButton>
-        <Title>Modifica: {pageData.id === "home" ? "Homepage" : pageData.id === "about" ? "Chi Siamo" : "Contatti"}</Title>
+        <Title>Modifica: {pageData.id === "home" ? "Homepage" : pageData.id === "about" ? "Chi Siamo" : pageData.id}</Title>
       </Header>
 
       <Form onSubmit={handleSave}>

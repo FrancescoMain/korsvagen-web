@@ -292,13 +292,13 @@ router.put("/:id", requireAuth, requireRole(["admin", "editor", "super_admin"]),
     logger.info(`Admin ${req.user.email} aggiorna certificazione: ${id}`);
 
     // Verifica esistenza certificazione
-    const { data: existingCertification } = await supabaseClient
+    const { data: existingCertification, error: checkError } = await supabaseClient
       .from("certifications")
       .select("id")
-      .eq("id", id)
-      .single();
+      .eq("id", id);
 
-    if (!existingCertification) {
+    if (checkError || !existingCertification || existingCertification.length === 0) {
+      logger.error("Certificazione non trovata durante verifica:", { id, error: checkError });
       return res.status(404).json({
         success: false,
         message: "Certificazione non trovata",
@@ -377,13 +377,13 @@ router.delete("/:id", requireAuth, requireRole(["admin", "editor", "super_admin"
     logger.info(`Admin ${req.user.email} elimina certificazione: ${id}`);
 
     // Verifica esistenza certificazione
-    const { data: existingCertification } = await supabaseClient
+    const { data: existingCertification, error: checkError } = await supabaseClient
       .from("certifications")
       .select("id, name")
-      .eq("id", id)
-      .single();
+      .eq("id", id);
 
-    if (!existingCertification) {
+    if (checkError || !existingCertification || existingCertification.length === 0) {
+      logger.error("Certificazione non trovata durante verifica per eliminazione:", { id, error: checkError });
       return res.status(404).json({
         success: false,
         message: "Certificazione non trovata",
@@ -405,7 +405,7 @@ router.delete("/:id", requireAuth, requireRole(["admin", "editor", "super_admin"
       });
     }
 
-    logger.info(`Certificazione eliminata con successo: ${id} (${existingCertification.name})`);
+    logger.info(`Certificazione eliminata con successo: ${id} (${existingCertification[0]?.name})`);
 
     res.json({
       success: true,
