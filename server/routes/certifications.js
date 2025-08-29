@@ -339,14 +339,15 @@ router.put("/:id", requireAuth, requireRole(["admin", "editor", "super_admin"]),
       });
     }
 
-    const { data: certification, error } = await supabaseClient
+    logger.info(`Eseguendo update certificazione ${id} con dati:`, updateData);
+
+    const { error: updateError } = await supabaseClient
       .from("certifications")
       .update(updateData)
-      .eq("id", id)
-      .select();
+      .eq("id", id);
 
-    if (error) {
-      logger.error("Errore aggiornamento certificazione:", error);
+    if (updateError) {
+      logger.error("Errore aggiornamento certificazione:", updateError);
       return res.status(500).json({
         success: false,
         message: "Errore durante l'aggiornamento della certificazione",
@@ -354,11 +355,19 @@ router.put("/:id", requireAuth, requireRole(["admin", "editor", "super_admin"]),
       });
     }
 
-    if (!certification || certification.length === 0) {
-      return res.status(404).json({
+    // Fetch the updated record
+    const { data: updatedCertification, error: fetchError } = await supabaseClient
+      .from("certifications")
+      .select("*")
+      .eq("id", id)
+      .single();
+
+    if (fetchError || !updatedCertification) {
+      logger.error("Errore recupero certificazione dopo update:", fetchError);
+      return res.status(500).json({
         success: false,
-        message: "Certificazione non trovata dopo l'aggiornamento",
-        code: "CERTIFICATION_NOT_FOUND"
+        message: "Errore nel recupero della certificazione aggiornata",
+        code: "FETCH_ERROR"
       });
     }
 
@@ -367,7 +376,7 @@ router.put("/:id", requireAuth, requireRole(["admin", "editor", "super_admin"]),
     res.json({
       success: true,
       message: "Certificazione aggiornata con successo",
-      data: certification[0]
+      data: updatedCertification
     });
 
   } catch (error) {
