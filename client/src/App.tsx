@@ -104,6 +104,7 @@ function App() {
                 <Route path="news" element={<NewsManager />} />
                 <Route path="jobs" element={<JobsManagement />} />
                 <Route path="messages" element={<MessagesManagement />} />
+                <Route path="messages/:messageId" element={<MessagesManagement />} />
                 <Route path="settings" element={<Settings />} />
               </Route>
 

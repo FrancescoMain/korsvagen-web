@@ -18,6 +18,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
+import { useParams, useNavigate } from 'react-router-dom';
 import { apiClient } from '../utils/api';
 import {
   MessageCircle,
@@ -35,7 +36,9 @@ import {
   X,
   CheckSquare,
   Square,
-  MoreVertical
+  MoreVertical,
+  ArrowLeft,
+  Reply
 } from 'lucide-react';
 
 interface ContactMessage {
@@ -462,11 +465,185 @@ const EmptyState = styled.div`
   }
 `;
 
+const MessageDetailModal = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+`;
+
+const MessageDetailContent = styled.div`
+  background: white;
+  border-radius: 12px;
+  max-width: 800px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+`;
+
+const DetailHeader = styled.div`
+  background: #f8fafc;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  .header-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  h2 {
+    margin: 0;
+    color: #1f2937;
+    font-size: 1.25rem;
+  }
+
+  .close-btn {
+    background: none;
+    border: none;
+    padding: 8px;
+    border-radius: 8px;
+    cursor: pointer;
+    color: #6b7280;
+
+    &:hover {
+      background: #f3f4f6;
+      color: #374151;
+    }
+  }
+`;
+
+const DetailBody = styled.div`
+  padding: 24px;
+
+  .message-info {
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 24px;
+    background: #f9fafb;
+  }
+
+  .info-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  .info-label {
+    font-weight: 600;
+    color: #374151;
+    min-width: 120px;
+  }
+
+  .info-value {
+    color: #6b7280;
+    flex: 1;
+  }
+
+  .message-content {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 24px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+  }
+
+  .admin-notes {
+    background: #fef3c7;
+    border: 1px solid #fbbf24;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 24px;
+    
+    h4 {
+      margin: 0 0 12px 0;
+      color: #92400e;
+    }
+    
+    textarea {
+      width: 100%;
+      min-height: 100px;
+      padding: 12px;
+      border: 1px solid #d97706;
+      border-radius: 6px;
+      resize: vertical;
+      font-family: inherit;
+    }
+  }
+`;
+
+const DetailActions = styled.div`
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  padding: 0 24px 24px;
+
+  .action-btn {
+    padding: 10px 20px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background: white;
+    color: #374151;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: #f9fafb;
+    }
+
+    &.primary {
+      background: #3b82f6;
+      border-color: #3b82f6;
+      color: white;
+
+      &:hover {
+        background: #2563eb;
+      }
+    }
+
+    &.danger {
+      border-color: #ef4444;
+      color: #dc2626;
+
+      &:hover {
+        background: #fef2f2;
+      }
+    }
+  }
+`;
+
 const MessagesManagement: React.FC = () => {
+  const { messageId } = useParams();
+  const navigate = useNavigate();
+  
   const [messages, setMessages] = useState<ContactMessage[]>([]);
+  const [selectedMessage, setSelectedMessage] = useState<ContactMessage | null>(null);
   const [stats, setStats] = useState<MessageStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedMessages, setSelectedMessages] = useState<Set<number>>(new Set());
+  const [adminNotes, setAdminNotes] = useState('');
   const [filters, setFilters] = useState<Filters>({
     type: 'all',
     status: 'all',
@@ -505,9 +682,30 @@ const MessagesManagement: React.FC = () => {
     }
   }, [filters]);
 
+  // Fetch individual message
+  const fetchMessage = useCallback(async (id: string) => {
+    try {
+      const response = await apiClient.get(`/admin/messages/${id}`);
+      const messageData = response.data.data;
+      setSelectedMessage(messageData);
+      setAdminNotes(messageData.admin_notes || '');
+    } catch (error) {
+      console.error('Error fetching message:', error);
+      navigate('/dashboard/messages');
+    }
+  }, [navigate]);
+
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  useEffect(() => {
+    if (messageId) {
+      fetchMessage(messageId);
+    } else {
+      setSelectedMessage(null);
+    }
+  }, [messageId, fetchMessage]);
 
   // Handle message selection
   const handleSelectMessage = (messageId: number) => {
@@ -545,6 +743,49 @@ const MessagesManagement: React.FC = () => {
       }
     } catch (error) {
       console.error('Bulk action error:', error);
+    }
+  };
+
+  // Message detail actions
+  const handleViewMessage = (messageId: number) => {
+    navigate(`/dashboard/messages/${messageId}`);
+  };
+
+  const handleCloseModal = () => {
+    navigate('/dashboard/messages');
+  };
+
+  const handleUpdateMessage = async (action: string, messageId: number) => {
+    try {
+      const response = await apiClient.patch(`/admin/messages/${messageId}`, {
+        action,
+        admin_notes: adminNotes
+      });
+
+      if (response.status === 200) {
+        await fetchData();
+        if (selectedMessage) {
+          await fetchMessage(messageId.toString());
+        }
+      }
+    } catch (error) {
+      console.error('Message update error:', error);
+    }
+  };
+
+  const handleSaveNotes = async () => {
+    if (!selectedMessage) return;
+    
+    try {
+      const response = await apiClient.patch(`/admin/messages/${selectedMessage.id}`, {
+        admin_notes: adminNotes
+      });
+
+      if (response.status === 200) {
+        setSelectedMessage({ ...selectedMessage, admin_notes: adminNotes });
+      }
+    } catch (error) {
+      console.error('Notes save error:', error);
     }
   };
 
@@ -801,7 +1042,13 @@ const MessagesManagement: React.FC = () => {
                   </MessageContent>
 
                   <MessageActions>
-                    <ActionButton title="Visualizza dettagli">
+                    <ActionButton 
+                      title="Visualizza dettagli"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleViewMessage(message.id);
+                      }}
+                    >
                       <Eye size={16} />
                     </ActionButton>
                     <ActionButton title="Altre azioni">
@@ -814,6 +1061,132 @@ const MessagesManagement: React.FC = () => {
           )}
         </MessagesList>
       </MessagesTable>
+
+      {/* Message Detail Modal */}
+      {selectedMessage && (
+        <MessageDetailModal onClick={handleCloseModal}>
+          <MessageDetailContent onClick={(e) => e.stopPropagation()}>
+            <DetailHeader>
+              <div className="header-info">
+                <div className={`type-badge ${selectedMessage.type}`}>
+                  {selectedMessage.type === 'emergency' ? (
+                    <AlertTriangle size={16} />
+                  ) : (
+                    <MessageCircle size={16} />
+                  )}
+                </div>
+                <h2>Dettagli Messaggio</h2>
+              </div>
+              <button className="close-btn" onClick={handleCloseModal}>
+                <X size={20} />
+              </button>
+            </DetailHeader>
+
+            <DetailBody>
+              <div className="message-info">
+                <div className="info-row">
+                  <span className="info-label">Da:</span>
+                  <span className="info-value">
+                    {selectedMessage.first_name} {selectedMessage.last_name}
+                  </span>
+                </div>
+                <div className="info-row">
+                  <span className="info-label">Email:</span>
+                  <span className="info-value">{selectedMessage.email}</span>
+                </div>
+                {selectedMessage.phone && (
+                  <div className="info-row">
+                    <span className="info-label">Telefono:</span>
+                    <span className="info-value">{selectedMessage.phone}</span>
+                  </div>
+                )}
+                {selectedMessage.company && (
+                  <div className="info-row">
+                    <span className="info-label">Azienda:</span>
+                    <span className="info-value">{selectedMessage.company}</span>
+                  </div>
+                )}
+                <div className="info-row">
+                  <span className="info-label">Stato:</span>
+                  <span className="info-value">
+                    <span 
+                      style={{
+                        ...getStatusColor(selectedMessage.status),
+                        padding: '4px 8px',
+                        borderRadius: '12px',
+                        fontSize: '11px',
+                        fontWeight: 500,
+                        textTransform: 'uppercase'
+                      }}
+                    >
+                      {selectedMessage.status}
+                    </span>
+                  </span>
+                </div>
+                <div className="info-row">
+                  <span className="info-label">Priorità:</span>
+                  <span className="info-value">{selectedMessage.priority}</span>
+                </div>
+                <div className="info-row">
+                  <span className="info-label">Ricevuto:</span>
+                  <span className="info-value">
+                    {new Date(selectedMessage.created_at).toLocaleString('it-IT')}
+                  </span>
+                </div>
+              </div>
+
+              {selectedMessage.subject && (
+                <>
+                  <h4>Oggetto:</h4>
+                  <div className="message-content">
+                    {selectedMessage.subject}
+                  </div>
+                </>
+              )}
+
+              <h4>Messaggio:</h4>
+              <div className="message-content">
+                {selectedMessage.message}
+              </div>
+
+              <div className="admin-notes">
+                <h4>Note Amministratore</h4>
+                <textarea
+                  value={adminNotes}
+                  onChange={(e) => setAdminNotes(e.target.value)}
+                  placeholder="Aggiungi note interne..."
+                />
+              </div>
+            </DetailBody>
+
+            <DetailActions>
+              <button className="action-btn" onClick={handleSaveNotes}>
+                Salva Note
+              </button>
+              <button 
+                className="action-btn primary" 
+                onClick={() => handleUpdateMessage('mark_read', selectedMessage.id)}
+              >
+                <Eye size={16} />
+                Segna come Letto
+              </button>
+              <button 
+                className="action-btn" 
+                onClick={() => handleUpdateMessage('reply', selectedMessage.id)}
+              >
+                <Reply size={16} />
+                Rispondi
+              </button>
+              <button 
+                className="action-btn danger" 
+                onClick={() => handleUpdateMessage('delete', selectedMessage.id)}
+              >
+                Elimina
+              </button>
+            </DetailActions>
+          </MessageDetailContent>
+        </MessageDetailModal>
+      )}
     </Container>
   );
 };
