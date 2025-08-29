@@ -365,17 +365,40 @@ router.put("/:id", requireAuth, requireRole(["admin", "editor", "super_admin"]),
       });
     }
 
+    // Add a small delay to handle potential DB consistency issues
+    await new Promise(resolve => setTimeout(resolve, 100));
+
     // Fetch the updated record
-    const { data: updatedCertification, error: fetchError } = await supabaseClient
+    let { data: updatedCertification, error: fetchError } = await supabaseClient
       .from("certifications")
       .select("*")
       .eq("id", id)
       .single();
 
+    // If the data hasn't changed, try once more after a longer delay
+    const originalDescription = "Certificazione di qualità nei processi di gestione";
+    if (!fetchError && updatedCertification && updateData.description && updatedCertification.description === originalDescription) {
+      logger.info("Dati non cambiati dopo primo fetch, ritento dopo delay...");
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      const { data: retryData, error: retryError } = await supabaseClient
+        .from("certifications")
+        .select("*")
+        .eq("id", id)
+        .single();
+        
+      if (!retryError && retryData) {
+        updatedCertification = retryData;
+        fetchError = retryError;
+      }
+    }
+
     logger.info(`Risultato fetch dopo update:`, { 
       error: fetchError, 
       data: updatedCertification,
-      dataChanged: updatedCertification?.description !== "Certificazione di qualità nei processi di gestione"
+      dataChanged: updatedCertification?.description !== originalDescription,
+      expectedDescription: updateData.description,
+      actualDescription: updatedCertification?.description
     });
 
     if (fetchError || !updatedCertification) {
