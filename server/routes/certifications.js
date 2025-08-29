@@ -297,8 +297,18 @@ router.put("/:id", requireAuth, requireRole(["admin", "editor", "super_admin"]),
       .select("id")
       .eq("id", id);
 
+    logger.info(`Verifica esistenza certificazione ${id}:`, { 
+      found: existingCertification?.length || 0, 
+      error: checkError,
+      data: existingCertification 
+    });
+
     if (checkError || !existingCertification || existingCertification.length === 0) {
-      logger.error("Certificazione non trovata durante verifica:", { id, error: checkError });
+      logger.error("Certificazione non trovata durante verifica:", { 
+        id, 
+        error: checkError, 
+        dataLength: existingCertification?.length || 0 
+      });
       return res.status(404).json({
         success: false,
         message: "Certificazione non trovata",
@@ -306,9 +316,7 @@ router.put("/:id", requireAuth, requireRole(["admin", "editor", "super_admin"]),
       });
     }
 
-    const updateData = {
-      updated_by: req.user.id
-    };
+    const updateData = {};
 
     // Aggiungi solo i campi presenti nella request
     if (name !== undefined) updateData.name = name;
@@ -316,6 +324,20 @@ router.put("/:id", requireAuth, requireRole(["admin", "editor", "super_admin"]),
     if (description !== undefined) updateData.description = description;
     if (is_active !== undefined) updateData.is_active = is_active;
     if (display_order !== undefined) updateData.display_order = display_order;
+    
+    // Add updated_by only if user exists and we have valid fields to update
+    if (Object.keys(updateData).length > 0 && req.user?.id) {
+      updateData.updated_by = req.user.id;
+    }
+
+    // Check if we have anything to update
+    if (Object.keys(updateData).length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Nessun campo da aggiornare fornito",
+        code: "NO_UPDATE_FIELDS"
+      });
+    }
 
     const { data: certification, error } = await supabaseClient
       .from("certifications")
