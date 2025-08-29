@@ -354,6 +354,8 @@ router.put("/:id", requireAuth, requireRole(["admin", "editor", "super_admin"]),
       .update(updateData)
       .eq("id", id);
 
+    logger.info(`Risultato update operation:`, { error: updateError, success: !updateError });
+
     if (updateError) {
       logger.error("Errore aggiornamento certificazione:", updateError);
       return res.status(500).json({
@@ -369,6 +371,12 @@ router.put("/:id", requireAuth, requireRole(["admin", "editor", "super_admin"]),
       .select("*")
       .eq("id", id)
       .single();
+
+    logger.info(`Risultato fetch dopo update:`, { 
+      error: fetchError, 
+      data: updatedCertification,
+      dataChanged: updatedCertification?.description !== "Certificazione di qualità nei processi di gestione"
+    });
 
     if (fetchError || !updatedCertification) {
       logger.error("Errore recupero certificazione dopo update:", fetchError);
