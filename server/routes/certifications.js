@@ -290,6 +290,14 @@ router.put("/:id", requireAuth, requireRole(["admin", "editor", "super_admin"]),
     const { name, code, description, is_active, display_order } = req.body;
 
     logger.info(`Admin ${req.user.email} aggiorna certificazione: ${id}`);
+    logger.info(`Dati ricevuti dal frontend:`, { 
+      name, 
+      code, 
+      description, 
+      is_active, 
+      display_order,
+      fullBody: req.body 
+    });
 
     // Verifica esistenza certificazione
     const { data: existingCertification, error: checkError } = await supabaseClient
