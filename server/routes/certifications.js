@@ -164,8 +164,8 @@ router.get("/", requireAuth, requireRole(["admin", "editor", "super_admin"]), as
         display_order,
         created_at,
         updated_at,
-        created_by_user:admin_users!certifications_created_by_fkey(username),
-        updated_by_user:admin_users!certifications_updated_by_fkey(username)
+        created_by,
+        updated_by
       `)
       .order("display_order", { ascending: true })
       .range(offset, offset + limit - 1);
@@ -321,8 +321,7 @@ router.put("/:id", requireAuth, requireRole(["admin", "editor", "super_admin"]),
       .from("certifications")
       .update(updateData)
       .eq("id", id)
-      .select()
-      .single();
+      .select();
 
     if (error) {
       logger.error("Errore aggiornamento certificazione:", error);
@@ -333,12 +332,20 @@ router.put("/:id", requireAuth, requireRole(["admin", "editor", "super_admin"]),
       });
     }
 
+    if (!certification || certification.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Certificazione non trovata dopo l'aggiornamento",
+        code: "CERTIFICATION_NOT_FOUND"
+      });
+    }
+
     logger.info(`Certificazione aggiornata con successo: ${id}`);
 
     res.json({
       success: true,
       message: "Certificazione aggiornata con successo",
-      data: certification
+      data: certification[0]
     });
 
   } catch (error) {

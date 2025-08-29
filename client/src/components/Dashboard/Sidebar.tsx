@@ -74,11 +74,11 @@ const navigationItems: NavigationItem[] = [
     icon: <MessageCircle size={20} />,
     path: "/dashboard/messages",
   },
-  {
-    title: "Contact",
-    icon: <FileText size={20} />,
-    path: "/dashboard/pages/contact",
-  },
+  // {
+  //   title: "Contact",
+  //   icon: <FileText size={20} />,
+  //   path: "/dashboard/pages/contact",
+  // },
   {
     title: "Recensioni",
     icon: <MessageSquare size={20} />,
