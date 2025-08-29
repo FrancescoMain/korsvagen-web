@@ -289,6 +289,16 @@ router.put("/:id", requireAuth, requireRole(["admin", "editor", "super_admin"]),
     const { id } = req.params;
     const { name, code, description, is_active, display_order } = req.body;
 
+    logger.info(`Dati dopo validazione Express:`, { 
+      name, 
+      code, 
+      description, 
+      is_active, 
+      display_order,
+      descriptionLength: description?.length,
+      descriptionCharCodes: description ? Array.from(description).map(c => c.charCodeAt(0)) : null
+    });
+
     logger.info(`Admin ${req.user.email} aggiorna certificazione: ${id}`);
     logger.info(`Dati ricevuti dal frontend:`, { 
       name, 
@@ -348,6 +358,14 @@ router.put("/:id", requireAuth, requireRole(["admin", "editor", "super_admin"]),
     }
 
     logger.info(`Eseguendo update certificazione ${id} con dati:`, updateData);
+
+    // Direct test - try to update description with a simple string
+    const testResult = await supabaseClient
+      .from("certifications")
+      .update({ description: "TEST_DESCRIPTION_UPDATE" })
+      .eq("id", id);
+    
+    logger.info(`Test update result:`, testResult);
 
     const { error: updateError } = await supabaseClient
       .from("certifications")
