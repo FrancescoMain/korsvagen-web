@@ -5,6 +5,7 @@ import Footer from "../components/layout/Footer";
 import ContactCTA from "../components/common/ContactCTA";
 import PageHero from "../components/common/PageHero";
 import { useSettings } from "../contexts/SettingsContext";
+import { useCertifications } from "../hooks/useCertifications";
 
 const AboutContainer = styled.div`
   min-height: 100vh;
@@ -836,6 +837,7 @@ const WhyChooseUsSection = styled.section`
 
 const AboutPage: React.FC = () => {
   const { companyStats } = useSettings();
+  const { publicCertifications, loading: certificationsLoading } = useCertifications();
 
   return (
     <AboutContainer>
@@ -931,117 +933,42 @@ const AboutPage: React.FC = () => {
               </p>
             </div>
             <div className="certifications-gallery">
-              <div className="certifications-track">
-                <div className="certification-item">
-                  <div className="certification-circle">
-                    <div className="certification-icon">ISO</div>
-                  </div>
-                  <div className="certification-content">
-                    <h3>ISO 9001</h3>
-                    <p>Certificazione di qualità nei processi di gestione</p>
-                  </div>
+              {certificationsLoading ? (
+                <div style={{ textAlign: 'center', padding: '2rem', color: '#666' }}>
+                  Caricamento certificazioni...
                 </div>
-                <div className="certification-item">
-                  <div className="certification-circle">
-                    <div className="certification-icon">SOA</div>
-                  </div>
-                  <div className="certification-content">
-                    <h3>SOA Costruzioni</h3>
-                    <p>Attestazione per lavori pubblici e privati</p>
-                  </div>
+              ) : publicCertifications.length > 0 ? (
+                <div className="certifications-track">
+                  {/* Render actual certifications */}
+                  {publicCertifications.map((cert) => (
+                    <div key={cert.id} className="certification-item">
+                      <div className="certification-circle">
+                        <div className="certification-icon">{cert.code}</div>
+                      </div>
+                      <div className="certification-content">
+                        <h3>{cert.name}</h3>
+                        <p>{cert.description}</p>
+                      </div>
+                    </div>
+                  ))}
+                  {/* Duplicate for seamless loop effect */}
+                  {publicCertifications.map((cert) => (
+                    <div key={`duplicate-${cert.id}`} className="certification-item">
+                      <div className="certification-circle">
+                        <div className="certification-icon">{cert.code}</div>
+                      </div>
+                      <div className="certification-content">
+                        <h3>{cert.name}</h3>
+                        <p>{cert.description}</p>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-                <div className="certification-item">
-                  <div className="certification-circle">
-                    <div className="certification-icon">ECO</div>
-                  </div>
-                  <div className="certification-content">
-                    <h3>Edilizia Sostenibile</h3>
-                    <p>Specializzazione in costruzioni eco-compatibili</p>
-                  </div>
+              ) : (
+                <div style={{ textAlign: 'center', padding: '2rem', color: '#666' }}>
+                  Nessuna certificazione disponibile al momento.
                 </div>
-                <div className="certification-item">
-                  <div className="certification-circle">
-                    <div className="certification-icon">ELT</div>
-                  </div>
-                  <div className="certification-content">
-                    <h3>Impianti Elettrici</h3>
-                    <p>Abilitazione per installazioni elettriche</p>
-                  </div>
-                </div>
-                <div className="certification-item">
-                  <div className="certification-circle">
-                    <div className="certification-icon">PRO</div>
-                  </div>
-                  <div className="certification-content">
-                    <h3>Progettazione</h3>
-                    <p>Certificazione per progettazione architettonica</p>
-                  </div>
-                </div>
-                <div className="certification-item">
-                  <div className="certification-circle">
-                    <div className="certification-icon">SIC</div>
-                  </div>
-                  <div className="certification-content">
-                    <h3>Sicurezza</h3>
-                    <p>Certificazione per sicurezza sul lavoro</p>
-                  </div>
-                </div>
-                {/* Duplicated items for seamless loop */}
-                <div className="certification-item">
-                  <div className="certification-circle">
-                    <div className="certification-icon">ISO</div>
-                  </div>
-                  <div className="certification-content">
-                    <h3>ISO 9001</h3>
-                    <p>Certificazione di qualità nei processi di gestione</p>
-                  </div>
-                </div>
-                <div className="certification-item">
-                  <div className="certification-circle">
-                    <div className="certification-icon">SOA</div>
-                  </div>
-                  <div className="certification-content">
-                    <h3>SOA Costruzioni</h3>
-                    <p>Attestazione per lavori pubblici e privati</p>
-                  </div>
-                </div>
-                <div className="certification-item">
-                  <div className="certification-circle">
-                    <div className="certification-icon">ECO</div>
-                  </div>
-                  <div className="certification-content">
-                    <h3>Edilizia Sostenibile</h3>
-                    <p>Specializzazione in costruzioni eco-compatibili</p>
-                  </div>
-                </div>
-                <div className="certification-item">
-                  <div className="certification-circle">
-                    <div className="certification-icon">ELT</div>
-                  </div>
-                  <div className="certification-content">
-                    <h3>Impianti Elettrici</h3>
-                    <p>Abilitazione per installazioni elettriche</p>
-                  </div>
-                </div>
-                <div className="certification-item">
-                  <div className="certification-circle">
-                    <div className="certification-icon">PRO</div>
-                  </div>
-                  <div className="certification-content">
-                    <h3>Progettazione</h3>
-                    <p>Certificazione per progettazione architettonica</p>
-                  </div>
-                </div>
-                <div className="certification-item">
-                  <div className="certification-circle">
-                    <div className="certification-icon">SIC</div>
-                  </div>
-                  <div className="certification-content">
-                    <h3>Sicurezza</h3>
-                    <p>Certificazione per sicurezza sul lavoro</p>
-                  </div>
-                </div>
-              </div>
+              )}
             </div>
           </div>
         </CertificationsSection>

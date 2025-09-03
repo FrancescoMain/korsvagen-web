@@ -75,52 +75,13 @@ router.get("/public", async (req, res) => {
       });
     }
 
-    // Se non ci sono certificazioni, restituisci quelle di default
+    // Se non ci sono certificazioni, restituisci array vuoto
     if (!certifications || certifications.length === 0) {
-      logger.info("Nessuna certificazione trovata, uso dati di default");
-      const defaultCertifications = [
-        {
-          id: "default-1",
-          name: "ISO 9001",
-          code: "ISO",
-          description: "Certificazione di qualità nei processi di gestione",
-        },
-        {
-          id: "default-2",
-          name: "SOA Costruzioni",
-          code: "SOA",
-          description: "Attestazione per lavori pubblici e privati",
-        },
-        {
-          id: "default-3",
-          name: "Edilizia Sostenibile",
-          code: "ECO",
-          description: "Specializzazione in costruzioni eco-compatibili",
-        },
-        {
-          id: "default-4",
-          name: "Impianti Elettrici",
-          code: "ELT",
-          description: "Abilitazione per installazioni elettriche",
-        },
-        {
-          id: "default-5",
-          name: "Progettazione",
-          code: "PRO",
-          description: "Certificazione per progettazione architettonica",
-        },
-        {
-          id: "default-6",
-          name: "Sicurezza",
-          code: "SIC",
-          description: "Certificazione per sicurezza sul lavoro",
-        },
-      ];
-
+      logger.info("Nessuna certificazione attiva trovata nel database");
       return res.json({
         success: true,
-        data: defaultCertifications,
-        count: defaultCertifications.length
+        data: [],
+        count: 0
       });
     }
 
