@@ -5,7 +5,7 @@
  * con upload multiplo, drag & drop, riordinamento e gestione copertina.
  */
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import styled from "styled-components";
 import { Project, ProjectImage, useProjects } from "../../hooks/useProjects";
 import {
@@ -284,19 +284,34 @@ const ImageInfo = styled.div`
   padding: 1rem;
 `;
 
-const ImageTitle = styled.input`
+const ImageTitle = styled.input<{ isPending?: boolean }>`
   width: 100%;
-  border: 1px solid #e0e0e0;
+  border: 1px solid ${props => props.isPending ? '#ffc107' : '#e0e0e0'};
   border-radius: 6px;
   padding: 0.5rem 0.75rem;
   font-size: 0.9rem;
-  margin-bottom: 0.75rem;
+  margin-bottom: ${props => props.isPending ? '0.25rem' : '0.75rem'};
   font-weight: 500;
+  background: ${props => props.isPending ? '#fff8e1' : 'white'};
 
   &:focus {
     outline: none;
     border-color: #d4af37;
     box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.1);
+  }
+`;
+
+const PendingIndicator = styled.div`
+  font-size: 0.75rem;
+  color: #f57f17;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+
+  &::before {
+    content: '⏳';
+    font-size: 0.8rem;
   }
 `;
 
@@ -431,6 +446,11 @@ const ImageGalleryManager: React.FC<ImageGalleryManagerProps> = ({
   const [uploadProgress, setUploadProgress] = useState(0);
   const [draggedItem, setDraggedItem] = useState<DragItem | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
+  const [pendingImageIds, setPendingImageIds] = useState<Set<number>>(new Set());
+  
+  // Debouncing for title updates
+  const updateTimeouts = useRef<Map<number, NodeJS.Timeout>>(new Map());
+  const pendingUpdates = useRef<Map<number, string>>(new Map());
 
   // Load project images from API
   useEffect(() => {
@@ -458,6 +478,16 @@ const ImageGalleryManager: React.FC<ImageGalleryManagerProps> = ({
 
     loadImages();
   }, [project.id]); // Removed fetchProject dependency to prevent infinite loop
+
+  // Cleanup timeouts on unmount
+  useEffect(() => {
+    return () => {
+      // Clear all pending timeouts
+      updateTimeouts.current.forEach(timeout => clearTimeout(timeout));
+      updateTimeouts.current.clear();
+      pendingUpdates.current.clear();
+    };
+  }, []);
 
   // Handle file upload
   const handleFileUpload = useCallback(async (files: FileList) => {
@@ -530,23 +560,71 @@ const ImageGalleryManager: React.FC<ImageGalleryManagerProps> = ({
     }
   }, [handleFileUpload]);
 
-  // Update image title
-  const handleUpdateImageTitle = async (imageId: number, title: string) => {
-    try {
-      await updateProjectImage(project.id, imageId, { title });
-      
-      setImages(prev => 
-        prev.map(img => 
-          img.id === imageId ? { ...img, title } : img
-        )
-      );
+  // Update image title with debouncing
+  const handleUpdateImageTitle = useCallback((imageId: number, title: string) => {
+    // Update local state immediately for responsive UI
+    setImages(prev => 
+      prev.map(img => 
+        img.id === imageId ? { ...img, title } : img
+      )
+    );
 
-      toast.success("Titolo aggiornato");
-      onUpdate();
-    } catch (error: any) {
-      toast.error("Errore nell'aggiornamento del titolo");
+    // Store pending update
+    pendingUpdates.current.set(imageId, title);
+
+    // Add to pending visual indicator
+    setPendingImageIds(prev => new Set(prev).add(imageId));
+
+    // Clear existing timeout for this image
+    const existingTimeout = updateTimeouts.current.get(imageId);
+    if (existingTimeout) {
+      clearTimeout(existingTimeout);
     }
-  };
+
+    // Set new timeout
+    const timeoutId = setTimeout(async () => {
+      const pendingTitle = pendingUpdates.current.get(imageId);
+      if (pendingTitle === undefined) return;
+
+      try {
+        await updateProjectImage(project.id, imageId, { title: pendingTitle });
+        toast.success("Titolo aggiornato", { duration: 2000 });
+        onUpdate();
+        
+        // Clean up
+        pendingUpdates.current.delete(imageId);
+        updateTimeouts.current.delete(imageId);
+        setPendingImageIds(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(imageId);
+          return newSet;
+        });
+      } catch (error: any) {
+        // Revert local state on error
+        setImages(prev => 
+          prev.map(img => {
+            if (img.id === imageId) {
+              // Try to revert to previous title if possible
+              const originalImage = images.find(originalImg => originalImg.id === imageId);
+              return originalImage ? { ...img, title: originalImage.title } : img;
+            }
+            return img;
+          })
+        );
+        
+        toast.error("Errore nell'aggiornamento del titolo");
+        pendingUpdates.current.delete(imageId);
+        updateTimeouts.current.delete(imageId);
+        setPendingImageIds(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(imageId);
+          return newSet;
+        });
+      }
+    }, 2000); // 2 second delay
+
+    updateTimeouts.current.set(imageId, timeoutId);
+  }, [project.id, updateProjectImage, onUpdate, images]);
 
   // Set as cover image
   const handleSetCover = async (imageId: number) => {
@@ -761,7 +839,11 @@ const ImageGalleryManager: React.FC<ImageGalleryManagerProps> = ({
                       value={image.title}
                       onChange={(e) => handleUpdateImageTitle(image.id, e.target.value)}
                       placeholder="Titolo immagine"
+                      isPending={pendingImageIds.has(image.id)}
                     />
+                    {pendingImageIds.has(image.id) && (
+                      <PendingIndicator>Salvataggio in corso...</PendingIndicator>
+                    )}
 
                     <ImageActions>
                       <div style={{ display: 'flex', gap: '0.25rem' }}>
