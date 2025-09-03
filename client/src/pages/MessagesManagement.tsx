@@ -20,6 +20,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
 import { useParams, useNavigate } from 'react-router-dom';
 import { apiClient } from '../utils/api';
+import toast from 'react-hot-toast';
 import {
   MessageCircle,
   AlertTriangle,
@@ -731,18 +732,54 @@ const MessagesManagement: React.FC = () => {
     if (selectedMessages.size === 0) return;
 
     try {
+      const selectedIds = Array.from(selectedMessages);
+      
+      // Optimistic update for bulk actions
+      if (action === 'mark_read' || action === 'mark_closed' || action === 'delete') {
+        setMessages(prevMessages => {
+          if (action === 'delete') {
+            // Remove messages from list
+            return prevMessages.filter(msg => !selectedIds.includes(msg.id));
+          } else {
+            // Update status
+            return prevMessages.map(msg => {
+              if (selectedIds.includes(msg.id)) {
+                const updatedStatus = action === 'mark_read' ? 'read' : 
+                                    action === 'mark_closed' ? 'closed' : msg.status;
+                return {
+                  ...msg,
+                  status: updatedStatus,
+                  updated_at: new Date().toISOString()
+                };
+              }
+              return msg;
+            });
+          }
+        });
+      }
+
       const response = await apiClient.post('/admin/messages/bulk-update', {
-        message_ids: Array.from(selectedMessages),
+        message_ids: selectedIds,
         action,
         assigned_to: assignedTo
       });
 
       if (response.status === 200) {
-        await fetchData();
         setSelectedMessages(new Set());
+        // Refresh to ensure server consistency
+        await fetchData();
+        
+        // Show success toast
+        const actionText = action === 'mark_read' ? 'letti' : 
+                          action === 'mark_closed' ? 'chiusi' : 
+                          action === 'delete' ? 'eliminati' : 'aggiornati';
+        toast.success(`${selectedIds.length} messaggi ${actionText} con successo`);
       }
     } catch (error) {
       console.error('Bulk action error:', error);
+      toast.error('Errore nell\'operazione bulk');
+      // Revert optimistic updates on error
+      await fetchData();
     }
   };
 
@@ -763,13 +800,55 @@ const MessagesManagement: React.FC = () => {
       });
 
       if (response.status === 200) {
-        await fetchData();
-        if (selectedMessage) {
-          await fetchMessage(messageId.toString());
+        // Update the selected message immediately for instant UI feedback
+        if (selectedMessage && selectedMessage.id === messageId) {
+          const updatedStatus = action === 'mark_read' ? 'read' : 
+                              action === 'reply' ? 'replied' : 
+                              action === 'mark_closed' ? 'closed' : selectedMessage.status;
+          
+          setSelectedMessage({
+            ...selectedMessage,
+            status: updatedStatus,
+            admin_notes: adminNotes,
+            updated_at: new Date().toISOString()
+          });
         }
+
+        // Update the messages list
+        setMessages(prevMessages => 
+          prevMessages.map(msg => {
+            if (msg.id === messageId) {
+              const updatedStatus = action === 'mark_read' ? 'read' : 
+                                  action === 'reply' ? 'replied' : 
+                                  action === 'mark_closed' ? 'closed' : msg.status;
+              return {
+                ...msg,
+                status: updatedStatus,
+                admin_notes: adminNotes,
+                updated_at: new Date().toISOString()
+              };
+            }
+            return msg;
+          })
+        );
+
+        // Refresh data to ensure consistency with server
+        await fetchData();
+        
+        // Show success toast
+        const actionText = action === 'mark_read' ? 'letto' : 
+                          action === 'reply' ? 'risposta registrata' : 
+                          action === 'mark_closed' ? 'chiuso' : 'aggiornato';
+        toast.success(`Messaggio ${actionText} con successo`);
       }
     } catch (error) {
       console.error('Message update error:', error);
+      toast.error('Errore nell\'aggiornamento del messaggio');
+      // Revert optimistic updates on error by refetching
+      await fetchData();
+      if (selectedMessage) {
+        await fetchMessage(messageId.toString());
+      }
     }
   };
 
