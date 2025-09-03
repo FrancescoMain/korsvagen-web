@@ -30,10 +30,13 @@ const ProjectsCTA: React.FC<ProjectsCTAProps> = ({
           <CTAButton onClick={scrollToContact}>{buttonText}</CTAButton>
         </CTAContent>
         <CTAVisual>
-          <CTAImage>
-            <div className="placeholder-text">
-              Immagine di progetto in arrivo
-            </div>
+          <CTAImage
+            style={{
+              backgroundImage: 'url(https://images.unsplash.com/photo-1541888946425-d81bb19240f5?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80)',
+              backgroundSize: 'cover',
+              backgroundPosition: 'center'
+            }}
+          >
           </CTAImage>
         </CTAVisual>
       </CTAContainer>
