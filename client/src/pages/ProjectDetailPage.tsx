@@ -105,15 +105,12 @@ const MobileBackButton = styled.button`
 `;
 
 const HeroSection = styled.section<{ backgroundImage?: string }>`
-  background: linear-gradient(
-      135deg,
-      rgba(26, 26, 26, 0.95) 0%,
-      rgba(44, 44, 44, 0.95) 100%
-    ),
-    url(${(props) => props.backgroundImage ? `"${props.backgroundImage}"` : '"https://images.unsplash.com/photo-1590479773265-7464e5d48118?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80"'});
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
+  background: ${(props) => props.backgroundImage 
+    ? `linear-gradient(135deg, rgba(26, 26, 26, 0.95) 0%, rgba(44, 44, 44, 0.95) 100%), url("${props.backgroundImage}")` 
+    : 'linear-gradient(135deg, rgba(26, 26, 26, 1) 0%, rgba(44, 44, 44, 1) 100%)'};
+  background-size: ${(props) => props.backgroundImage ? 'cover' : 'auto'};
+  background-position: ${(props) => props.backgroundImage ? 'center' : 'initial'};
+  background-attachment: ${(props) => props.backgroundImage ? 'fixed' : 'initial'};
   color: white;
   text-align: center;
   padding: 120px 20px 80px;
