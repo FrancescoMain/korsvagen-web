@@ -85,11 +85,6 @@ const navigationItems: NavigationItem[] = [
     path: "/dashboard/reviews",
   },
   {
-    title: "Media Library",
-    icon: <Image size={20} />,
-    path: "/dashboard/media",
-  },
-  {
     title: "Impostazioni",
     icon: <Settings size={20} />,
     path: "/dashboard/settings",

@@ -466,12 +466,17 @@ const ProjectsPage: React.FC = () => {
                     backgroundPosition: 'center',
                     color: 'white',
                     textShadow: '0 2px 4px rgba(0,0,0,0.7)'
-                  } : {}}
+                  } : {
+                    backgroundImage: 'url(https://images.unsplash.com/photo-1504307651254-35680f356dfd?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80)',
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    color: 'white',
+                    textShadow: '0 2px 4px rgba(0,0,0,0.7)'
+                  }}
                 >
                   <div className="project-category">
                     {project.label.toUpperCase()}
                   </div>
-                  {!project.cover_image_url && "Immagine del progetto in arrivo"}
                 </div>
                 <div className="project-content">
                   <h3>{project.title}</h3>

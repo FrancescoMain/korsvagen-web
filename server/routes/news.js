@@ -563,15 +563,23 @@ router.put('/admin/:id', requireAuth, async (req, res) => {
     const { id } = req.params;
     const updateData = req.body;
 
-    // Validazione dati (escludi slug se non modificato)
-    const validation = validateNewsData(updateData);
-    if (!validation.isValid) {
-      return res.status(400).json({
-        success: false,
-        error: 'Dati non validi',
-        code: 'VALIDATION_ERROR',
-        details: validation.errors
-      });
+    // Per gli aggiornamenti parziali (come toggle featured), saltare la validazione completa
+    // se sono presenti solo campi booleani/semplici
+    const isPartialUpdate = Object.keys(updateData).every(key => 
+      ['is_published', 'is_featured'].includes(key)
+    );
+
+    if (!isPartialUpdate) {
+      // Validazione completa solo per aggiornamenti di contenuto
+      const validation = validateNewsData(updateData);
+      if (!validation.isValid) {
+        return res.status(400).json({
+          success: false,
+          error: 'Dati non validi',
+          code: 'VALIDATION_ERROR',
+          details: validation.errors
+        });
+      }
     }
 
     // Verifica che l'articolo esista
