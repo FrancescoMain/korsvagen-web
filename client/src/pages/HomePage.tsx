@@ -1978,7 +1978,7 @@ const HomePage: React.FC = () => {
                   onTouchEnd={() => onTouchEnd("projects")}
                 >
                   <img
-                    src={project.cover_image || 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=2075&q=80'}
+                    src={project.cover_image_url || 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=2075&q=80'}
                     alt={project.title}
                     className="project-image"
                   />

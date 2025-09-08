@@ -26,7 +26,7 @@ interface Project {
   duration?: string;
   features?: string[];
   slug?: string;
-  cover_image?: string;
+  cover_image_url?: string;
   images?: ProjectImage[];
   is_active: boolean;
   display_order: number;
@@ -74,7 +74,7 @@ export const useHomeProjects = (limit: number = 6): UseHomeProjectsResult => {
             status: "Completato",
             label: "Residenziale",
             description: "Villa unifamiliare con design contemporaneo e soluzioni eco-sostenibili.",
-            cover_image: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=2075&q=80",
+            cover_image_url: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=2075&q=80",
             is_active: true,
             display_order: 1,
             created_at: new Date().toISOString()
@@ -87,7 +87,7 @@ export const useHomeProjects = (limit: number = 6): UseHomeProjectsResult => {
             status: "Completato",
             label: "Industriale",
             description: "Impianto produttivo all'avanguardia con tecnologie Industry 4.0. Ottimizzazione dei flussi logistici e massima efficienza energetica.",
-            cover_image: "https://images.unsplash.com/photo-1504711434969-e33886168f5c?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80",
+            cover_image_url: "https://images.unsplash.com/photo-1504711434969-e33886168f5c?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80",
             is_active: true,
             display_order: 2,
             created_at: new Date().toISOString()
@@ -100,7 +100,7 @@ export const useHomeProjects = (limit: number = 6): UseHomeProjectsResult => {
             status: "Completato",
             label: "Commerciale",
             description: "Complesso commerciale moderno con focus sulla sostenibilità ambientale.",
-            cover_image: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
+            cover_image_url: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
             is_active: true,
             display_order: 3,
             created_at: new Date().toISOString()
