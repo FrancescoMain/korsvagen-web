@@ -110,6 +110,16 @@ export const endpoints = {
     adminUploadImage: "/news/admin",
     adminDeleteImage: "/news/admin",
   },
+  projects: {
+    // Public endpoints
+    list: "/projects",
+    detail: "/projects",
+    labels: "/projects/labels",
+  },
+  services: {
+    // Public endpoints
+    list: "/services",
+  },
 };
 
 // Helper functions for API calls
@@ -230,5 +240,33 @@ export const api = {
 
     deleteImage: (id: number) =>
       apiClient.delete(`${endpoints.news.adminDeleteImage}/${id}/image`),
+  },
+
+  // Projects endpoints
+  projects: {
+    // Public endpoints
+    getList: (params?: { label?: string; status?: string; limit?: number; page?: number }) => {
+      const query = new URLSearchParams();
+      if (params?.label) query.append('label', params.label);
+      if (params?.status) query.append('status', params.status);
+      if (params?.limit) query.append('limit', params.limit.toString());
+      if (params?.page) query.append('page', params.page.toString());
+      
+      const queryString = query.toString();
+      return apiClient.get(`${endpoints.projects.list}${queryString ? `?${queryString}` : ''}`);
+    },
+
+    getDetail: (idOrSlug: string | number) =>
+      apiClient.get(`${endpoints.projects.detail}/${idOrSlug}`),
+
+    getLabels: () =>
+      apiClient.get(endpoints.projects.labels),
+  },
+
+  // Services endpoints
+  services: {
+    // Public endpoints
+    getList: () =>
+      apiClient.get(endpoints.services.list),
   },
 };

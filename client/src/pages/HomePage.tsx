@@ -8,6 +8,9 @@ import EmergencyButton from "../components/common/EmergencyButton";
 import EmergencyModal from "../components/common/EmergencyModal";
 import { usePageData } from "../hooks/usePageData";
 import { useReviews } from "../hooks/useReviews";
+import { useHomeNews } from "../hooks/useHomeNews";
+import { useHomeProjects } from "../hooks/useHomeProjects";
+import { useHomeServices } from "../hooks/useHomeServices";
 
 const HomeContainer = styled.div`
   min-height: 100vh;
@@ -476,11 +479,11 @@ const ServicesGallery = styled.section`
       }
 
       @media (max-width: 768px) {
-        padding: 25px 20px;
+        padding: 30px 20px;
       }
 
       @media (max-width: 480px) {
-        padding: 20px 15px;
+        padding: 25px 15px 20px;
       }
     }
   }
@@ -873,13 +876,17 @@ const ProjectsGallery = styled.section`
         font-family: "Korsvagen Brand", "Times New Roman", serif;
         letter-spacing: 0.05em;
         text-transform: uppercase;
+        line-height: 1.2;
 
         @media (max-width: 768px) {
-          font-size: 1.6rem;
+          font-size: 1.4rem;
+          line-height: 1.1;
         }
 
         @media (max-width: 480px) {
-          font-size: 1.2rem;
+          font-size: 1.1rem;
+          line-height: 1.1;
+          margin-bottom: 8px;
         }
       }
 
@@ -937,11 +944,11 @@ const ProjectsGallery = styled.section`
       }
 
       @media (max-width: 768px) {
-        padding: 25px 20px;
+        padding: 30px 20px;
       }
 
       @media (max-width: 480px) {
-        padding: 20px 15px;
+        padding: 25px 15px 20px;
       }
     }
   }
@@ -1655,7 +1662,7 @@ const InstagramEmbed = styled.div`
 
 const HomePage: React.FC = () => {
   const [currentSlide, setCurrentSlide] = React.useState(0);
-  const [currentProjectSlide, setCurrentProjectSlide] = React.useState(2); // Terzo elemento selezionato di default (design a specchi)
+  const [currentProjectSlide, setCurrentProjectSlide] = React.useState(0); // Primo elemento selezionato di default
   const [currentReviewSlide, setCurrentReviewSlide] = React.useState(0);
   const [showEmergencyModal, setShowEmergencyModal] = React.useState(false);
   
@@ -1664,6 +1671,11 @@ const HomePage: React.FC = () => {
   
   // Load reviews from database
   const { publicReviews, loading: reviewsLoading } = useReviews();
+  
+  // Load dynamic data from APIs
+  const { news, loading: newsLoading } = useHomeNews(3);
+  const { projects, loading: projectsLoading } = useHomeProjects(6);
+  const { services, loading: servicesLoading } = useHomeServices();
 
   // Touch handling for mobile navigation
   const [touchStart, setTouchStart] = React.useState<number | null>(null);
@@ -1713,86 +1725,6 @@ const HomePage: React.FC = () => {
     }
   };
 
-  const services = [
-    {
-      title: "Costruzioni",
-      description:
-        "Realizziamo costruzioni di ogni tipologia con materiali di qualità e tecniche all'avanguardia, dal residenziale all'industriale.",
-      video:
-        "https://www.techbau.it/wp-content/uploads/2024/06/Construction_v3.webm",
-    },
-    {
-      title: "Progettazione",
-      description:
-        "Progettazione completa e consulenza specializzata per trasformare le tue idee in progetti concreti e realizzabili.",
-      video:
-        "https://www.techbau.it/wp-content/uploads/2024/06/Site-Selection_v3.webm",
-    },
-    {
-      title: "Facility Management",
-      description:
-        "Gestione completa delle strutture con servizi di manutenzione, ottimizzazione e controllo per massimizzare l'efficienza.",
-      video:
-        "https://www.techbau.it/wp-content/uploads/2024/07/Facility-20Management-20V2.webm",
-    },
-  ];
-
-  const projects = [
-    {
-      title: "Villa Moderna",
-      location: "Milano, Lombardia",
-      description:
-        "Residenza di lusso con design contemporaneo e tecnologie smart home integrate. Struttura ecosostenibile con certificazione energetica A+.",
-      image:
-        "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=2075&q=80",
-    },
-    {
-      title: "Centro Commerciale",
-      location: "Roma, Lazio",
-      description:
-        "Complesso commerciale multifunzionale con spazi retail, uffici e aree ricreative. Design architettonico innovativo e sostenibile.",
-      image:
-        "https://images.unsplash.com/photo-1441986300917-64674bd600d8?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
-    },
-    {
-      title: "Stabilimento Industriale",
-      location: "Torino, Piemonte",
-      description:
-        "Impianto produttivo all'avanguardia con tecnologie Industry 4.0. Ottimizzazione dei flussi logistici e massima efficienza energetica.",
-      image:
-        "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
-    },
-  ];
-
-  const news = [
-    {
-      date: "15 Gen 2024",
-      title: "Nuove Tecnologie BIM per l'Edilizia Sostenibile",
-      excerpt:
-        "Korsvagen adotta le più moderne tecnologie BIM per garantire progetti sempre più sostenibili e efficienti dal punto di vista energetico.",
-      image:
-        "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
-      link: "/news/tecnologie-bim-edilizia-sostenibile",
-    },
-    {
-      date: "8 Gen 2024",
-      title: "Inaugurazione Nuovo Stabilimento a Milano",
-      excerpt:
-        "Aperta la nuova sede operativa a Milano: 5.000 mq di spazi moderni dedicati alla progettazione e alla gestione cantieri.",
-      image:
-        "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
-      link: "/news/inaugurazione-stabilimento-milano",
-    },
-    {
-      date: "22 Dic 2023",
-      title: "Certificazione ISO 14001: Impegno per l'Ambiente",
-      excerpt:
-        "Korsvagen ottiene la certificazione ISO 14001 per la gestione ambientale, confermando il nostro impegno verso la sostenibilità.",
-      image:
-        "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
-      link: "/news/certificazione-iso-14001-ambiente",
-    },
-  ];
 
   // Use dynamic reviews from database with fallback to static data
   const reviews = publicReviews.length > 0 ? publicReviews.map(review => ({
@@ -1831,11 +1763,15 @@ const HomePage: React.FC = () => {
   }, [reviews.length]);
 
   const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % services.length);
+    if (services.length > 0) {
+      setCurrentSlide((prev) => (prev + 1) % services.length);
+    }
   };
 
   const prevSlide = () => {
-    setCurrentSlide((prev) => (prev - 1 + services.length) % services.length);
+    if (services.length > 0) {
+      setCurrentSlide((prev) => (prev - 1 + services.length) % services.length);
+    }
   };
 
   const goToSlide = (index: number) => {
@@ -1843,13 +1779,17 @@ const HomePage: React.FC = () => {
   };
 
   const nextProjectSlide = () => {
-    setCurrentProjectSlide((prev) => (prev + 1) % projects.length);
+    if (projects.length > 0) {
+      setCurrentProjectSlide((prev) => (prev + 1) % projects.length);
+    }
   };
 
   const prevProjectSlide = () => {
-    setCurrentProjectSlide(
-      (prev) => (prev - 1 + projects.length) % projects.length
-    );
+    if (projects.length > 0) {
+      setCurrentProjectSlide(
+        (prev) => (prev - 1 + projects.length) % projects.length
+      );
+    }
   };
 
   const goToProjectSlide = (index: number) => {
@@ -1871,6 +1811,7 @@ const HomePage: React.FC = () => {
   };
 
   const getCardClass = (index: number) => {
+    if (services.length === 0) return "hidden";
     if (index === currentSlide) return "active";
     if (
       index === (currentSlide - 1 + services.length) % services.length ||
@@ -1881,6 +1822,7 @@ const HomePage: React.FC = () => {
   };
 
   const getProjectCardClass = (index: number) => {
+    if (projects.length === 0) return "hidden";
     if (index === currentProjectSlide) return "active";
     if (
       index === (currentProjectSlide - 1 + projects.length) % projects.length ||
@@ -1894,6 +1836,23 @@ const HomePage: React.FC = () => {
     if (index === currentReviewSlide) return "active";
     return ""; // Mostra tutte le recensioni, ma solo quella attiva è visibile
   };
+
+  // Show loading if page data or any critical content is loading
+  const isLoading = loading || newsLoading || projectsLoading || servicesLoading;
+  
+  if (isLoading) {
+    return (
+      <HomeContainer>
+        <Header />
+        <MainContent>
+          <div style={{ textAlign: "center", padding: "100px 20px", color: "#666" }}>
+            Caricamento contenuti...
+          </div>
+        </MainContent>
+        <Footer />
+      </HomeContainer>
+    );
+  }
 
   return (
     <HomeContainer>
@@ -1935,22 +1894,30 @@ const HomePage: React.FC = () => {
             <div className="gallery-track">
               {services.map((service, index) => (
                 <div
-                  key={index}
+                  key={service.id || index}
                   className={`service-card ${getCardClass(index)}`}
                   onClick={() => goToSlide(index)}
                   onTouchStart={onTouchStart}
                   onTouchMove={onTouchMove}
                   onTouchEnd={() => onTouchEnd("services")}
                 >
-                  <video
-                    className="service-video"
-                    autoPlay
-                    muted
-                    loop
-                    playsInline
-                  >
-                    <source src={service.video} type="video/webm" />
-                  </video>
+                  {service.image_url && service.image_url.endsWith('.webm') ? (
+                    <video
+                      className="service-video"
+                      autoPlay
+                      muted
+                      loop
+                      playsInline
+                    >
+                      <source src={service.image_url} type="video/webm" />
+                    </video>
+                  ) : (
+                    <img
+                      className="service-video"
+                      src={service.image_url || 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80'}
+                      alt={service.title}
+                    />
+                  )}
                   <div className="service-overlay"></div>
                   <div className="service-content">
                     <h3>{service.title}</h3>
@@ -2003,7 +1970,7 @@ const HomePage: React.FC = () => {
             <div className="gallery-track">
               {projects.map((project, index) => (
                 <div
-                  key={index}
+                  key={project.id || index}
                   className={`project-card ${getProjectCardClass(index)}`}
                   onClick={() => goToProjectSlide(index)}
                   onTouchStart={onTouchStart}
@@ -2011,7 +1978,7 @@ const HomePage: React.FC = () => {
                   onTouchEnd={() => onTouchEnd("projects")}
                 >
                   <img
-                    src={project.image}
+                    src={project.cover_image || 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=2075&q=80'}
                     alt={project.title}
                     className="project-image"
                   />
@@ -2061,16 +2028,16 @@ const HomePage: React.FC = () => {
 
             <NewsGallery>
               {news.map((newsItem, index) => (
-                <NewsCard key={index}>
+                <NewsCard key={newsItem.id || index}>
                   <NewsImageContainer>
-                    <NewsImage src={newsItem.image} alt={`News ${index + 1}`} />
+                    <NewsImage src={newsItem.image_url || 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80'} alt={newsItem.title} />
                   </NewsImageContainer>
                   <NewsContent>
-                    <NewsDate>{newsItem.date}</NewsDate>
+                    <NewsDate>{newsItem.published_date}</NewsDate>
                     <NewsTitle>{newsItem.title}</NewsTitle>
-                    <NewsExcerpt>{newsItem.excerpt}</NewsExcerpt>
+                    <NewsExcerpt>{newsItem.subtitle || newsItem.content?.substring(0, 120) + '...'}</NewsExcerpt>
                     <NewsActions>
-                      <NewsCtaButton to={newsItem.link}>
+                      <NewsCtaButton to={`/news/${newsItem.slug}`}>
                         Leggi di più
                       </NewsCtaButton>
                       <NewsSecondaryButton to="/progetti">
