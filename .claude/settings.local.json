@@ -38,7 +38,8 @@
       "Bash(cp:*)",
       "Bash(timeout 30 npx tsc --noEmit --target es5 client/src/components/common/EmergencyButton.tsx)",
       "Bash(timeout 30 npx tsc --noEmit)",
-      "Bash(timeout 30 npx tsc --noEmit --target es5 client/src/pages/MessagesManagement.tsx)"
+      "Bash(timeout 30 npx tsc --noEmit --target es5 client/src/pages/MessagesManagement.tsx)",
+      "Bash(npm run:*)"
     ],
     "deny": []
   }

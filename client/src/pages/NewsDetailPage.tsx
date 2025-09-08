@@ -148,7 +148,7 @@ const HeroSection = styled.section`
       font-family: "Korsvagen Brand", "Times New Roman", serif;
       letter-spacing: 0.05em;
       text-transform: uppercase;
-      color: #ffffff;
+      color: #ffffff !important;
       line-height: 1.2;
 
       @media (max-width: 1024px) {
@@ -336,8 +336,8 @@ const NewsArticle = styled.article`
       }
     }
 
-    h2 {
-      color: #ffffff;
+    h1, h2 {
+      color: #ffffff !important;
       margin: 40px 0 20px;
       font-family: "Korsvagen Brand", "Times New Roman", serif;
       font-size: 1.8rem;
@@ -356,7 +356,7 @@ const NewsArticle = styled.article`
     }
 
     h3 {
-      color: #ffffff;
+      color: #ffffff !important;
       margin: 30px 0 15px;
       font-family: "Korsvagen Brand", "Times New Roman", serif;
       font-size: 1.4rem;
