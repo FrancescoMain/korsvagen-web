@@ -3,7 +3,7 @@
 ## Informazioni Generali
 
 - **Ragione Sociale**: KORSVAGEN S.R.L.
-- **Settore**: Costruzioni & Progettazione Edilizia
+- **Settore**: Costruzione & Progettazione Edilizia
 - **Anno di costituzione**: Dato non disponibile
 - **Dipendenti**: 5 (2025)
 - **Fatturato**: € 653.054,00 (2024)
@@ -45,4 +45,4 @@
 - Utilizzato per sezione contatti
 - Footer con informazioni legali complete
 - Meta tag SEO ottimizzati per settore edilizio
-- Brand positioning: "Costruzioni & Progettazione"
+- Brand positioning: "Costruzione & Progettazione"

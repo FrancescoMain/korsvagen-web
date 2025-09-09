@@ -8,7 +8,7 @@
 ├─────────────────────────────────────────────────────────────────────────────┤
 │                                                                             │
 │  [LOGO]                                    KORSVAGEN                        │
-│                                      Costruzioni & Progettazione                │
+│                                      Costruzione & Progettazione                │
 │                                                                             │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │                               HERO SECTION                                  │
@@ -94,7 +94,7 @@ Vuoi che proceda con l'implementazione di questo design moderno per l'edilizia?
 │                        │
 │      [LOGO]            │
 │    KORSVAGEN           │
-│ Costruzioni & Progettazione │
+│ Costruzione & Progettazione │
 │                        │
 ├─────────────────────────┤
 │      HERO SECTION      │
