@@ -43,7 +43,8 @@
       "Bash(timeout 60 npx react-scripts build)",
       "Bash(git rm:*)",
       "Bash(git filter-branch:*)",
-      "Bash(git log:*)"
+      "Bash(git log:*)",
+      "Bash(FILTER_BRANCH_SQUELCH_WARNING=1 git filter-branch --force --index-filter \"git rm --cached --ignore-unmatch .env .env.example\" --prune-empty --tag-name-filter cat -- --all)"
     ],
     "deny": []
   }
