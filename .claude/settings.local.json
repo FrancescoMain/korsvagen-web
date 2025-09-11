@@ -39,7 +39,11 @@
       "Bash(timeout 30 npx tsc --noEmit --target es5 client/src/components/common/EmergencyButton.tsx)",
       "Bash(timeout 30 npx tsc --noEmit)",
       "Bash(timeout 30 npx tsc --noEmit --target es5 client/src/pages/MessagesManagement.tsx)",
-      "Bash(npm run:*)"
+      "Bash(npm run:*)",
+      "Bash(timeout 60 npx react-scripts build)",
+      "Bash(git rm:*)",
+      "Bash(git filter-branch:*)",
+      "Bash(git log:*)"
     ],
     "deny": []
   }
