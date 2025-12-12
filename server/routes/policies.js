@@ -572,18 +572,32 @@ router.post("/:id/document", requireAuth, requireRole(["admin", "editor", "super
       .replace(/[:\s]/g, '_')
       .replace(/[^a-zA-Z0-9_-]/g, '');
 
-    // Upload nuovo documento su Cloudinary
+    // Upload nuovo documento su Cloudinary (same pattern as team CV upload)
+    const timestamp = Date.now();
+    const filename = `policy-${sanitizedSlug}-${timestamp}`;
+
+    logger.info(`Iniziando upload policy documento: ${filename}, dimensione: ${req.file.size} bytes`);
+
     const uploadResult = await new Promise((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(
         {
           resource_type: "raw",
-          folder: "korsvagen/policies",
-          public_id: `policy_${sanitizedSlug}_${Date.now()}`,
-          format: "pdf"
+          public_id: `policies/${filename}`,
+          use_filename: false,
+          unique_filename: false,
+          type: "upload",
+          invalidate: true,
+          overwrite: true
         },
         (error, result) => {
-          if (error) reject(error);
-          else resolve(result);
+          if (error) {
+            logger.error("Errore upload Cloudinary:", error);
+            reject(error);
+          } else {
+            logger.info(`Policy documento caricato con successo: ${result.secure_url}`);
+            logger.info(`Cloudinary public_id: ${result.public_id}`);
+            resolve(result);
+          }
         }
       );
       uploadStream.end(req.file.buffer);
