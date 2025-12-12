@@ -534,13 +534,18 @@ router.post("/:id/document", requireAuth, requireRole(["admin", "editor", "super
       }
     }
 
+    // Sanitize code for URL-safe public_id (remove colons, spaces, special chars)
+    const sanitizedCode = existingCert.code
+      .replace(/[:\s]/g, '_')
+      .replace(/[^a-zA-Z0-9_-]/g, '');
+
     // Upload nuovo documento su Cloudinary
     const uploadResult = await new Promise((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(
         {
           resource_type: "raw",
           folder: "korsvagen/certifications",
-          public_id: `cert_${existingCert.code}_${Date.now()}`,
+          public_id: `cert_${sanitizedCode}_${Date.now()}`,
           format: "pdf"
         },
         (error, result) => {

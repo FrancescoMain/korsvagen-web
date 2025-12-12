@@ -495,13 +495,18 @@ router.post("/:id/document", requireAuth, requireRole(["admin", "editor", "super
       }
     }
 
+    // Sanitize slug for URL-safe public_id
+    const sanitizedSlug = existingPolicy.slug
+      .replace(/[:\s]/g, '_')
+      .replace(/[^a-zA-Z0-9_-]/g, '');
+
     // Upload nuovo documento su Cloudinary
     const uploadResult = await new Promise((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(
         {
           resource_type: "raw",
           folder: "korsvagen/policies",
-          public_id: `policy_${existingPolicy.slug}_${Date.now()}`,
+          public_id: `policy_${sanitizedSlug}_${Date.now()}`,
           format: "pdf"
         },
         (error, result) => {
