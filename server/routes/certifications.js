@@ -613,7 +613,8 @@ router.post("/:id/document", requireAuth, requireRole(["admin", "editor", "super
 
     // Upload nuovo documento su Cloudinary (same pattern as team CV upload)
     const timestamp = Date.now();
-    const filename = `cert-${sanitizedCode}-${timestamp}`;
+    // Include .pdf extension in public_id so Cloudinary serves it with correct extension
+    const filename = `cert-${sanitizedCode}-${timestamp}.pdf`;
 
     logger.info(`Iniziando upload certificato: ${filename}, dimensione: ${req.file.size} bytes`);
 
