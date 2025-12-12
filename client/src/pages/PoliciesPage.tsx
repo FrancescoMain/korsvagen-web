@@ -348,9 +348,7 @@ const PoliciesPage: React.FC = () => {
                   <CertDescription>{cert.description}</CertDescription>
                   {cert.document_url && (
                     <CertDownloadLink
-                      href={cert.document_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                      href={`${process.env.REACT_APP_API_URL || '/api'}/certifications/${cert.id}/download`}
                     >
                       <Download size={14} />
                       Scarica PDF
@@ -412,9 +410,7 @@ const PoliciesPage: React.FC = () => {
 
                     {policy.document_url ? (
                       <DownloadButton
-                        href={policy.document_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                        href={`${process.env.REACT_APP_API_URL || '/api'}/policies/${policy.id}/download`}
                       >
                         <Download size={18} />
                         Scarica Documento PDF

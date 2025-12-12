@@ -122,6 +122,78 @@ router.get("/public", async (req, res) => {
 });
 
 /**
+ * GET /api/certifications/:id/download
+ * Download pubblico del documento PDF certificazione
+ */
+router.get("/:id/download", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Verifica che sia un UUID valido
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "ID certificazione non valido",
+        code: "INVALID_ID"
+      });
+    }
+
+    const { data: certification, error } = await supabaseClient
+      .from("certifications")
+      .select("id, name, code, document_url, is_active")
+      .eq("id", id)
+      .single();
+
+    if (error || !certification) {
+      return res.status(404).json({
+        success: false,
+        message: "Certificazione non trovata",
+        code: "CERTIFICATION_NOT_FOUND"
+      });
+    }
+
+    // Verifica che sia attiva (per accesso pubblico)
+    if (!certification.is_active) {
+      return res.status(404).json({
+        success: false,
+        message: "Documento non disponibile",
+        code: "DOCUMENT_NOT_AVAILABLE"
+      });
+    }
+
+    if (!certification.document_url) {
+      return res.status(404).json({
+        success: false,
+        message: "Nessun documento associato a questa certificazione",
+        code: "DOCUMENT_NOT_FOUND"
+      });
+    }
+
+    // Genera nome file per download
+    const fileName = `Certificato_${certification.code.replace(/[:\s]/g, '_')}.pdf`;
+
+    // Forza download usando fl_attachment di Cloudinary
+    const downloadUrl = certification.document_url.includes('?')
+      ? `${certification.document_url}&fl_attachment=${encodeURIComponent(fileName)}`
+      : `${certification.document_url}?fl_attachment=${encodeURIComponent(fileName)}`;
+
+    logger.info(`Download certificazione ${certification.code} -> ${downloadUrl}`);
+
+    // Redirect con parametri per forzare download
+    res.redirect(302, downloadUrl);
+
+  } catch (error) {
+    logger.error("Errore download certificazione:", error);
+    res.status(500).json({
+      success: false,
+      message: "Errore interno del server",
+      code: "CERTIFICATION_DOWNLOAD_ERROR"
+    });
+  }
+});
+
+/**
  * GET /api/certifications
  * Recupera tutte le certificazioni (admin only)
  */

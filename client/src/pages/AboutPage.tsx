@@ -1001,7 +1001,7 @@ const AboutPage: React.FC = () => {
                       </div>
                       {cert.document_url && (
                         <div className="certification-download">
-                          <a href={cert.document_url} target="_blank" rel="noopener noreferrer">
+                          <a href={`${process.env.REACT_APP_API_URL || '/api'}/certifications/${cert.id}/download`}>
                             <DownloadIconSvg /> Certificato
                           </a>
                         </div>
@@ -1020,7 +1020,7 @@ const AboutPage: React.FC = () => {
                       </div>
                       {cert.document_url && (
                         <div className="certification-download">
-                          <a href={cert.document_url} target="_blank" rel="noopener noreferrer">
+                          <a href={`${process.env.REACT_APP_API_URL || '/api'}/certifications/${cert.id}/download`}>
                             <DownloadIconSvg /> Certificato
                           </a>
                         </div>

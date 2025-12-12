@@ -143,6 +143,78 @@ router.get("/public", async (req, res) => {
 });
 
 /**
+ * GET /api/policies/:id/download
+ * Download pubblico del documento PDF politica aziendale
+ */
+router.get("/:id/download", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Verifica che sia un UUID valido
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "ID policy non valido",
+        code: "INVALID_ID"
+      });
+    }
+
+    const { data: policy, error } = await supabaseClient
+      .from("company_policies")
+      .select("id, title, slug, document_url, is_published")
+      .eq("id", id)
+      .single();
+
+    if (error || !policy) {
+      return res.status(404).json({
+        success: false,
+        message: "Policy non trovata",
+        code: "POLICY_NOT_FOUND"
+      });
+    }
+
+    // Verifica che sia pubblicata (per accesso pubblico)
+    if (!policy.is_published) {
+      return res.status(404).json({
+        success: false,
+        message: "Documento non disponibile",
+        code: "DOCUMENT_NOT_AVAILABLE"
+      });
+    }
+
+    if (!policy.document_url) {
+      return res.status(404).json({
+        success: false,
+        message: "Nessun documento associato a questa policy",
+        code: "DOCUMENT_NOT_FOUND"
+      });
+    }
+
+    // Genera nome file per download
+    const fileName = `${policy.title.replace(/[:\s]/g, '_')}.pdf`;
+
+    // Forza download usando fl_attachment di Cloudinary
+    const downloadUrl = policy.document_url.includes('?')
+      ? `${policy.document_url}&fl_attachment=${encodeURIComponent(fileName)}`
+      : `${policy.document_url}?fl_attachment=${encodeURIComponent(fileName)}`;
+
+    logger.info(`Download policy ${policy.title} -> ${downloadUrl}`);
+
+    // Redirect con parametri per forzare download
+    res.redirect(302, downloadUrl);
+
+  } catch (error) {
+    logger.error("Errore download policy:", error);
+    res.status(500).json({
+      success: false,
+      message: "Errore interno del server",
+      code: "POLICY_DOWNLOAD_ERROR"
+    });
+  }
+});
+
+/**
  * GET /api/policies
  * Recupera tutte le politiche (admin only)
  */
