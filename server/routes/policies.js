@@ -192,13 +192,14 @@ router.get("/:id/download", async (req, res) => {
       });
     }
 
-    // Genera nome file per download
+    // Genera nome file per download (con estensione .pdf)
     const fileName = `${policy.title.replace(/[:\s]/g, '_')}.pdf`;
 
-    // Forza download diretto usando Cloudinary API con parametri di download
-    // Stesso approccio del CV in team.js
-    const downloadUrl = policy.document_url.includes('?')
-      ? `${policy.document_url}&fl_attachment=${encodeURIComponent(fileName)}`
+    // Per file raw su Cloudinary, fl_attachment va inserito come trasformazione nell'URL
+    // Formato: .../raw/upload/fl_attachment:filename.pdf/v123/...
+    const urlParts = policy.document_url.split('/upload/');
+    const downloadUrl = urlParts.length === 2
+      ? `${urlParts[0]}/upload/fl_attachment:${encodeURIComponent(fileName)}/${urlParts[1]}`
       : `${policy.document_url}?fl_attachment=${encodeURIComponent(fileName)}`;
 
     logger.info(`Download policy ${policy.title} -> ${downloadUrl}`);

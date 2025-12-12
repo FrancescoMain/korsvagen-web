@@ -171,13 +171,14 @@ router.get("/:id/download", async (req, res) => {
       });
     }
 
-    // Genera nome file per download
+    // Genera nome file per download (con estensione .pdf)
     const fileName = `Certificato_${certification.code.replace(/[:\s]/g, '_')}.pdf`;
 
-    // Forza download diretto usando Cloudinary API con parametri di download
-    // Stesso approccio del CV in team.js
-    const downloadUrl = certification.document_url.includes('?')
-      ? `${certification.document_url}&fl_attachment=${encodeURIComponent(fileName)}`
+    // Per file raw su Cloudinary, fl_attachment va inserito come trasformazione nell'URL
+    // Formato: .../raw/upload/fl_attachment:filename.pdf/v123/...
+    const urlParts = certification.document_url.split('/upload/');
+    const downloadUrl = urlParts.length === 2
+      ? `${urlParts[0]}/upload/fl_attachment:${encodeURIComponent(fileName)}/${urlParts[1]}`
       : `${certification.document_url}?fl_attachment=${encodeURIComponent(fileName)}`;
 
     logger.info(`Download certificazione ${certification.code} -> ${downloadUrl}`);
