@@ -264,6 +264,7 @@ router.post("/", requireAuth, requireRole(["admin", "editor", "super_admin"]), v
 
     logger.info(`Admin ${req.user.email} crea nuova policy: ${title}`);
 
+    // Non settiamo created_by/updated_by per evitare FK constraint con users
     const { data: policy, error } = await supabaseClient
       .from("company_policies")
       .insert({
@@ -276,9 +277,7 @@ router.post("/", requireAuth, requireRole(["admin", "editor", "super_admin"]), v
         display_order,
         effective_date,
         revision_date,
-        revision_number,
-        created_by: req.user.id,
-        updated_by: req.user.id
+        revision_number
       })
       .select()
       .single();
@@ -333,12 +332,13 @@ router.put("/:id", requireAuth, requireRole(["admin", "editor", "super_admin"]),
     }
 
     const { id } = req.params;
-    const updateData = { ...req.body, updated_by: req.user.id };
+    const updateData = { ...req.body };
 
     // Rimuovi campi che non devono essere aggiornati direttamente
     delete updateData.id;
     delete updateData.created_at;
     delete updateData.created_by;
+    delete updateData.updated_by; // Evita FK constraint
     delete updateData.document_url;
     delete updateData.document_public_id;
     delete updateData.file_size;
@@ -512,14 +512,13 @@ router.post("/:id/document", requireAuth, requireRole(["admin", "editor", "super
       uploadStream.end(req.file.buffer);
     });
 
-    // Aggiorna database
+    // Aggiorna database (non settiamo updated_by per evitare FK constraint)
     const { data: policy, error: updateError } = await supabaseClient
       .from("company_policies")
       .update({
         document_url: uploadResult.secure_url,
         document_public_id: uploadResult.public_id,
-        file_size: req.file.size,
-        updated_by: req.user.id
+        file_size: req.file.size
       })
       .eq("id", id)
       .select()
@@ -645,14 +644,13 @@ router.delete("/:id/document", requireAuth, requireRole(["admin", "editor", "sup
       logger.warn("Errore eliminazione da Cloudinary:", cloudinaryError);
     }
 
-    // Aggiorna database
+    // Aggiorna database (non settiamo updated_by per evitare FK constraint)
     const { error: updateError } = await supabaseClient
       .from("company_policies")
       .update({
         document_url: null,
         document_public_id: null,
-        file_size: null,
-        updated_by: req.user.id
+        file_size: null
       })
       .eq("id", id);
 
