@@ -124,6 +124,7 @@ router.get("/public", async (req, res) => {
 /**
  * GET /api/certifications/:id/download
  * Download pubblico del documento PDF certificazione
+ * Usa streaming per forzare il download con Content-Disposition
  */
 router.get("/:id/download", async (req, res) => {
   try {
@@ -173,15 +174,33 @@ router.get("/:id/download", async (req, res) => {
     // Genera nome file per download
     const fileName = `Certificato_${certification.code.replace(/[:\s]/g, '_')}.pdf`;
 
-    // Forza download usando fl_attachment di Cloudinary
-    const downloadUrl = certification.document_url.includes('?')
-      ? `${certification.document_url}&fl_attachment=${encodeURIComponent(fileName)}`
-      : `${certification.document_url}?fl_attachment=${encodeURIComponent(fileName)}`;
+    logger.info(`Download certificazione ${certification.code} -> streaming file as ${fileName}`);
 
-    logger.info(`Download certificazione ${certification.code} -> ${downloadUrl}`);
+    // Fetch il file da Cloudinary e stream con headers corretti
+    const response = await fetch(certification.document_url);
 
-    // Redirect con parametri per forzare download
-    res.redirect(302, downloadUrl);
+    if (!response.ok) {
+      logger.error(`Errore fetch da Cloudinary: ${response.status}`);
+      return res.status(500).json({
+        success: false,
+        message: "Errore nel recupero del documento",
+        code: "FETCH_ERROR"
+      });
+    }
+
+    // Imposta headers per forzare il download
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+
+    // Passa il content-length se disponibile
+    const contentLength = response.headers.get('content-length');
+    if (contentLength) {
+      res.setHeader('Content-Length', contentLength);
+    }
+
+    // Stream il file al client
+    const arrayBuffer = await response.arrayBuffer();
+    res.send(Buffer.from(arrayBuffer));
 
   } catch (error) {
     logger.error("Errore download certificazione:", error);

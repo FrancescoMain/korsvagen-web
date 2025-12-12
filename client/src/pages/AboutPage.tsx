@@ -6,6 +6,7 @@ import ContactCTA from "../components/common/ContactCTA";
 import PageHero from "../components/common/PageHero";
 import { useSettings } from "../contexts/SettingsContext";
 import { useCertifications } from "../hooks/useCertifications";
+import { usePolicies, POLICY_CATEGORIES } from "../hooks/usePolicies";
 
 const AboutContainer = styled.div`
   min-height: 100vh;
@@ -736,6 +737,149 @@ const DownloadIconSvg = () => (
   </svg>
 );
 
+const PoliciesSection = styled.section`
+  background: #ffffff;
+  padding: 80px 0;
+
+  .policies-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 40px;
+
+    @media (max-width: 768px) {
+      padding: 0 25px;
+    }
+
+    @media (max-width: 480px) {
+      padding: 0 20px;
+    }
+  }
+
+  .policies-title {
+    text-align: center;
+    margin-bottom: 60px;
+
+    h2 {
+      font-size: 2.5rem;
+      font-weight: 400;
+      color: #1a1a1a;
+      margin-bottom: 20px;
+      font-family: "Korsvagen Brand", "Times New Roman", serif;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+
+      @media (max-width: 768px) {
+        font-size: 2rem;
+      }
+
+      @media (max-width: 480px) {
+        font-size: 1.8rem;
+      }
+    }
+
+    .subtitle {
+      font-size: 1.1rem;
+      color: #6c757d;
+      font-weight: 300;
+      max-width: 600px;
+      margin: 0 auto;
+      line-height: 1.6;
+      font-family: "Inter", "Segoe UI", sans-serif;
+
+      @media (max-width: 768px) {
+        font-size: 1rem;
+      }
+    }
+  }
+
+  .policies-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+
+    @media (max-width: 480px) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .policy-card {
+    background: #f8f9fa;
+    border-radius: 16px;
+    padding: 30px;
+    transition: all 0.3s ease;
+    border: 1px solid #eee;
+
+    &:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+  }
+
+  .policy-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #1a1a1a 0%, #2c2c2c 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+    color: white;
+    font-size: 1.5rem;
+  }
+
+  .policy-category {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #d4af37;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+
+  .policy-title {
+    font-size: 1.25rem;
+    font-weight: 500;
+    color: #1a1a1a;
+    margin-bottom: 12px;
+    font-family: "Korsvagen Brand", "Times New Roman", serif;
+  }
+
+  .policy-description {
+    color: #6c757d;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin-bottom: 20px;
+  }
+
+  .policy-download {
+    a {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(135deg, #d4af37 0%, #b8941f 100%);
+      color: white;
+      padding: 10px 20px;
+      border-radius: 25px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 8px rgba(212, 175, 55, 0.3);
+
+      &:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 12px rgba(212, 175, 55, 0.4);
+      }
+
+      svg {
+        width: 16px;
+        height: 16px;
+      }
+    }
+  }
+`;
+
 const WhyChooseUsSection = styled.section`
   background: white;
   padding: 100px 0;
@@ -888,6 +1032,7 @@ const WhyChooseUsSection = styled.section`
 const AboutPage: React.FC = () => {
   const { companyStats } = useSettings();
   const { publicCertifications, loading: certificationsLoading } = useCertifications();
+  const { publicPolicies, loading: policiesLoading } = usePolicies();
 
   return (
     <AboutContainer>
@@ -1008,25 +1153,6 @@ const AboutPage: React.FC = () => {
                       )}
                     </div>
                   ))}
-                  {/* Duplicate for seamless loop effect */}
-                  {publicCertifications.map((cert) => (
-                    <div key={`duplicate-${cert.id}`} className="certification-item">
-                      <div className="certification-circle">
-                        <div className="certification-icon">{cert.code}</div>
-                      </div>
-                      <div className="certification-content">
-                        <h3>{cert.name}</h3>
-                        <p>{cert.description}</p>
-                      </div>
-                      {cert.document_url && (
-                        <div className="certification-download">
-                          <a href={`${process.env.REACT_APP_API_URL || '/api'}/certifications/${cert.id}/download`}>
-                            <DownloadIconSvg /> Certificato
-                          </a>
-                        </div>
-                      )}
-                    </div>
-                  ))}
                 </div>
               ) : (
                 <div style={{ textAlign: 'center', padding: '2rem', color: '#666' }}>
@@ -1036,6 +1162,48 @@ const AboutPage: React.FC = () => {
             </div>
           </div>
         </CertificationsSection>
+
+        {/* Sezione Politiche Aziendali */}
+        {!policiesLoading && publicPolicies.length > 0 && (
+          <PoliciesSection>
+            <div className="policies-container">
+              <div className="policies-title">
+                <h2>Politiche Aziendali</h2>
+                <p className="subtitle">
+                  I principi e le linee guida che orientano la nostra attivita
+                </p>
+              </div>
+              <div className="policies-grid">
+                {publicPolicies.map((policy) => (
+                  <div key={policy.id} className="policy-card">
+                    <div className="policy-icon">
+                      {policy.category === 'quality' && '★'}
+                      {policy.category === 'environment' && '🌱'}
+                      {policy.category === 'safety' && '🛡'}
+                      {policy.category === 'anticorruption' && '⚖'}
+                      {policy.category === 'gender_equality' && '♀'}
+                      {!['quality', 'environment', 'safety', 'anticorruption', 'gender_equality'].includes(policy.category) && '📋'}
+                    </div>
+                    <div className="policy-category">
+                      {POLICY_CATEGORIES[policy.category] || policy.category}
+                    </div>
+                    <h3 className="policy-title">{policy.title}</h3>
+                    {policy.description && (
+                      <p className="policy-description">{policy.description}</p>
+                    )}
+                    {policy.document_url && (
+                      <div className="policy-download">
+                        <a href={`${process.env.REACT_APP_API_URL || '/api'}/policies/${policy.id}/download`}>
+                          <DownloadIconSvg /> Scarica PDF
+                        </a>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </PoliciesSection>
+        )}
 
         <WhyChooseUsSection>
           <div className="why-choose-container">
