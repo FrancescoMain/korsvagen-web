@@ -16,11 +16,29 @@
 
 import express from "express";
 import { body, validationResult, param } from "express-validator";
+import multer from "multer";
+import { v2 as cloudinary } from "cloudinary";
 import { requireAuth, requireRole } from "../utils/auth.js";
 import { supabaseClient } from "../config/supabase.js";
 import { logger } from "../utils/logger.js";
 
 const router = express.Router();
+
+// Configurazione multer per upload PDF
+const storage = multer.memoryStorage();
+const upload = multer({
+  storage,
+  limits: {
+    fileSize: 15 * 1024 * 1024, // 15MB max
+  },
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype === "application/pdf") {
+      cb(null, true);
+    } else {
+      cb(new Error("Solo file PDF sono permessi"), false);
+    }
+  },
+});
 
 /**
  * VALIDAZIONI
@@ -62,7 +80,7 @@ router.get("/public", async (req, res) => {
 
     const { data: certifications, error } = await supabaseClient
       .from("certifications")
-      .select("id, name, code, description")
+      .select("id, name, code, description, document_url")
       .eq("is_active", true)
       .order("display_order", { ascending: true });
 
@@ -123,6 +141,8 @@ router.get("/", requireAuth, requireRole(["admin", "editor", "super_admin"]), as
         description,
         is_active,
         display_order,
+        document_url,
+        document_public_id,
         created_at,
         updated_at,
         created_by,
@@ -467,6 +487,178 @@ router.delete("/:id", requireAuth, requireRole(["admin", "editor", "super_admin"
       success: false,
       message: "Errore interno del server",
       code: "CERTIFICATION_DELETE_ERROR"
+    });
+  }
+});
+
+/**
+ * POST /api/certifications/:id/document
+ * Carica documento PDF per una certificazione (admin only)
+ */
+router.post("/:id/document", requireAuth, requireRole(["admin", "editor", "super_admin"]), upload.single("document"), async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: "Nessun file caricato",
+        code: "NO_FILE"
+      });
+    }
+
+    logger.info(`Admin ${req.user.email} carica documento per certificazione: ${id}`);
+
+    // Verifica esistenza certificazione
+    const { data: existingCert, error: checkError } = await supabaseClient
+      .from("certifications")
+      .select("id, document_public_id, code")
+      .eq("id", id)
+      .single();
+
+    if (checkError || !existingCert) {
+      return res.status(404).json({
+        success: false,
+        message: "Certificazione non trovata",
+        code: "CERTIFICATION_NOT_FOUND"
+      });
+    }
+
+    // Elimina documento precedente se esiste
+    if (existingCert.document_public_id) {
+      try {
+        await cloudinary.uploader.destroy(existingCert.document_public_id, { resource_type: "raw" });
+        logger.info(`Documento precedente eliminato: ${existingCert.document_public_id}`);
+      } catch (cloudinaryError) {
+        logger.warn("Errore eliminazione documento precedente:", cloudinaryError);
+      }
+    }
+
+    // Upload nuovo documento su Cloudinary
+    const uploadResult = await new Promise((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        {
+          resource_type: "raw",
+          folder: "korsvagen/certifications",
+          public_id: `cert_${existingCert.code}_${Date.now()}`,
+          format: "pdf"
+        },
+        (error, result) => {
+          if (error) reject(error);
+          else resolve(result);
+        }
+      );
+      uploadStream.end(req.file.buffer);
+    });
+
+    // Aggiorna database
+    const { data: certification, error: updateError } = await supabaseClient
+      .from("certifications")
+      .update({
+        document_url: uploadResult.secure_url,
+        document_public_id: uploadResult.public_id
+      })
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (updateError) {
+      logger.error("Errore aggiornamento database dopo upload:", updateError);
+      return res.status(500).json({
+        success: false,
+        message: "Errore durante il salvataggio del documento",
+        code: "DATABASE_ERROR"
+      });
+    }
+
+    logger.info(`Documento caricato con successo per certificazione ${id}`);
+
+    res.json({
+      success: true,
+      message: "Documento caricato con successo",
+      data: {
+        document_url: certification.document_url
+      }
+    });
+
+  } catch (error) {
+    logger.error("Errore upload documento certificazione:", error);
+    res.status(500).json({
+      success: false,
+      message: "Errore durante il caricamento del documento",
+      code: "DOCUMENT_UPLOAD_ERROR"
+    });
+  }
+});
+
+/**
+ * DELETE /api/certifications/:id/document
+ * Elimina documento da una certificazione (admin only)
+ */
+router.delete("/:id/document", requireAuth, requireRole(["admin", "editor", "super_admin"]), async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    logger.info(`Admin ${req.user.email} elimina documento certificazione: ${id}`);
+
+    const { data: certification, error: fetchError } = await supabaseClient
+      .from("certifications")
+      .select("document_public_id")
+      .eq("id", id)
+      .single();
+
+    if (fetchError || !certification) {
+      return res.status(404).json({
+        success: false,
+        message: "Certificazione non trovata",
+        code: "CERTIFICATION_NOT_FOUND"
+      });
+    }
+
+    if (!certification.document_public_id) {
+      return res.status(404).json({
+        success: false,
+        message: "Nessun documento da eliminare",
+        code: "DOCUMENT_NOT_FOUND"
+      });
+    }
+
+    // Elimina da Cloudinary
+    try {
+      await cloudinary.uploader.destroy(certification.document_public_id, { resource_type: "raw" });
+    } catch (cloudinaryError) {
+      logger.warn("Errore eliminazione da Cloudinary:", cloudinaryError);
+    }
+
+    // Aggiorna database
+    const { error: updateError } = await supabaseClient
+      .from("certifications")
+      .update({
+        document_url: null,
+        document_public_id: null
+      })
+      .eq("id", id);
+
+    if (updateError) {
+      logger.error("Errore aggiornamento database dopo eliminazione:", updateError);
+      return res.status(500).json({
+        success: false,
+        message: "Errore durante l'eliminazione del documento",
+        code: "DATABASE_ERROR"
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "Documento eliminato con successo"
+    });
+
+  } catch (error) {
+    logger.error("Errore eliminazione documento certificazione:", error);
+    res.status(500).json({
+      success: false,
+      message: "Errore interno del server",
+      code: "DOCUMENT_DELETE_ERROR"
     });
   }
 });

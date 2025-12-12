@@ -2,10 +2,33 @@
  * CERTIFICATIONS MANAGER - Gestione Certificazioni Dashboard
  */
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import styled from "styled-components";
 import { useCertifications, type Certification, type CertificationFormData } from "../../hooks/useCertifications";
 import toast from "react-hot-toast";
+
+// Icone semplici come componenti
+const UploadIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+    <polyline points="17,8 12,3 7,8" />
+    <line x1="12" y1="3" x2="12" y2="15" />
+  </svg>
+);
+
+const DocumentIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+    <polyline points="14,2 14,8 20,8" />
+  </svg>
+);
+
+const TrashIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <polyline points="3,6 5,6 21,6" />
+    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+  </svg>
+);
 
 // Styled Components
 const Container = styled.div`
@@ -252,6 +275,82 @@ const LoadingSpinner = styled.div`
   color: #666;
 `;
 
+// Styled components per upload documenti
+const DocumentSection = styled.div`
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px dashed #e0e0e0;
+`;
+
+const UploadZone = styled.div<{ isDragging?: boolean }>`
+  border: 2px dashed ${props => props.isDragging ? '#d4af37' : '#ddd'};
+  border-radius: 8px;
+  padding: 1rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: ${props => props.isDragging ? 'rgba(212, 175, 55, 0.05)' : '#fafafa'};
+
+  &:hover {
+    border-color: #d4af37;
+    background: rgba(212, 175, 55, 0.05);
+  }
+`;
+
+const UploadText = styled.p`
+  margin: 0.5rem 0 0 0;
+  color: #666;
+  font-size: 0.9rem;
+`;
+
+const DocumentInfo = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #e8f5e9;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+`;
+
+const DocumentLink = styled.a`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #2e7d32;
+  text-decoration: none;
+  font-weight: 500;
+
+  &:hover {
+    text-decoration: underline;
+  }
+`;
+
+const DeleteDocButton = styled.button`
+  background: #ffebee;
+  color: #d32f2f;
+  border: none;
+  padding: 0.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.8rem;
+
+  &:hover {
+    background: #ffcdd2;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+`;
+
+const HiddenInput = styled.input`
+  display: none;
+`;
+
 const CertificationsManager: React.FC = () => {
   const {
     certifications,
@@ -261,6 +360,8 @@ const CertificationsManager: React.FC = () => {
     createCertification,
     updateCertification,
     deleteCertification,
+    uploadDocument,
+    deleteDocument,
   } = useCertifications();
 
   // Stati per il modal
@@ -273,6 +374,10 @@ const CertificationsManager: React.FC = () => {
     is_active: true,
     display_order: 0,
   });
+
+  // Stati per upload documenti
+  const [uploadingId, setUploadingId] = useState<string | null>(null);
+  const fileInputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});
 
   // Carica certificazioni al mount
   useEffect(() => {
@@ -353,6 +458,39 @@ const CertificationsManager: React.FC = () => {
     }
   };
 
+  // Gestione upload documento
+  const handleFileSelect = async (certId: string, file: File) => {
+    if (!file.type.includes('pdf')) {
+      toast.error('Solo file PDF sono permessi');
+      return;
+    }
+    if (file.size > 15 * 1024 * 1024) {
+      toast.error('Il file non può superare i 15MB');
+      return;
+    }
+
+    setUploadingId(certId);
+    await uploadDocument(certId, file);
+    setUploadingId(null);
+  };
+
+  const handleFileInputChange = (certId: string, e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      handleFileSelect(certId, file);
+    }
+    // Reset input per permettere di ricaricare lo stesso file
+    e.target.value = '';
+  };
+
+  const handleDeleteDocument = async (certId: string) => {
+    if (window.confirm('Sei sicuro di voler eliminare il documento?')) {
+      setUploadingId(certId);
+      await deleteDocument(certId);
+      setUploadingId(null);
+    }
+  };
+
   if (loading && certifications.length === 0) {
     return <LoadingSpinner>Caricamento certificazioni...</LoadingSpinner>;
   }
@@ -390,15 +528,15 @@ const CertificationsManager: React.FC = () => {
             <CertificationDescription>{certification.description}</CertificationDescription>
             
             <CertificationActions>
-              <ActionButton 
-                variant="edit" 
+              <ActionButton
+                variant="edit"
                 onClick={() => handleEditCertification(certification)}
                 disabled={loading}
               >
                 Modifica
               </ActionButton>
-              <ActionButton 
-                variant="delete" 
+              <ActionButton
+                variant="delete"
                 onClick={() => handleDeleteCertification(certification.id, certification.name)}
                 disabled={loading}
               >
@@ -410,6 +548,50 @@ const CertificationsManager: React.FC = () => {
                 </span>
               )}
             </CertificationActions>
+
+            {/* Sezione Documento PDF */}
+            <DocumentSection>
+              {certification.document_url ? (
+                <DocumentInfo>
+                  <DocumentLink
+                    href={certification.document_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <DocumentIcon />
+                    Certificato PDF
+                  </DocumentLink>
+                  <DeleteDocButton
+                    onClick={() => handleDeleteDocument(certification.id)}
+                    disabled={uploadingId === certification.id}
+                  >
+                    <TrashIcon />
+                    {uploadingId === certification.id ? 'Eliminazione...' : 'Elimina'}
+                  </DeleteDocButton>
+                </DocumentInfo>
+              ) : (
+                <>
+                  <HiddenInput
+                    type="file"
+                    accept=".pdf,application/pdf"
+                    ref={el => fileInputRefs.current[certification.id] = el}
+                    onChange={(e) => handleFileInputChange(certification.id, e)}
+                  />
+                  <UploadZone
+                    onClick={() => fileInputRefs.current[certification.id]?.click()}
+                  >
+                    {uploadingId === certification.id ? (
+                      <UploadText>Caricamento in corso...</UploadText>
+                    ) : (
+                      <>
+                        <UploadIcon />
+                        <UploadText>Clicca per caricare il certificato PDF</UploadText>
+                      </>
+                    )}
+                  </UploadZone>
+                </>
+              )}
+            </DocumentSection>
           </CertificationCard>
         ))}
       </div>

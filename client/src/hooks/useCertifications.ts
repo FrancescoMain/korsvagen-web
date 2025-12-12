@@ -25,6 +25,8 @@ export interface Certification {
   description: string;
   is_active?: boolean;
   display_order?: number;
+  document_url?: string;
+  document_public_id?: string;
   created_at?: string;
   updated_at?: string;
 }
@@ -52,6 +54,10 @@ interface UseCertificationsReturn {
   createCertification: (certificationData: CertificationFormData) => Promise<boolean>;
   updateCertification: (id: string, certificationData: Partial<CertificationFormData>) => Promise<boolean>;
   deleteCertification: (id: string) => Promise<boolean>;
+
+  // Metodi documenti
+  uploadDocument: (id: string, file: File) => Promise<boolean>;
+  deleteDocument: (id: string) => Promise<boolean>;
 
   // Utilità
   refreshCertifications: () => Promise<void>;
@@ -200,6 +206,69 @@ export const useCertifications = (): UseCertificationsReturn => {
   }, [fetchCertifications]);
 
   /**
+   * Upload documento PDF per una certificazione
+   */
+  const uploadDocument = useCallback(async (id: string, file: File): Promise<boolean> => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const formData = new FormData();
+      formData.append("document", file);
+
+      const response = await apiClient.post(`/certifications/${id}/document`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      if (response.data.success) {
+        toast.success("Documento caricato con successo!");
+        await fetchCertifications();
+        return true;
+      } else {
+        throw new Error(response.data.message || "Errore upload documento");
+      }
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.message || err.message || "Errore upload documento";
+      setError(errorMessage);
+      toast.error(errorMessage);
+      console.error("Errore uploadDocument:", err);
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  }, [fetchCertifications]);
+
+  /**
+   * Elimina documento da una certificazione
+   */
+  const deleteDocument = useCallback(async (id: string): Promise<boolean> => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await apiClient.delete(`/certifications/${id}/document`);
+
+      if (response.data.success) {
+        toast.success("Documento eliminato con successo!");
+        await fetchCertifications();
+        return true;
+      } else {
+        throw new Error(response.data.message || "Errore eliminazione documento");
+      }
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.message || err.message || "Errore eliminazione documento";
+      setError(errorMessage);
+      toast.error(errorMessage);
+      console.error("Errore deleteDocument:", err);
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  }, [fetchCertifications]);
+
+  /**
    * Ricarica tutte le certificazioni
    */
   const refreshCertifications = useCallback(async () => {
@@ -231,6 +300,10 @@ export const useCertifications = (): UseCertificationsReturn => {
     createCertification,
     updateCertification,
     deleteCertification,
+
+    // Metodi documenti
+    uploadDocument,
+    deleteDocument,
 
     // Utilità
     refreshCertifications,
