@@ -507,49 +507,28 @@ const CertificationsSection = styled.section`
   }
 
   .certifications-gallery {
-    position: relative;
-    overflow: hidden;
-    height: 380px;
-    width: 100vw;
-    margin-left: calc(-50vw + 50%);
+    display: flex;
+    justify-content: center;
     padding: 15px 0;
 
     @media (max-width: 768px) {
-      height: 330px;
-      padding: 10px 0;
-    }
-
-    @media (max-width: 480px) {
-      height: 280px;
       padding: 10px 0;
     }
   }
 
   .certifications-track {
     display: flex;
-    align-items: center;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-start;
     gap: 60px;
-    animation: scroll 30s linear infinite;
-    width: fit-content;
-    padding: 0 50px;
 
     @media (max-width: 768px) {
       gap: 40px;
-      padding: 0 30px;
     }
 
     @media (max-width: 480px) {
       gap: 30px;
-      padding: 0 20px;
-    }
-  }
-
-  @keyframes scroll {
-    0% {
-      transform: translateX(0);
-    }
-    100% {
-      transform: translateX(-50%);
     }
   }
 
@@ -566,10 +545,6 @@ const CertificationsSection = styled.section`
       transform: translateY(-10px);
     }
 
-    &:hover ~ * .certifications-track,
-    &:hover + * .certifications-track {
-      animation-play-state: paused;
-    }
 
     @media (max-width: 768px) {
       min-width: 180px;
@@ -582,13 +557,6 @@ const CertificationsSection = styled.section`
     }
   }
 
-  .certification-item:hover ~ .certifications-track {
-    animation-play-state: paused;
-  }
-
-  .certifications-track:hover {
-    animation-play-state: paused;
-  }
 
   .certification-circle {
     width: 150px;
