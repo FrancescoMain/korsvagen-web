@@ -171,20 +171,23 @@ router.get("/:id/download", async (req, res) => {
       });
     }
 
-    // Genera nome file per download (con estensione .pdf)
+    // Genera nome file per download
     const fileName = `Certificato_${certification.code.replace(/[:\s]/g, '_')}.pdf`;
 
-    // Per file raw su Cloudinary, fl_attachment va inserito come trasformazione nell'URL
-    // Formato: .../raw/upload/fl_attachment:filename.pdf/v123/...
-    const urlParts = certification.document_url.split('/upload/');
-    const downloadUrl = urlParts.length === 2
-      ? `${urlParts[0]}/upload/fl_attachment:${encodeURIComponent(fileName)}/${urlParts[1]}`
-      : `${certification.document_url}?fl_attachment=${encodeURIComponent(fileName)}`;
+    logger.info(`Download certificazione ${certification.code} -> ${fileName}`);
 
-    logger.info(`Download certificazione ${certification.code} -> ${downloadUrl}`);
+    // Scarica il file da Cloudinary e rinvia con nome corretto
+    const response = await fetch(certification.document_url);
+    if (!response.ok) {
+      throw new Error(`Errore fetch Cloudinary: ${response.status}`);
+    }
 
-    // Redirect con parametri per forzare download
-    res.redirect(302, downloadUrl);
+    const buffer = await response.arrayBuffer();
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+    res.setHeader('Content-Length', buffer.byteLength);
+    res.send(Buffer.from(buffer));
 
   } catch (error) {
     logger.error("Errore download certificazione:", error);
