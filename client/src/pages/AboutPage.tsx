@@ -557,7 +557,8 @@ const CertificationsSection = styled.section`
     flex-direction: column;
     align-items: center;
     text-align: center;
-    min-width: 250px;
+    min-width: 200px;
+    max-width: 200px;
     transition: transform 0.3s ease;
 
     &:hover {
@@ -570,11 +571,13 @@ const CertificationsSection = styled.section`
     }
 
     @media (max-width: 768px) {
-      min-width: 200px;
+      min-width: 180px;
+      max-width: 180px;
     }
 
     @media (max-width: 480px) {
-      min-width: 180px;
+      min-width: 160px;
+      max-width: 160px;
     }
   }
 
@@ -648,43 +651,90 @@ const CertificationsSection = styled.section`
   }
 
   .certification-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+
     h3 {
-      font-size: 1.3rem;
-      font-weight: 400;
+      font-size: 1rem;
+      font-weight: 500;
       color: #1a1a1a;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
       font-family: "Korsvagen Brand", "Times New Roman", serif;
       letter-spacing: 0.05em;
       text-transform: uppercase;
+      min-height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
 
       @media (max-width: 768px) {
-        font-size: 1.2rem;
+        font-size: 0.95rem;
+        min-height: 45px;
       }
 
       @media (max-width: 480px) {
-        font-size: 1.1rem;
+        font-size: 0.9rem;
+        min-height: 40px;
       }
     }
 
     p {
       color: #6c757d;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       line-height: 1.4;
-      margin: 0;
-      max-width: 200px;
+      margin: 0 0 12px 0;
+      min-height: 60px;
 
       @media (max-width: 768px) {
-        font-size: 0.85rem;
-        max-width: 160px;
+        font-size: 0.8rem;
+        min-height: 55px;
       }
 
       @media (max-width: 480px) {
-        font-size: 0.8rem;
-        max-width: 140px;
+        font-size: 0.75rem;
+        min-height: 50px;
+      }
+    }
+  }
+
+  .certification-download {
+    margin-top: auto;
+
+    a {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: linear-gradient(135deg, #d4af37 0%, #b8941f 100%);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 8px rgba(212, 175, 55, 0.3);
+
+      &:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 12px rgba(212, 175, 55, 0.4);
+      }
+
+      svg {
+        width: 14px;
+        height: 14px;
       }
     }
   }
 `;
+
+const DownloadIconSvg = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+    <polyline points="7,10 12,15 17,10" />
+    <line x1="12" y1="15" x2="12" y2="3" />
+  </svg>
+);
 
 const WhyChooseUsSection = styled.section`
   background: white;
@@ -949,6 +999,13 @@ const AboutPage: React.FC = () => {
                         <h3>{cert.name}</h3>
                         <p>{cert.description}</p>
                       </div>
+                      {cert.document_url && (
+                        <div className="certification-download">
+                          <a href={cert.document_url} target="_blank" rel="noopener noreferrer">
+                            <DownloadIconSvg /> Certificato
+                          </a>
+                        </div>
+                      )}
                     </div>
                   ))}
                   {/* Duplicate for seamless loop effect */}
@@ -961,6 +1018,13 @@ const AboutPage: React.FC = () => {
                         <h3>{cert.name}</h3>
                         <p>{cert.description}</p>
                       </div>
+                      {cert.document_url && (
+                        <div className="certification-download">
+                          <a href={cert.document_url} target="_blank" rel="noopener noreferrer">
+                            <DownloadIconSvg /> Certificato
+                          </a>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>

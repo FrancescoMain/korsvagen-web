@@ -144,7 +144,27 @@ const CertDescription = styled.p`
   font-size: 0.9rem;
   color: #666;
   line-height: 1.5;
-  margin: 0;
+  margin: 0 0 1rem 0;
+  min-height: 60px;
+`;
+
+const CertDownloadLink = styled.a`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #d4af37;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: #b8941f;
+    transform: translateY(-2px);
+  }
 `;
 
 const PoliciesGrid = styled.div`
@@ -326,6 +346,16 @@ const PoliciesPage: React.FC = () => {
                   <CertBadge>{cert.code}</CertBadge>
                   <CertName>{cert.name}</CertName>
                   <CertDescription>{cert.description}</CertDescription>
+                  {cert.document_url && (
+                    <CertDownloadLink
+                      href={cert.document_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <Download size={14} />
+                      Scarica PDF
+                    </CertDownloadLink>
+                  )}
                 </CertificationCard>
               ))}
             </CertificationsGrid>
