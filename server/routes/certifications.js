@@ -124,7 +124,7 @@ router.get("/public", async (req, res) => {
 /**
  * GET /api/certifications/:id/download
  * Download pubblico del documento PDF certificazione
- * Usa streaming per forzare il download con Content-Disposition
+ * Usa URL firmato Cloudinary per forzare il download
  */
 router.get("/:id/download", async (req, res) => {
   try {
@@ -142,7 +142,7 @@ router.get("/:id/download", async (req, res) => {
 
     const { data: certification, error } = await supabaseClient
       .from("certifications")
-      .select("id, name, code, document_url, is_active")
+      .select("id, name, code, document_url, document_public_id, is_active")
       .eq("id", id)
       .single();
 
@@ -174,33 +174,20 @@ router.get("/:id/download", async (req, res) => {
     // Genera nome file per download
     const fileName = `Certificato_${certification.code.replace(/[:\s]/g, '_')}.pdf`;
 
-    logger.info(`Download certificazione ${certification.code} -> streaming file as ${fileName}`);
+    // Genera URL firmato con Cloudinary per download diretto
+    // Usa fl_attachment per forzare il download con nome file specifico
+    const signedUrl = cloudinary.url(certification.document_public_id || certification.document_url, {
+      resource_type: "raw",
+      type: "upload",
+      sign_url: true,
+      flags: `attachment:${fileName}`,
+      expires_at: Math.floor(Date.now() / 1000) + 300 // URL valido per 5 minuti
+    });
 
-    // Fetch il file da Cloudinary e stream con headers corretti
-    const response = await fetch(certification.document_url);
+    logger.info(`Download certificazione ${certification.code} -> redirect to signed URL`);
 
-    if (!response.ok) {
-      logger.error(`Errore fetch da Cloudinary: ${response.status}`);
-      return res.status(500).json({
-        success: false,
-        message: "Errore nel recupero del documento",
-        code: "FETCH_ERROR"
-      });
-    }
-
-    // Imposta headers per forzare il download
-    res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
-
-    // Passa il content-length se disponibile
-    const contentLength = response.headers.get('content-length');
-    if (contentLength) {
-      res.setHeader('Content-Length', contentLength);
-    }
-
-    // Stream il file al client
-    const arrayBuffer = await response.arrayBuffer();
-    res.send(Buffer.from(arrayBuffer));
+    // Redirect all'URL firmato
+    res.redirect(302, signedUrl);
 
   } catch (error) {
     logger.error("Errore download certificazione:", error);
