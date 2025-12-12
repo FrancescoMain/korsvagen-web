@@ -7,6 +7,7 @@ import styled from "styled-components";
 import { useAboutContent, type AboutContent } from "../../hooks/useAboutContent";
 import { useCertifications } from "../../hooks/useCertifications";
 import CertificationsManager from "./CertificationsManager";
+import PoliciesManager from "./PoliciesManager";
 import toast from "react-hot-toast";
 
 // Styled Components
@@ -172,7 +173,7 @@ const GridRow = styled.div`
 
 const AboutManager: React.FC = () => {
   const { content, loading, error, fetchContent, updateContent } = useAboutContent();
-  const [activeTab, setActiveTab] = useState<'content' | 'certifications'>('content');
+  const [activeTab, setActiveTab] = useState<'content' | 'certifications' | 'policies'>('content');
   const [formData, setFormData] = useState<AboutContent>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -237,11 +238,17 @@ const AboutManager: React.FC = () => {
           >
             Contenuti Testo
           </Tab>
-          <Tab 
-            active={activeTab === 'certifications'} 
+          <Tab
+            active={activeTab === 'certifications'}
             onClick={() => setActiveTab('certifications')}
           >
             Certificazioni
+          </Tab>
+          <Tab
+            active={activeTab === 'policies'}
+            onClick={() => setActiveTab('policies')}
+          >
+            Politiche Aziendali
           </Tab>
         </TabsList>
       </TabsContainer>
@@ -483,6 +490,10 @@ const AboutManager: React.FC = () => {
 
       {activeTab === 'certifications' && (
         <CertificationsManager />
+      )}
+
+      {activeTab === 'policies' && (
+        <PoliciesManager />
       )}
     </Container>
   );

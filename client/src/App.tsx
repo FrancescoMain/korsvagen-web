@@ -17,6 +17,7 @@ import {
   ContactPage,
   CareersPage,
   TeamPage,
+  PoliciesPage,
   WorkInProgressPage,
   PageEditorPage,
 } from "./pages";
@@ -79,6 +80,7 @@ function App() {
                 path="/work-in-progress"
                 element={<WorkInProgressPage />}
               />
+              <Route path="/certificazioni" element={<PoliciesPage />} />
 
               {/* Auth routes */}
               <Route path="/login" element={<LoginPage />} />

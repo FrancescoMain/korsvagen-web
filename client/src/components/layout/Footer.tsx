@@ -9,19 +9,25 @@
  * @version 1.1.0 - Updated to use SettingsContext
  */
 
-import React from "react";
+import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
 import { useContactData } from "../../contexts/SettingsContext";
 import { contactData as fallbackData } from "../../data/contactData";
+import { useCertifications } from "../../hooks/useCertifications";
 
 const Footer: React.FC = () => {
   // Utilizza il nuovo hook per ottenere i dati di contatto
-  // Commento: useContactData fornisce compatibilità con contactData.ts
   const { contactData: dynamicContactData, loading } = useContactData();
 
+  // Carica certificazioni per i badge
+  const { publicCertifications, fetchPublicCertifications } = useCertifications();
+
+  useEffect(() => {
+    fetchPublicCertifications();
+  }, [fetchPublicCertifications]);
+
   // Utilizza i dati dinamici se disponibili, altrimenti fallback ai dati statici
-  // Commento: Garantisce che il footer funzioni sempre, anche durante il caricamento
   const contactData = dynamicContactData || fallbackData;
 
   const quickLinks = [
@@ -32,6 +38,7 @@ const Footer: React.FC = () => {
     { path: "/news", label: "News" },
     { path: "/contatti", label: "Contatti" },
     { path: "/lavora-con-noi", label: "Lavora con Noi" },
+    { path: "/certificazioni", label: "Certificazioni" },
   ];
 
   const services = [
@@ -121,6 +128,20 @@ const Footer: React.FC = () => {
             </ContactInfo>
           </FooterSection>
         </FooterGrid>
+
+        {/* Sezione Certificazioni */}
+        {publicCertifications.length > 0 && (
+          <CertificationsSection>
+            <CertificationsTitle>Certificazioni</CertificationsTitle>
+            <CertificationsBadges>
+              {publicCertifications.map((cert) => (
+                <CertificationBadge key={cert.id} to="/certificazioni" title={cert.name}>
+                  <BadgeCode>{cert.code}</BadgeCode>
+                </CertificationBadge>
+              ))}
+            </CertificationsBadges>
+          </CertificationsSection>
+        )}
 
         <FooterBottom>
           <div>
@@ -341,6 +362,51 @@ const FooterSubtext = styled.p`
     font-size: 0.8rem;
     line-height: 1.4;
   }
+`;
+
+const CertificationsSection = styled.div`
+  border-top: 1px solid #333333;
+  padding: 2rem 0;
+  margin-bottom: 0;
+`;
+
+const CertificationsTitle = styled.h4`
+  color: #ffffff;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin: 0 0 1rem 0;
+  font-weight: 600;
+`;
+
+const CertificationsBadges = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+`;
+
+const CertificationBadge = styled(Link)`
+  background: linear-gradient(135deg, #d4af37 0%, #b8941f 100%);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.85rem;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(212, 175, 55, 0.4);
+  }
+`;
+
+const BadgeCode = styled.span`
+  white-space: nowrap;
 `;
 
 export default Footer;

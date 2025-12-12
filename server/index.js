@@ -55,6 +55,7 @@ import projectsRoutes from "./routes/projects.js";
 import newsRoutes from "./routes/news.js";
 import jobsRoutes from "./routes/jobs-new.js";
 import messagesRoutes from "./routes/messages.js";
+import policiesRoutes from "./routes/policies.js";
 
 // Inizializza l'app Express
 const app = express();
@@ -392,6 +393,9 @@ app.use("/api/reviews", reviewsRoutes);
 
 // Certificazioni e qualifiche
 app.use("/api/certifications", certificationsRoutes);
+
+// Politiche aziendali (Qualita, Parita di Genere, etc.)
+app.use("/api/policies", policiesRoutes);
 
 // Contenuti pagina About
 app.use("/api/about-content", aboutContentRoutes);
