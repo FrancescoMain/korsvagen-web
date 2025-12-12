@@ -145,7 +145,7 @@ router.get("/public", async (req, res) => {
 /**
  * GET /api/policies/:id/download
  * Download pubblico del documento PDF politica aziendale
- * Usa URL firmato Cloudinary per forzare il download
+ * Replica il funzionamento del download CV (team.js)
  */
 router.get("/:id/download", async (req, res) => {
   try {
@@ -163,7 +163,7 @@ router.get("/:id/download", async (req, res) => {
 
     const { data: policy, error } = await supabaseClient
       .from("company_policies")
-      .select("id, title, slug, document_url, document_public_id, is_published")
+      .select("id, title, slug, document_url, is_published")
       .eq("id", id)
       .single();
 
@@ -195,19 +195,16 @@ router.get("/:id/download", async (req, res) => {
     // Genera nome file per download
     const fileName = `${policy.title.replace(/[:\s]/g, '_')}.pdf`;
 
-    // Genera URL firmato con Cloudinary per download diretto
-    const signedUrl = cloudinary.url(policy.document_public_id || policy.document_url, {
-      resource_type: "raw",
-      type: "upload",
-      sign_url: true,
-      flags: `attachment:${fileName}`,
-      expires_at: Math.floor(Date.now() / 1000) + 300 // URL valido per 5 minuti
-    });
+    // Forza download diretto usando Cloudinary API con parametri di download
+    // Stesso approccio del CV in team.js
+    const downloadUrl = policy.document_url.includes('?')
+      ? `${policy.document_url}&fl_attachment=${encodeURIComponent(fileName)}`
+      : `${policy.document_url}?fl_attachment=${encodeURIComponent(fileName)}`;
 
-    logger.info(`Download policy ${policy.title} -> redirect to signed URL`);
+    logger.info(`Download policy ${policy.title} -> ${downloadUrl}`);
 
-    // Redirect all'URL firmato
-    res.redirect(302, signedUrl);
+    // Redirect con parametri per forzare download
+    res.redirect(302, downloadUrl);
 
   } catch (error) {
     logger.error("Errore download policy:", error);

@@ -124,7 +124,7 @@ router.get("/public", async (req, res) => {
 /**
  * GET /api/certifications/:id/download
  * Download pubblico del documento PDF certificazione
- * Usa URL firmato Cloudinary per forzare il download
+ * Replica il funzionamento del download CV (team.js)
  */
 router.get("/:id/download", async (req, res) => {
   try {
@@ -142,7 +142,7 @@ router.get("/:id/download", async (req, res) => {
 
     const { data: certification, error } = await supabaseClient
       .from("certifications")
-      .select("id, name, code, document_url, document_public_id, is_active")
+      .select("id, name, code, document_url, is_active")
       .eq("id", id)
       .single();
 
@@ -174,20 +174,16 @@ router.get("/:id/download", async (req, res) => {
     // Genera nome file per download
     const fileName = `Certificato_${certification.code.replace(/[:\s]/g, '_')}.pdf`;
 
-    // Genera URL firmato con Cloudinary per download diretto
-    // Usa fl_attachment per forzare il download con nome file specifico
-    const signedUrl = cloudinary.url(certification.document_public_id || certification.document_url, {
-      resource_type: "raw",
-      type: "upload",
-      sign_url: true,
-      flags: `attachment:${fileName}`,
-      expires_at: Math.floor(Date.now() / 1000) + 300 // URL valido per 5 minuti
-    });
+    // Forza download diretto usando Cloudinary API con parametri di download
+    // Stesso approccio del CV in team.js
+    const downloadUrl = certification.document_url.includes('?')
+      ? `${certification.document_url}&fl_attachment=${encodeURIComponent(fileName)}`
+      : `${certification.document_url}?fl_attachment=${encodeURIComponent(fileName)}`;
 
-    logger.info(`Download certificazione ${certification.code} -> redirect to signed URL`);
+    logger.info(`Download certificazione ${certification.code} -> ${downloadUrl}`);
 
-    // Redirect all'URL firmato
-    res.redirect(302, signedUrl);
+    // Redirect con parametri per forzare download
+    res.redirect(302, downloadUrl);
 
   } catch (error) {
     logger.error("Errore download certificazione:", error);
