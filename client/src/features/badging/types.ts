@@ -1,3 +1,4 @@
+import { ScheduleDay } from './statisticsTypes';
 export interface BadgeSite {
   id: string;
   name: string;
@@ -24,6 +25,7 @@ export interface Employee {
   device_count?: number;
   first_device_hash?: string | null;
   shared_with?: string[];
+  schedule?: ScheduleDay[];
 }
 export interface BadgeEvent {
   id: string;
@@ -62,6 +64,7 @@ export interface BadgeReport {
   present: Pick<Employee, 'id' | 'first_name' | 'last_name' | 'job_role' | 'current_entry_at' | 'current_site_id'>[];
 }
 export const anomalyLabels: Record<string, string> = {
+  admin_correction: 'Orario corretto dal responsabile',
   shared_device: 'Browser condiviso tra dipendenti',
   new_device: 'Browser diverso dal primo utilizzato',
   outside_zone: 'Fuori dalla zona della sede',

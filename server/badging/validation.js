@@ -143,3 +143,39 @@ export function scheduleInput(body) {
   if (!valid(start) || !valid(end) || start === end) invalid('Inserisci entrambi gli orari, diversi tra loro, oppure disattiva l’orario previsto.');
   return { start, end };
 }
+
+export function employeeScheduleInput(body) {
+  if (!Array.isArray(body.days) || body.days.length > 7) invalid('Seleziona i giorni previsti.');
+  const seen = new Set();
+  const valid = value => typeof value === 'string' && /^([01]\d|2[0-3]):[0-5]\d$/.test(value);
+  const minutes = value => Number(value.slice(0, 2)) * 60 + Number(value.slice(3));
+  return body.days.map(day => {
+    if (!day || !Number.isInteger(day.weekday) || day.weekday < 1 || day.weekday > 7 || seen.has(day.weekday)) invalid('Giorni previsti non validi o duplicati.');
+    seen.add(day.weekday);
+    const { expected_start: start, expected_end: end } = day;
+    if (!valid(start) || !valid(end) || start === end) invalid('Inserisci ingresso e uscita diversi per ogni giorno previsto.');
+    const breakStart = day.break_start ?? null, breakEnd = day.break_end ?? null;
+    if (breakStart !== null || breakEnd !== null) {
+      if (!valid(breakStart) || !valid(breakEnd) || breakStart === breakEnd) invalid('Inserisci inizio e fine della pausa pranzo.');
+      const span = (minutes(end) - minutes(start) + 1440) % 1440;
+      const offset = (minutes(breakStart) - minutes(start) + 1440) % 1440;
+      const length = (minutes(breakEnd) - minutes(breakStart) + 1440) % 1440;
+      if (offset >= span || offset + length > span) invalid('La pausa pranzo deve essere compresa nell’orario previsto.');
+    }
+    return { weekday: day.weekday, expected_start: start, expected_end: end, break_start: breakStart, break_end: breakEnd };
+  }).sort((a, b) => a.weekday - b.weekday);
+}
+
+// Interpret the editor in Italian time even when the admin's browser is abroad.
+// During the repeated autumn hour preserve the original UTC offset where possible.
+export function correctionTime(local, original) {
+  if (typeof local !== 'string' || !/^\d{4}-\d{2}-\d{2}T([01]\d|2[0-3]):[0-5]\d:[0-5]\d$/.test(local)) invalid('Data e ora italiane non valide.');
+  dateInput(local.slice(0, 10));
+  const format = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Rome', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23' });
+  const render = date => format.format(date).replace(' ', 'T');
+  const candidates = [1, 2].map(hours => new Date(new Date(local + 'Z').getTime() - hours * 3600000)).filter(date => render(date) === local);
+  if (!candidates.length) invalid('Quest’ora non esiste in Italia per il cambio dell’ora legale.');
+  const source = new Date(original);
+  const offset = Math.round((new Date(render(source) + 'Z').getTime() - source.getTime()) / 60000) * 60000;
+  return (candidates.find(date => new Date(local + 'Z').getTime() - date.getTime() === offset) || candidates[0]).toISOString();
+}

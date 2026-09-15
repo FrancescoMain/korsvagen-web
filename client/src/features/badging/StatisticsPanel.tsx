@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { adminBadge, messageOf } from './api';
 import { BadgeSite, Employee, dateTime, todayInRome } from './types';
 import { BadgeStatistics, EmployeeStatistics, StatisticsDay } from './statisticsTypes';
+import EventEditor from './EventEditor';
 import ScheduleSettings from './ScheduleSettings';
 
 const quarters = ['Gennaio – Marzo', 'Aprile – Giugno', 'Luglio – Settembre', 'Ottobre – Dicembre'];
@@ -54,16 +55,19 @@ function Ranking({ title, people, value, empty, onSelect }: {
   </ol> : <p className="badge-help">{empty}</p>}</section>;
 }
 
-function StatisticsHistory({ site, year, quarter, revision, employee, name }: {
-  site: string; year: number; quarter: number; revision: number; employee: string; name: string;
+function StatisticsHistory({ site, year, quarter, revision, employee, name, onChanged }: {
+  site: string; year: number; quarter: number; revision: number; employee: string; name: string; onChanged: () => void;
 }) {
+  const [editing, setEditing] = useState<{ id: string; mode: 'edit' | 'delete' } | null>(null);
   const { data, loading, error } = useStatistics(site, year, quarter, revision, employee);
   return <section className="badge-history" aria-label={'Storico di ' + name}>
     <h3>Storico di {name}</h3>
     <p>{quarters[quarter - 1]} {year} · orari italiani</p>
     {loading && <p role="status">Caricamento storico…</p>}
     {error && <p className="badge-alert error" role="alert">{error}</p>}
+    {editing && <EventEditor key={editing.id + editing.mode} {...editing} onClose={() => setEditing(null)} onSaved={() => { setEditing(null); onChanged(); }} />}
     {data && <>
+      <ScheduleSettings key={employee + ':' + revision} employeeId={employee} name={name} schedule={data.employee_schedule || []} onSaved={onChanged} />
       {!data.days?.length ? <p className="badge-empty">Nessun ingresso in questa sede nel trimestre selezionato.</p> :
         <div className="badge-table-wrap badge-statistics-wrap"><table className="badge-table badge-statistics-table" role="table">
           <caption className="badge-sr-only">Storico giornaliero di {name}</caption>
@@ -72,11 +76,12 @@ function StatisticsHistory({ site, year, quarter, revision, employee, name }: {
             <td role="cell" className="badge-statistics-identity"><span className="badge-cell-label" aria-hidden="true">Giorno di ingresso</span><strong>{day.date.split('-').reverse().join('/')}</strong></td>
             <td role="cell"><span className="badge-cell-label" aria-hidden="true">Primo ingresso</span>{clock(day.first_entry)}{day.late_minutes !== null && day.late_minutes > 0 && <span className="badge-pill warning">Ritardo: {day.late_minutes} min</span>}</td>
             <td role="cell"><span className="badge-cell-label" aria-hidden="true">Ultima uscita</span>{day.last_exit ? dateTime(day.last_exit) : 'Giornata incompleta'}{day.early_minutes !== null && day.early_minutes > 0 && <span className="badge-pill warning">Anticipo: {day.early_minutes} min</span>}</td>
-            <td role="cell"><span className="badge-cell-label" aria-hidden="true">Ore registrate</span>{duration(day.worked_seconds)}{day.review_seconds > 0 && <small>{duration(day.review_seconds)} da verificare</small>}</td>
+            <td role="cell"><span className="badge-cell-label" aria-hidden="true">Ore registrate</span>{duration(day.worked_seconds)}{!!day.break_seconds && <small>Pausa sottratta: {duration(day.break_seconds)}</small>}{day.review_seconds > 0 && <small>{duration(day.review_seconds)} da verificare</small>}</td>
             <td role="cell" className="badge-statistics-details">
               {!day.complete && <span className="badge-pill warning">Dati da completare o verificare</span>}
               <details><summary>{day.intervals.length} {day.intervals.length === 1 ? 'intervallo' : 'intervalli'} · mostra timbrature</summary>
                 <ul className="badge-intervals">{day.intervals.map(interval => <li key={interval.id}>
+                  <div className="badge-actions"><button className="badge-button" onClick={() => setEditing({ id: interval.id, mode: 'edit' })}>Modifica ingresso</button><button className="badge-button danger" onClick={() => setEditing({ id: interval.id, mode: 'delete' })}>Elimina ingresso</button></div>
                   <span>Ingresso: {dateTime(interval.entry_at)}</span>
                   <span>Uscita: {interval.exit_at ? dateTime(interval.exit_at) : 'Non registrata'}</span>
                   {interval.status === 'different_site' && <span>QR di uscita: {interval.exit_site_name}</span>}
@@ -90,7 +95,7 @@ function StatisticsHistory({ site, year, quarter, revision, employee, name }: {
   </section>;
 }
 
-export default function StatisticsPanel({ sites, employees }: { sites: BadgeSite[]; employees: Employee[] }) {
+export default function StatisticsPanel({ sites, employees, onChange }: { sites: BadgeSite[]; employees: Employee[]; onChange?: () => void }) {
   const today = todayInRome();
   const [site, setSite] = useState(sites.find(value => !value.archived_at)?.id || sites[0]?.id || '');
   const [year, setYear] = useState(Number(today.slice(0, 4)));
@@ -143,13 +148,12 @@ export default function StatisticsPanel({ sites, employees }: { sites: BadgeSite
     {error && <div className="badge-alert error" role="alert">{error} <button className="badge-button" onClick={() => setRevision(value => value + 1)}>Riprova</button></div>}
     {data && <>
       <h3>{data.site.name} · {quarter}° trimestre {year}</h3>
-      <ScheduleSettings key={site + ':' + revision} siteId={site} schedule={data.schedule} onSaved={() => { setNotice('Orari aggiornati.'); setRevision(value => value + 1); }} />
       <div className="badge-stats" aria-label="Totali del trimestre">
-        {[['Ore registrate', duration(data.summary.worked_seconds)], ['Giornate di presenza', data.summary.presence_days],
+        {[['Ore lavorate nette', duration(data.summary.worked_seconds)], ['Pausa pranzo sottratta', duration(data.summary.break_seconds || 0)], ['Giornate di presenza', data.summary.presence_days],
           ['Dipendenti con ingressi', data.summary.employees], ['Intervalli incompleti', data.summary.incomplete_intervals]].map(([label, value]) =>
           <div className="badge-card" key={label}><span>{label}</span><strong>{value}</strong></div>)}
       </div>
-      <p className="badge-help">Una presenza è un giorno con almeno un ingresso. Le ore sommano gli intervalli chiusi nella stessa sede e sono attribuite al giorno dell’ingresso. Le medie usano il primo ingresso e l’ultima uscita di ogni giornata; l’uscita media considera solo giornate complete.</p>
+      <p className="badge-help">Una presenza è un giorno con almeno un ingresso. Le ore sommano gli intervalli chiusi nella stessa sede, al netto della pausa pranzo prevista e sono attribuite al giorno dell’ingresso. Le medie usano il primo ingresso e l’ultima uscita di ogni giornata; l’uscita media considera solo giornate complete.</p>
       {(data.summary.incomplete_intervals > 0 || data.summary.review_intervals > 0) && <div className="badge-alert">
         <strong>Dati da completare o verificare</strong>
         <p>{data.summary.open_intervals} ingressi ancora aperti · {data.summary.incomplete_intervals} intervalli senza uscita valida · {data.summary.review_intervals} intervalli con uscita su altro QR o durata oltre 16 ore.</p>
@@ -165,14 +169,14 @@ export default function StatisticsPanel({ sites, employees }: { sites: BadgeSite
         </div>)}
       </div>
       <h3>Confronto tra dipendenti</h3>
-      <p className="badge-help">Confronto dei dati registrati da chi ha timbrato un ingresso in questa sede nel trimestre. Giorni e ore inferiori non indicano da soli un’assenza: turni e assegnazioni non sono registrati.</p>
+      <p className="badge-help">Confronto dei dati registrati da chi ha timbrato un ingresso in questa sede nel trimestre. Giorni e ore inferiori non indicano da soli un’assenza: le assegnazioni alle singole sedi non sono registrate.</p>
       <div className="badge-rankings">
         <Ranking title="Meno giorni di presenza" people={lowestDays} value={person => person.presence_days + ' giorni'} empty="Nessun ingresso nel periodo." onSelect={showHistory} />
         <Ranking title="Meno ore registrate" people={lowestHours} value={person => duration(person.worked_seconds)} empty="Nessun totale completo da confrontare." onSelect={showHistory} />
         <Ranking title="Ritardi e uscite anticipate" people={deviations} value={person => (person.late_days || 0) + ' ritardi · ' + (person.early_days || 0) + ' uscite anticipate'}
-          empty={data.schedule.expected_start ? 'Nessuno scostamento dagli orari previsti.' : 'Imposta gli orari previsti per attivare queste segnalazioni.'} onSelect={showHistory} />
+          empty={people.some(person => person.late_days !== null || person.early_days !== null) ? 'Nessuno scostamento dagli orari previsti.' : 'Imposta gli orari previsti per attivare queste segnalazioni.'} onSelect={showHistory} />
       </div>
-      {data.schedule.expected_start && <p className="badge-help">Confronto con l’orario attuale della sede, al minuto. Le uscite anticipate sono valutate dopo l’orario di uscita previsto e solo su giornate complete.</p>}
+      <p className="badge-help">Giorni, orari e pausa pranzo si impostano per dipendente in “Dipendenti → Giorni e orari” oppure aprendo lo storico qui sotto. I confronti considerano il primo ingresso e l’ultima uscita tra tutte le sedi: un cambio di QR durante la giornata non genera ritardi o uscite anticipate.</p>
       <label className="badge-search">Ordina dipendenti<select value={sort} onChange={e => setSort(e.target.value)}><option value="name">Nome</option><option value="days">Meno giorni di presenza</option><option value="hours">Meno ore registrate</option></select></label>
       {rows.length ? <div className="badge-table-wrap badge-statistics-wrap"><table className="badge-table badge-statistics-table" role="table">
         <caption className="badge-sr-only">Statistiche per dipendente</caption>
@@ -187,7 +191,7 @@ export default function StatisticsPanel({ sites, employees }: { sites: BadgeSite
             {person.late_days !== null && <span>{person.late_days} ritardi · {person.late_minutes} min totali</span>}
             {person.early_days !== null && <small>{person.early_days} uscite anticipate su {person.evaluated_exit_days} giorni valutati · {person.early_minutes} min totali</small>}
             {person.incomplete_intervals + person.review_intervals > 0 && <span className="badge-pill warning">{person.incomplete_intervals + person.review_intervals} intervalli da verificare</span>}
-            {person.late_days === null && comparable(person) && <small>Orario previsto non impostato</small>}
+            {person.late_days === null && comparable(person) && <small>Nessun confronto sui giorni registrati</small>}
           </td>
           <td role="cell" className="badge-statistics-details"><button className="badge-button" onClick={() => showHistory(person.employee_id)} aria-label={'Storico di ' + person.employee_name}>Apri storico</button></td>
         </tr>)}</tbody>
@@ -197,7 +201,7 @@ export default function StatisticsPanel({ sites, employees }: { sites: BadgeSite
       <label>Storico dipendente<select value={selected} onChange={e => setSelected(e.target.value)}><option value="">Seleziona un dipendente</option>
         {employees.map(person => <option key={person.id} value={person.id}>{person.first_name} {person.last_name}</option>)}
       </select></label>
-      {selected && valid && <StatisticsHistory site={site} year={year} quarter={quarter} revision={revision} employee={selected} name={historyName} />}
+      {selected && valid && <StatisticsHistory key={[site, year, quarter, selected].join(':')} site={site} year={year} quarter={quarter} revision={revision} employee={selected} name={historyName} onChanged={() => { setNotice('Dati aggiornati.'); onChange?.(); setRevision(value => value + 1); }} />}
     </section>
   </section>;
 }

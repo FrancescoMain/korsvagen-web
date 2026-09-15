@@ -27,6 +27,10 @@ export default function BadgingManagement() {
     } catch (err) { setError(messageOf(err)); }
     finally { setLoading(false); }
   }, []);
+  const refreshEmployees = async () => {
+    try { setEmployees((await adminBadge.get<{ data: Employee[] }>('/employees')).data); }
+    catch (err) { setError(messageOf(err)); }
+  };
   useEffect(() => { if (allowed) void load(); }, [allowed, load]);
   if (!allowed) return <p>La gestione presenze è riservata agli amministratori.</p>;
   return <div className="badge-admin">
@@ -42,8 +46,8 @@ export default function BadgingManagement() {
     {loading ? <p role="status">Caricamento dati…</p> : <>
       {tab === 'sites' && <SitesPanel sites={sites} onChange={load} />}
       {tab === 'employees' && <EmployeesPanel employees={employees} onChange={load} />}
-      {tab === 'reports' && <ReportsPanel sites={sites} employees={employees} />}
-      {tab === 'statistics' && <StatisticsPanel sites={sites} employees={employees} />}
+      {tab === 'reports' && <ReportsPanel sites={sites} employees={employees} onChange={refreshEmployees} />}
+      {tab === 'statistics' && <StatisticsPanel sites={sites} employees={employees} onChange={refreshEmployees} />}
     </>}
   </div>;
 }

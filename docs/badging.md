@@ -94,12 +94,15 @@ e le singole timbrature; cambiando trimestre conserva il dipendente scelto.
 Le sedi archiviate restano consultabili. Le tabelle diventano schede negli
 spazi stretti, conservando etichette e comandi accessibili.
 
-**Orari previsti della sede** è una configurazione facoltativa: abilitare il
-confronto, compilare ingresso/uscita e salvare. Disabilitare e salvare rimuove
-le soglie senza cancellare eventi. Sono uguali per chi timbra quel QR; ufficio
-e cantiere hanno impostazioni indipendenti. La configurazione attuale è un
-riferimento applicato anche allo storico, come indicato nel modulo: non è uno
-storico contrattuale dei turni. Le modifiche sono registrate nell'audit admin.
+**Dipendenti → Giorni e orari** configura la settimana del singolo dipendente:
+selezionare i giorni previsti e, per ciascuno, ingresso, uscita e pausa pranzo
+facoltativa (inizio/fine). Lo stesso editor è disponibile nello storico personale
+in Statistiche. Nessun giorno selezionato significa nessun confronto con orari
+previsti. Gli orari valgono per tutte le sedi del dipendente, anche nello storico;
+non costituiscono uno storico contrattuale dei turni. Le modifiche sono auditate.
+La pausa viene sottratta solo nella parte coperta da intervalli completati: uscite
+per pranzo già timbrate non causano doppie sottrazioni. Totali netti e pausa
+sottratta sono mostrati separatamente; il Report conserva le ore lorde.
 
 Regole di calcolo:
 
@@ -119,11 +122,13 @@ Regole di calcolo:
   orari usano il primo ingresso e l'ultima uscita giornalieri: i passaggi
   multipli non pesano più volte; le uscite medie richiedono giornate complete.
   Orari opposti senza media significativa restituiscono un valore assente.
-- Se configurato, il primo ingresso è confrontato con l'ingresso previsto al
-  minuto. L'ultima uscita è valutata solo a orario previsto terminato e giornata
+- Nei giorni previsti, il primo ingresso tra tutte le sedi è confrontato con
+  l'ingresso previsto al minuto. Il ritardo è attribuito solo al QR del primo
+  ingresso; l'anticipo solo al QR dell'ultima uscita globale. Un passaggio da
+  ufficio a cantiere non genera segnalazioni per il semplice cambio di sede. L'ultima uscita è valutata solo a orario previsto terminato e giornata
   completa, evitando di segnalare la pausa pranzo come uscita anticipata.
 - I confronti riguardano chi ha un ingresso nella sede nel trimestre; non
-  deducono assenze senza assegnazioni e turni. I totali incompleti sono esclusi
+  deducono assenze nella singola sede senza assegnazioni. I totali incompleti sono esclusi
   dalla graduatoria delle ore; i valori minimi uguali restano segnalati insieme.
 
 API riservate ad amministratori attivi, con risposte no-store:
@@ -131,17 +136,53 @@ API riservate ad amministratori attivi, con risposte no-store:
 - GET /api/badging/admin/statistics?site=<uuid>&year=2026&quarter=1
   restituisce aggregati dell'intero trimestre, dipendenti e tre mesi;
   employee=<uuid> aggiunge lo storico giornaliero del dipendente.
-- PATCH /api/badging/admin/sites/:id/schedule accetta expected_start e
-  expected_end in HH:mm, entrambi validi e diversi oppure entrambi null.
+- PATCH /api/badging/admin/employees/:id/schedule accetta `{ days: [...] }`.
+  Ogni elemento contiene `weekday` ISO 1–7, `expected_start`, `expected_end`
+  HH:mm, `break_start`/`break_end` HH:mm o entrambi null. Nessun duplicato;
+  pausa compresa nel turno, anche notturno. Array vuoto rimuove la settimana.
+- Il vecchio endpoint di configurazione per sede risponde 410 con il percorso
+  personale da usare. Le colonne precedenti sono conservate per compatibilità;
+  non vengono copiate né utilizzate per inventare turni personali.
 
-Applicare **database/badging-statistics.sql dopo database/badging.sql** e
-prima del nuovo backend. La migrazione aggiunge due colonne nullable alle sedi,
-il salvataggio atomico/audit e una funzione di aggregazione; non modifica gli
-eventi esistenti. I nuovi RPC non sono eseguibili da anon/authenticated.
-L'aggregazione JSON avviene nel database e non dipende dal limite PostgREST
-di 1000 righe né dalla paginazione del report.
+Applicare **database/badging-personal-schedules.sql** dopo `badging.sql` e
+`badging-statistics.sql`, prima del backend. Nuove tabelle RLS, RPC solo per
+service_role e viste security_invoker. La funzione legacy delle statistiche
+inoltra al nuovo calcolo per mantenere report coerenti durante il rollout.
+L'aggregazione avviene nel database, oltre il limite PostgREST di 1000 righe.
 
-Verifiche del 2026-09-15: nove test API/DB delle statistiche, inclusi 1202 eventi,
+### Correzione ed eliminazione delle timbrature
+
+In **Report presenze**, ogni timbratura accettata ha **Modifica** accanto alla
+data; gli ingressi hanno anche **Elimina**. Gli stessi comandi per l'ingresso
+sono nello storico delle statistiche. Il modulo richiede un motivo, mostra
+l'originale e le correzioni precedenti. Gli orari sono interpretati in Italia
+anche se il browser è in un altro fuso; le ore inesistenti al cambio legale
+sono rifiutate e nell'ora autunnale ripetuta si conserva l'offset originale.
+
+La rettifica modifica la vista effettiva e ricalcola report, CSV, statistiche e
+presenza aperta. Non può attraversare altre timbrature accettate o collocarsi
+nel futuro. **Elimina** esclude l'ingresso e la sua uscita associata, indicata
+prima della conferma; chiude la presenza se ancora aperta. Le ricevute originali
+restano append-only e ogni operazione è registrata nell'audit. I tentativi
+respinti non si trasformano in presenze, non si alterano GPS o identità e non
+si crea un'uscita mai timbrata. Per correggere un'uscita usare la sua riga nel
+Report. Per gli ingressi dimenticati resta la chiusura amministrativa senza ore.
+
+`GET /api/badging/admin/events/:id` restituisce dati effettivi, revisione, uscita
+associata e audit. `PATCH` richiede revisione, motivo e `local_time` italiano
+YYYY-MM-DDTHH:mm:ss; `DELETE` richiede revisione, motivo e `paired_exit` atteso.
+Lock sul dipendente e controllo della revisione impediscono sovrascritture
+obsolete; un'uscita appena timbrata richiede di riaprire la conferma.
+
+Verifiche dell'estensione: gate full, 49 test server e 21 client; tre mutation
+probe manuali rilevano mancata sottrazione della pausa, eliminazione incompleta
+della coppia e assenza del controllo della revisione. Chromium locale: impostazioni
+personali persistenti, ore nette, isolamento dei colleghi, modifica/eliminazione
+e ricalcolo; 22 combinazioni da 320 a 3440 px senza overflow o errori JavaScript.
+Runner mutation automatico assente; warning di build preesistenti fuori dal modulo.
+
+Verifiche della precedente versione del 2026-09-15:
+ nove test API/DB delle statistiche, inclusi 1202 eventi,
 QR separati/archiviati, più intervalli al giorno, orari opzionali e audit,
 ingressi incompleti, notte, confini dei trimestri e cambi d'ora di marzo/ottobre.
 Cinque test UI coprono confronti, salvataggio/rimozione, storico, errori e risposte

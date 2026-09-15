@@ -75,24 +75,30 @@ test('whole-quarter totals, first/last daily averages, monthly sums and employee
   assert.equal(office.data.summary.worked_seconds, 10 * 3600);
 });
 
-test('optional site schedule persists, produces late/early counts and can be removed without losing history', async () => {
-  for (const body of [
-    { expected_start: '08:00', expected_end: null }, { expected_start: '25:00', expected_end: '17:00' },
-    { expected_start: '08:00', expected_end: '08:00' }, { expected_start: ['08:00'], expected_end: '17:00' },
-  ]) assert.equal((await call('/admin/sites/' + TEST_SITE + '/schedule', { token: adminToken(), body })).status, 400);
-  const saved = await call('/admin/sites/' + TEST_SITE + '/schedule', { token: adminToken(), body: { expected_start: '08:00', expected_end: '17:00' } });
+test('personal weekdays and lunch persist, avoid double deductions, and never configure colleagues', async () => {
+  const path = '/admin/employees/' + TEST_EMPLOYEE + '/schedule';
+  const days = [1,2].map(weekday => ({ weekday, expected_start: '08:00', expected_end: '17:00', break_start: '12:00', break_end: '13:00' }));
+  const saved = await call(path, { token: adminToken(), body: { days } });
   assert.equal(saved.status, 200);
-  const result = await call('/admin/statistics' + quarter, { token: adminToken() });
-  const anna = result.data.employees.find(e => e.employee_id === TEST_EMPLOYEE);
-  assert.equal(anna.late_days, 1); assert.equal(anna.late_minutes, 60);
-  assert.equal(anna.early_days, 1); assert.equal(anna.early_minutes, 60);
-  assert.equal(result.data.schedule.expected_start.slice(0, 5), '08:00');
-  assert.equal((await harness.pg.query("SELECT count(*)::int n FROM badge_admin_audit WHERE action='site_schedule' AND resource_id=$1 AND admin_id=$2", [TEST_SITE, TEST_ADMIN])).rows[0].n, 1);
-  const cleared = await call('/admin/sites/' + TEST_SITE + '/schedule', { token: adminToken(), body: { expected_start: null, expected_end: null } });
-  assert.equal(cleared.status, 200);
-  const unset = await call('/admin/statistics' + quarter, { token: adminToken() });
-  assert.equal(unset.data.employees[0].late_days, null);
-  assert.equal(unset.data.summary.worked_seconds, 19 * 3600);
+  const result = (await call('/admin/statistics' + quarter, { token: adminToken() })).data;
+  const anna = result.employees.find(e => e.employee_id === TEST_EMPLOYEE);
+  const bruno = result.employees.find(e => e.employee_id === otherEmployee);
+  assert.equal(anna.worked_seconds, 14 * 3600); // Monday already punched out for lunch.
+  assert.equal(anna.break_seconds, 3600);
+  assert.equal(anna.late_days, 1); assert.equal(anna.early_days, 1);
+  assert.equal(bruno.late_days, null); assert.equal(bruno.worked_seconds, 4 * 3600);
+  const detail = (await call('/admin/statistics' + quarter + '&employee=' + TEST_EMPLOYEE, { token: adminToken() })).data;
+  assert.deepEqual(detail.employee_schedule, days);
+  const people = (await call('/admin/employees', { token: adminToken() })).data.data;
+  assert.deepEqual(people.find(e => e.id === TEST_EMPLOYEE).schedule, days);
+  for (const invalidDays of [[...days, days[0]], [{...days[0],weekday:8}], [{...days[0],break_end:null}], [{...days[0],break_start:'07:00'}]]) {
+    assert.equal((await call(path, { token: adminToken(), body: { days: invalidDays } })).status, 400);
+  }
+  assert.equal((await call(path, { token: adminToken(TEST_EDITOR), body: { days: [] } })).status, 403);
+  assert.equal((await call(path, { token: adminToken(), body: { days: [] } })).status, 200);
+  const unset = (await call('/admin/statistics' + quarter, { token: adminToken() })).data;
+  assert.equal(unset.employees[0].late_days, null);
+  assert.equal(unset.summary.worked_seconds, 19 * 3600);
 });
 
 test('cross-site exits, long intervals, open and manually closed entries are visible without inflating worked hours', async () => {
@@ -123,7 +129,7 @@ test('cross-site exits, long intervals, open and manually closed entries are vis
 test('Rome daylight saving, overnight schedules and quarter boundaries use elapsed durations and entry work dates', async () => {
   const employee = randomUUID();
   await harness.pg.query("INSERT INTO badge_employees (id,first_name,last_name,birth_date,job_role,phone,password_hash,status) VALUES ($1,'Turno','Notturno','1990-01-01','Operaio','+393331234570','hash-locale','active')", [employee]);
-  await call('/admin/sites/' + otherSite + '/schedule', { token: adminToken(), body: { expected_start: '22:00', expected_end: '06:00' } });
+  await call('/admin/employees/' + employee + '/schedule', { token: adminToken(), body: { days: [1,2,3,4,5,6,7].map(weekday => ({ weekday, expected_start: '22:00', expected_end: '06:00' })) } });
   // DST starts during this night: seven elapsed hours despite eight clock hours.
   await shift(employee, otherSite, '2026-03-28T22:00:00+01:00', '2026-03-29T06:00:00+02:00');
   await shift(employee, otherSite, '2026-03-31T22:00:00+02:00', '2026-04-01T06:00:00+02:00');
@@ -181,7 +187,7 @@ test('early-exit alerts wait for the expected end, minute boundaries are stable 
   const employee = randomUUID(), site = randomUUID();
   await harness.pg.query("INSERT INTO badge_sites (id,name,address,latitude,longitude) VALUES ($1,'Orari da verificare','Dati locali',40,14)", [site]);
   await harness.pg.query("INSERT INTO badge_employees (id,first_name,last_name,birth_date,job_role,phone,password_hash,status) VALUES ($1,'Confronto','Orario','1990-01-01','Operaio','+393331234573','hash-locale','active')", [employee]);
-  await call('/admin/sites/' + site + '/schedule', { token: adminToken(), body: { expected_start: '08:00', expected_end: '17:00' } });
+  await call('/admin/employees/' + employee + '/schedule', { token: adminToken(), body: { days: [1,2,3,4,5,6,7].map(weekday => ({ weekday, expected_start: '08:00', expected_end: '17:00' })) } });
   await shift(employee, site, '2026-01-08T08:00:59+01:00', '2026-01-08T17:00:00+01:00');
   const past = (await call('/admin/statistics' + quarter.replace(TEST_SITE, site), { token: adminToken() })).data;
   assert.equal(past.employees[0].late_days, 0);
@@ -191,9 +197,26 @@ test('early-exit alerts wait for the expected end, minute boundaries are stable 
   const future = (await call('/admin/statistics' + quarter.replace(TEST_SITE, site).replace('year=2026', 'year=2099') + '&employee=' + employee, { token: adminToken() })).data;
   assert.equal(future.employees[0].evaluated_exit_days, 0);
   assert.equal(future.days[0].early_minutes, null);
-  await call('/admin/sites/' + site + '/schedule', { token: adminToken(), body: { expected_start: '22:00', expected_end: '06:00' } });
+  await call('/admin/employees/' + employee + '/schedule', { token: adminToken(), body: { days: [1,2,3,4,5,6,7].map(weekday => ({ weekday, expected_start: '22:00', expected_end: '06:00' })) } });
   await shift(employee, site, '2025-10-25T22:00:00+02:00', '2025-10-26T06:00:00+01:00');
   const autumn = (await call('/admin/statistics' + quarter.replace(TEST_SITE, site).replace('year=2026', 'year=2025').replace('quarter=1', 'quarter=4'), { token: adminToken() })).data;
   assert.equal(autumn.summary.worked_seconds, 9 * 3600);
   assert.equal(autumn.employees[0].late_days, 0); assert.equal(autumn.employees[0].early_days, 0);
+});
+
+test('personal weekdays and all-QR day boundaries prevent false alerts on split-site and unscheduled days', async () => {
+  const employee=randomUUID();
+  await harness.pg.query("INSERT INTO badge_employees (id,first_name,last_name,birth_date,job_role,phone,password_hash,status) VALUES ($1,'Cambio','Sede','1990-01-01','Operaio','+393331234599','local','active')",[employee]);
+  const days=[{weekday:1,expected_start:'08:00',expected_end:'17:00',break_start:'12:00',break_end:'13:00'}];
+  assert.equal((await call('/admin/employees/'+employee+'/schedule',{token:adminToken(),body:{days}})).status,200);
+  await shift(employee,TEST_SITE,'2026-01-05T08:00:00+01:00','2026-01-05T12:30:00+01:00');
+  await shift(employee,otherSite,'2026-01-05T12:30:00+01:00','2026-01-05T17:00:00+01:00');
+  await shift(employee,TEST_SITE,'2026-01-06T10:00:00+01:00','2026-01-06T16:00:00+01:00'); // Tuesday not configured
+  const a=(await call('/admin/statistics'+quarter+'&employee='+employee,{token:adminToken()})).data;
+  const b=(await call('/admin/statistics'+quarter.replace(TEST_SITE,otherSite)+'&employee='+employee,{token:adminToken()})).data;
+  assert.equal(a.summary.break_seconds,1800);assert.equal(b.summary.break_seconds,1800);
+  assert.equal(a.summary.worked_seconds,10*3600);assert.equal(b.summary.worked_seconds,4*3600);
+  assert.equal(a.days.find(d=>d.date==='2026-01-06').late_minutes,null);
+  assert.equal(a.days.find(d=>d.date==='2026-01-05').early_minutes,null);
+  assert.equal(b.days[0].late_minutes,null);assert.equal(b.days[0].early_minutes,0);
 });

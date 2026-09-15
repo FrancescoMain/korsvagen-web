@@ -55,25 +55,6 @@ test('shows daily averages and excludes incomplete zero-hour totals from the low
   expect(screen.getByText('Totale parziale: escluso dal confronto')).toBeInTheDocument();
 });
 
-test('site settings can be enabled, saved and disabled, and refresh the comparison after each save', async () => {
-  let schedule: BadgeStatistics['schedule'] = { expected_start: null, expected_end: null };
-  get.mockImplementation(() => Promise.resolve({ ...result(), schedule }));
-  patch.mockImplementation((_path, body) => { schedule = body; return Promise.resolve({}); });
-  render(<StatisticsPanel sites={sites} employees={employees} />);
-  fireEvent.click(await screen.findByText('Orari previsti della sede'));
-  fireEvent.click(screen.getByRole('checkbox', { name: 'Confronta con gli orari previsti' }));
-  fireEvent.change(screen.getByLabelText('Ingresso previsto'), { target: { value: '08:00' } });
-  fireEvent.change(screen.getByLabelText('Uscita prevista'), { target: { value: '17:00' } });
-  fireEvent.click(screen.getByRole('button', { name: 'Salva orari' }));
-  await waitFor(() => expect(patch).toHaveBeenCalledWith('/sites/site-0/schedule', { expected_start: '08:00', expected_end: '17:00' }));
-  expect(await screen.findByText('Nessuno scostamento dagli orari previsti.')).toBeInTheDocument();
-  fireEvent.click(screen.getByText('Orari previsti della sede'));
-  fireEvent.click(screen.getByRole('checkbox', { name: 'Confronta con gli orari previsti' }));
-  fireEvent.click(screen.getByRole('button', { name: 'Salva orari' }));
-  await waitFor(() => expect(patch).toHaveBeenLastCalledWith('/sites/site-0/schedule', { expected_start: null, expected_end: null }));
-  expect(await screen.findByText('Imposta gli orari previsti per attivare queste segnalazioni.')).toBeInTheDocument();
-});
-
 test('opens quarterly daily history including individual punches and preserves employee selection across quarters', async () => {
   get.mockImplementation((_path, params) => Promise.resolve({
     ...result(), days: params.employee ? [{ date: '2026-01-05', first_entry: '2026-01-05T07:00:00Z', last_exit: '2026-01-05T16:00:00Z',
@@ -105,18 +86,4 @@ test('a slow response from the previous site cannot appear under the new QR and 
   fireEvent.click(screen.getByRole('button', { name: 'Riprova' }));
   expect(await screen.findByText('Nessun ingresso in questa sede nel trimestre selezionato.')).toBeInTheDocument();
   expect(screen.queryByRole('alert')).not.toBeInTheDocument();
-});
-
-test('a failed save retains the draft and does not claim that the schedule changed', async () => {
-  patch.mockRejectedValueOnce(new Error('Salvataggio non riuscito'));
-  render(<StatisticsPanel sites={sites} employees={employees} />);
-  fireEvent.click(await screen.findByText('Orari previsti della sede'));
-  fireEvent.click(screen.getByRole('checkbox', { name: 'Confronta con gli orari previsti' }));
-  fireEvent.change(screen.getByLabelText('Ingresso previsto'), { target: { value: '08:00' } });
-  fireEvent.change(screen.getByLabelText('Uscita prevista'), { target: { value: '17:00' } });
-  fireEvent.click(screen.getByRole('button', { name: 'Salva orari' }));
-  expect(await screen.findByRole('alert')).toHaveTextContent('Salvataggio non riuscito');
-  expect(screen.getByLabelText('Ingresso previsto')).toHaveValue('08:00');
-  expect(screen.queryByText('Orari aggiornati.')).not.toBeInTheDocument();
-  expect(get).toHaveBeenCalledTimes(1);
 });

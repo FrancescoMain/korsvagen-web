@@ -1,3 +1,6 @@
+export interface ScheduleDay {
+  weekday: number; expected_start: string; expected_end: string; break_start: string | null; break_end: string | null;
+}
 export interface SiteSchedule {
   expected_start: string | null;
   expected_end: string | null;
@@ -10,6 +13,7 @@ export interface EmployeeStatistics {
   presence_days: number;
   complete_days: number;
   worked_seconds: number;
+  break_seconds?: number;
   review_seconds: number;
   incomplete_intervals: number;
   review_intervals: number;
@@ -27,6 +31,7 @@ export interface StatisticsDay {
   first_entry: string;
   last_exit: string | null;
   worked_seconds: number;
+  break_seconds?: number;
   review_seconds: number;
   complete: boolean;
   late_minutes: number | null;
@@ -43,12 +48,14 @@ export interface StatisticsDay {
 export interface BadgeStatistics {
   site: { id: string; name: string; archived_at: string | null };
   schedule: SiteSchedule;
+  employee_schedule?: ScheduleDay[];
   period: { year: number; quarter: number; from: string; to: string };
   summary: {
     employees: number;
     presence_days: number;
     complete_days: number;
     worked_seconds: number;
+  break_seconds?: number;
     review_seconds: number;
     incomplete_intervals: number;
     review_intervals: number;

@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { adminBadge, messageOf } from './api';
+import ScheduleSettings from './ScheduleSettings';
 import { Employee, dateTime } from './types';
 
 export default function EmployeesPanel({ employees, onChange }: { employees: Employee[]; onChange: () => Promise<void> }) {
+  const [selected, setSelected] = useState<Employee | null>(null);
   const [search, setSearch] = useState('');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
@@ -42,6 +44,7 @@ export default function EmployeesPanel({ employees, onChange }: { employees: Emp
       <label>Password da comunicare<input readOnly value={temporary.password} onFocus={e => e.target.select()} /></label>
       <button className="badge-button" onClick={() => setTemporary(null)}>Ho comunicato la password · Chiudi</button>
     </div>}
+    {selected && <div><button className="badge-button" onClick={() => setSelected(null)}>Chiudi impostazioni</button><ScheduleSettings key={selected.id} employeeId={selected.id} name={selected.first_name + ' ' + selected.last_name} schedule={selected.schedule || []} onSaved={() => { setSelected(null); onChange(); }} /></div>}
     {/* Explicit roles preserve table semantics when CSS presents the rows as cards. */}
     <div className="badge-table-wrap badge-employees-wrap"><table className="badge-table badge-employees-table" role="table" aria-label="Dipendenti"><thead><tr role="row"><th scope="col" role="columnheader">Dipendente</th><th scope="col" role="columnheader">Data di nascita</th><th scope="col" role="columnheader">Mansione</th><th scope="col" role="columnheader">Stato</th><th scope="col" role="columnheader">Controlli browser</th><th scope="col" role="columnheader">Azioni</th></tr></thead><tbody>
       {visible.map(person => <tr key={person.id} role="row">
@@ -52,6 +55,7 @@ export default function EmployeesPanel({ employees, onChange }: { employees: Emp
         <td role="cell"><span className="badge-cell-label" aria-hidden="true">Controlli browser</span>{person.device_count || 0} browser osservati{person.first_device_hash && <small>Primo: {person.first_device_hash.slice(0, 12)}</small>}
           {!!person.shared_with?.length && <span className="badge-flag">Condiviso con: {person.shared_with.join(', ')}</span>}</td>
         <td role="cell" className="badge-employee-actions"><span className="badge-cell-label" aria-hidden="true">Azioni</span><div className="badge-actions">
+          <button className="badge-button" onClick={() => { setSelected(person); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>Giorni e orari</button>
           {person.status !== 'active' && <button className="badge-button primary" disabled={busy} onClick={() => status(person, 'active')}>Attiva</button>}
           {person.status === 'active' && <button className="badge-button danger" disabled={busy} onClick={() => status(person, 'suspended')}>Sospendi</button>}
           <button className="badge-button" disabled={busy} onClick={() => reset(person)}>Reimposta password</button>

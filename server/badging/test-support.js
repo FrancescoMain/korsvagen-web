@@ -74,6 +74,7 @@ export async function fixture() {
   await pg.exec('CREATE ROLE anon; CREATE ROLE authenticated; CREATE ROLE service_role BYPASSRLS; CREATE TABLE admin_users (id uuid PRIMARY KEY, role text, is_active boolean); GRANT SELECT ON admin_users TO service_role;');
   await pg.exec(await readFile(new URL('../../database/badging.sql', import.meta.url), 'utf8'));
   await pg.exec(await readFile(new URL('../../database/badging-statistics.sql', import.meta.url), 'utf8'));
+  await pg.exec(await readFile(new URL('../../database/badging-personal-schedules.sql', import.meta.url), 'utf8'));
   await pg.query("INSERT INTO admin_users VALUES ($1,'admin',true)", [TEST_ADMIN]);
   await pg.query("INSERT INTO admin_users VALUES ($1,'editor',true)", [TEST_EDITOR]);
   await pg.query("INSERT INTO badge_sites (id,name,address,latitude,longitude,qr_token) VALUES ($1,'Cantiere dimostrativo','Dati di prova locali',40,14,$2)", [TEST_SITE, TEST_QR]);

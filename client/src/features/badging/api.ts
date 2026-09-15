@@ -67,7 +67,7 @@ export const adminBadge = {
   post: async <T,>(path: string, body: unknown = {}): Promise<T> => (await apiClient.post('/badging/admin' + path, body)).data,
   put: async (path: string, body: unknown) => apiClient.put('/badging/admin' + path, body),
   patch: async (path: string, body: unknown) => apiClient.patch('/badging/admin' + path, body),
-  remove: async (path: string) => apiClient.delete('/badging/admin' + path),
+  remove: async (path: string, data?: unknown) => apiClient.delete('/badging/admin' + path, { data }),
   csv: async (params: object) => {
     try {
       const response = await apiClient.get('/badging/admin/reports.csv', { params, responseType: 'blob', timeout: 60000 });

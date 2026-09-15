@@ -159,3 +159,10 @@
   .badge-sheet ol { font-size: 14pt; }
   @page { size: A4; margin: 12mm; }
 }
+
+.badge-weekday { min-width: 0; margin: 16px 0; padding: 16px; border: 1px solid #dce5df; border-radius: 12px; }
+.badge-weekday legend { padding: 0 8px; font-weight: 700; }
+.badge-weekday .badge-schedule-toggle { margin: 8px 0; }
+.badge-event-editor { max-width: 850px; scroll-margin-top: 24px; }
+.badge-event-editor form > label { margin-bottom: 16px; }
+.badge-event-editor > button { margin-top: 16px; }

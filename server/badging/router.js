@@ -3,7 +3,7 @@ import bcrypt from 'bcryptjs';
 import { randomBytes } from 'node:crypto';
 import { badgeSecurity } from './security.js';
 import { createAddressSearch } from './geocoding.js';
-import { BadgeError, invalid, uuid, textField, phoneNumber, passwordInput, registration, siteInput, positionInput, reportFilters, statisticsFilters, scheduleInput, csvCell } from './validation.js';
+import { BadgeError, invalid, uuid, textField, phoneNumber, passwordInput, registration, siteInput, positionInput, reportFilters, statisticsFilters, employeeScheduleInput, correctionTime, csvCell } from './validation.js';
 
 const EMPLOYEE_FIELDS = 'id,first_name,last_name,birth_date,job_role,phone,status,must_change_password,current_site_id,current_entry_at,created_at';
 const SESSION_AUDIENCE = 'korsvagen-badging';
@@ -17,6 +17,9 @@ const DATABASE_ERRORS = {
   SITE_OCCUPIED: [409, 'Ci sono ingressi ancora aperti in questa sede. Registrare prima le uscite.'],
   REQUEST_CONFLICT: [409, 'Richiesta già utilizzata. Aggiorna lo stato prima di timbrare.'],
   INVALID_INPUT: [400, 'Dati della richiesta non validi.'],
+  EVENT_NOT_FOUND: [404, 'Timbratura non trovata.'],
+  EVENT_CHANGED: [409, 'La timbratura è cambiata. Chiudi e riapri la modifica.'],
+  EVENT_OVERLAP: [409, 'L’orario deve restare tra la timbratura precedente e quella successiva.'],
   NO_OPEN_ENTRY: [409, 'Non risulta un ingresso aperto. Aggiorna i dati.'],
 };
 
@@ -134,7 +137,7 @@ export function createBadgeRouter({ db, secret, verifyAdminToken, searchAddresse
   }));
 
   router.get('/me', requireEmployee, run(async (req, res) => {
-    const last = checked(await db.from('badge_events').select('id,action,occurred_at,site_name,outcome,reason').eq('employee_id', req.employee.id).order('occurred_at', { ascending: false }).limit(1));
+    const last = checked(await db.from('badge_effective_events').select('id,action,occurred_at,site_name,outcome,reason').eq('employee_id', req.employee.id).order('occurred_at', { ascending: false }).limit(1));
     const current = req.employee.current_site_id
       ? checked(await db.from('badge_sites').select('name').eq('id', req.employee.current_site_id).maybeSingle()) : null;
     const { session_version, ...employee } = req.employee;
@@ -204,16 +207,12 @@ export function createBadgeRouter({ db, secret, verifyAdminToken, searchAddresse
   router.get('/admin/sites', run(async (req, res) => {
     res.json({ data: await allRows(() => db.from('badge_sites').select('*').order('created_at').order('id')) });
   }));
-  router.patch('/admin/sites/:id/schedule', run(async (req, res) => {
-    const schedule = scheduleInput(req.body);
-    const data = await rpcRecord('badge_set_site_schedule', {
-      p_admin: req.admin.id, p_site: uuid(req.params.id), p_start: schedule.start, p_end: schedule.end,
-    });
-    res.json({ data });
+  router.patch('/admin/sites/:id/schedule', run(async () => {
+    throw new BadgeError(410, 'EMPLOYEE_SCHEDULE_REQUIRED', 'Imposta giorni e orari sul singolo dipendente in Dipendenti → Giorni e orari.');
   }));
   router.get('/admin/statistics', run(async (req, res) => {
     const filters = statisticsFilters(req.query);
-    const data = await rpc('badge_statistics', {
+    const data = await rpc('badge_employee_statistics', {
       p_from: filters.from, p_to: filters.to, p_site: filters.site, p_employee: filters.employee,
     });
     res.json({ ...data, period: { year: filters.year, quarter: filters.quarter, from: filters.from, to: filters.to } });
@@ -231,6 +230,7 @@ export function createBadgeRouter({ db, secret, verifyAdminToken, searchAddresse
 
   router.get('/admin/employees', run(async (req, res) => {
     const employees = await allRows(() => db.from('badge_employees').select(EMPLOYEE_FIELDS + ',first_device_hash').order('last_name').order('id'));
+    const schedules = await allRows(() => db.from('badge_employee_schedules').select('*').order('employee_id').order('weekday'));
     const devices = await allRows(() => db.from('badge_devices').select('*').order('device_hash').order('employee_id'));
     const deviceUsers = new Map();
     for (const device of devices) {
@@ -242,9 +242,35 @@ export function createBadgeRouter({ db, secret, verifyAdminToken, searchAddresse
       const sharedIds = new Set(ownDevices.flatMap(device => [...deviceUsers.get(device.device_hash)]));
       return {
         ...employee, device_count: ownDevices.length,
+        schedule: schedules.filter(day => day.employee_id === employee.id).map(day => ({
+          weekday: day.weekday, expected_start: day.expected_start.slice(0, 5), expected_end: day.expected_end.slice(0, 5),
+          break_start: day.break_start?.slice(0, 5) || null, break_end: day.break_end?.slice(0, 5) || null,
+        })),
         shared_with: employees.filter(other => other.id !== employee.id && sharedIds.has(other.id)).map(other => other.first_name + ' ' + other.last_name),
       };
     }) });
+  }));
+
+  router.patch('/admin/employees/:id/schedule', run(async (req, res) => {
+    const data = await rpc('badge_set_employee_schedule', { p_admin: req.admin.id, p_employee: uuid(req.params.id), p_days: employeeScheduleInput(req.body) });
+    res.json({ data });
+  }));
+
+  router.get('/admin/events/:id', run(async (req, res) => {
+    const data = await rpc('badge_event_detail', { p_event: uuid(req.params.id) });
+    if (!data) throw new BadgeError(404, 'EVENT_NOT_FOUND', DATABASE_ERRORS.EVENT_NOT_FOUND[1]);
+    res.json(data);
+  }));
+  for (const method of ['patch', 'delete']) router[method]('/admin/events/:id', run(async (req, res) => {
+    const id = uuid(req.params.id);
+    if (!Number.isSafeInteger(req.body.revision) || req.body.revision < 0) invalid('Versione della timbratura non valida.');
+    const original = await rpc('badge_event_detail', { p_event: id });
+    if (!original) throw new BadgeError(404, 'EVENT_NOT_FOUND', DATABASE_ERRORS.EVENT_NOT_FOUND[1]);
+    const data = await rpc('badge_adjust_event', { p_admin: req.admin.id, p_event: id, p_revision: req.body.revision,
+      p_at: method === 'patch' ? correctionTime(req.body.local_time, original.occurred_at) : null,
+      p_delete: method === 'delete', p_paired_exit: req.body.paired_exit ? uuid(req.body.paired_exit) : null,
+      p_reason: textField(req.body.reason, 'Motivo della modifica', 5, 500) });
+    res.json(data);
   }));
 
   router.patch('/admin/employees/:id', run(async (req, res) => {
