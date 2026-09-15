@@ -41,7 +41,7 @@
 .badge-receipt.success { border-color: #97c6a4; background: #eaf8ee; color: #245236; }
 .badge-receipt strong, .badge-receipt span { display: block; }
 .badge-receipt strong { font-size: 20px; margin-bottom: 6px; }
-.badge-admin { color: #233b2d; max-width: 1600px; margin: 0 auto; }
+.badge-admin { color: #233b2d; max-width: 1600px; margin: 0; }
 .badge-admin-heading { display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; margin-bottom: 16px; }
 .badge-tabs { display: flex; flex-wrap: wrap; gap: 4px; border-bottom: 1px solid #cbd9cf; margin: 0 0 28px; }
 .badge-tabs button { cursor: pointer; font: inherit; font-size: 14px; font-weight: 600; background: transparent; border: 0; padding: 14px 18px; color: #4b6152; border-bottom: 3px solid transparent; }

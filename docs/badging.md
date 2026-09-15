@@ -388,3 +388,19 @@ Pubblicato nello stesso giorno il commit `61ff228` sul frontend
 pubblico, usando risposte API dimostrative nel browser senza scrivere dati reali.
 Nessun errore JavaScript; ripristinata la sessione anonima e verificato il login.
 Versione frontend precedente: `dpl_Cnu5KP2mFQZ1fjF8uyM9F51yJm1Y`.
+
+## Allineamento e anteprime dei link — 2026-09-15
+
+Su richiesta dell'utente, il contenitore comune di Presenze è allineato al
+margine sinistro del contenuto, anche sui monitor larghi. Conserva il limite
+di 1600 px e il comportamento responsive delle tabelle. Verificate sulla build
+44 combinazioni Chromium da 320 a 3440 px, sidebar aperta/chiusa e schede
+Dipendenti/Report: bordo sinistro coincidente con il padding del main,
+controlli visibili e nessun overflow della pagina o errore JavaScript.
+
+Il titolo e la descrizione HTML iniziali non contengono più «Sito in Arrivo».
+Metadati Open Graph espliciti forniscono nome, attività e logo KORSVAGEN ai
+servizi di anteprima senza richiedere JavaScript. Il logo riutilizza un asset
+pubblico esistente; l'HTML compilato è stato verificato insieme all'immagine.
+`agent-gate full` superato (34 test server, 12 client, TypeScript, lint, build);
+build ripetuta dopo la modifica dei metadati, con soli warning preesistenti.
