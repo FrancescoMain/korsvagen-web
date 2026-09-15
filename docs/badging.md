@@ -85,7 +85,7 @@ web usate qui; il fingerprinting non è una prova affidabile dell'identità.
 - [Gate](../.agent-gates): sintassi server, TypeScript, lint delle schermate nuove,
   test API/database/client e build frontend.
 
-Per l'ambiente reale, dopo autorizzazione alla pubblicazione:
+Per preparare ulteriori ambienti, dopo autorizzazione alla pubblicazione:
 
 1. Applicare lo schema in un progetto Supabase di preview e verificare le funzioni
    tramite PostgREST. È richiesto PostgreSQL 15 o successivo per la vista con
@@ -166,3 +166,72 @@ Il lint senza warning riguarda il nuovo modulo e le route React. Il sito preesis
 contiene warning lint e dati Browserslist da aggiornare. Nessuna migrazione remota,
 pubblicazione, verifica GPS fisica, prova iOS o test multi-connessione è implicita
 nei risultati locali.
+
+## Produzione — 2026-09-15
+
+Pubblicazione completata su richiesta dell'utente. La gestione è disponibile su
+[www.korsvagen.it/dashboard/badging](https://www.korsvagen.it/dashboard/badging),
+con il normale account amministrativo del CMS. I QR generati dalla dashboard
+puntano a `https://www.korsvagen.it/badge/:token`.
+
+| Componente | Versione pubblicata |
+| --- | --- |
+| Supabase | Progetto `xmkbguocqvhhydinlrwg`, PostgreSQL 17.4; migrazione `20260915081623_badging_employee_attendance` |
+| Backend Vercel | `dpl_FogSUGw6JhJT3fX7z78jwsXdPjFi`, READY; alias `korsvagen-web-be.vercel.app`; sorgenti `11e70c3` |
+| Frontend Vercel | `dpl_4aoCs5Wevr4UYcjvU8bW7QeArXQf`, READY; dominio `www.korsvagen.it`; sorgenti `df49135` |
+
+Lo schema è stato provato prima in una transazione conclusa con ROLLBACK, poi
+applicato tramite l'API delle migrazioni Supabase. Verificati i corpi delle sette
+funzioni contro il file locale, RLS sulle sei tabelle e privilegi di accesso.
+La nuova cronologia delle migrazioni registra il badging: non ricostruisce la
+storia precedente del database.
+
+Il deploy carica i file dei commit locali nei due progetti Vercel esistenti,
+con directory radice rispettivamente `server` e `client`. Questi commit sono
+ancora da sincronizzare con GitHub. Le variabili già presenti includono il
+corretto URL API e i segreti del backend; non è stata necessaria una rotazione.
+
+La prima build cloud del frontend ha incontrato i warning preesistenti del sito,
+trattati come errori da Create React App con `CI=true`. Il file
+[client/vercel.json](../client/vercel.json) imposta `CI=false npm run build`,
+come nella build locale validata: i warning rimangono visibili. I gate espliciti
+TypeScript, test e lint del modulo conservano i propri criteri bloccanti.
+Build locale con URL API di produzione e build Vercel completate.
+
+### Verifiche dopo la pubblicazione
+
+Dodici gruppi di prove sulle API pubblicate, con database e PostgREST reali:
+registrazione, account pending, attivazione, login, separazione dei ruoli,
+timbrature con coordinate obbligatorie, geofence, precisione GPS, report/CSV,
+browser condiviso, chiusura amministrativa, reset password e revoca dei QR.
+
+Le richieste HTTP simultanee hanno confermato sia una sola ricevuta per retry
+con lo stesso UUID sia un solo ingresso accettato fra due richieste distinte.
+Il report della prova conteneva otto eventi: tre ingressi, due uscite e tre
+tentativi respinti. La chiusura amministrativa non ha aggiunto un'uscita.
+
+Dal browser sul dominio pubblico: creazione sede, schede dipendenti e report,
+QR decodificato verso il dominio corretto, PDF su una pagina A4, login mobile
+a 390 px senza scorrimento orizzontale e redirect al login della dashboard
+anonima. Nessun errore JavaScript di esecuzione osservato nelle nuove schermate.
+Health del backend e CORS dal dominio pubblico verificati.
+
+Le fixture erano fittizie e sono state rimosse per identificatori univoci.
+A fine collaudo: zero sedi, dipendenti, eventi, associazioni browser e audit di
+prova; i due amministratori operativi preesistenti sono rimasti attivi.
+
+### Primo utilizzo e punti aperti
+
+Aprire **Presenze → Sedi e QR → Nuova sede** sul posto, impostare la posizione
+effettiva e verificare raggio e precisione con i telefoni dei dipendenti prima
+di distribuire il QR. L'attivazione degli account rimane manuale.
+
+Restano le prove con GPS fisico su Android/iPhone, la definizione di informativa
+e conservazione dei dati e l'eventuale introduzione del mutation runner automatico.
+Il collaudo remoto ha verificato coordinate fornite alle API, non il GPS fisico.
+
+Riferimenti per un eventuale ripristino applicativo: frontend precedente
+`dpl_CeMuAkhzhcM41EKjz2ZymaZVZz7g`, backend precedente
+`dpl_9KuApcvWVuiij25wJ6GFkiMwe8M6`. Il ripristino dei deployment non richiede
+di cancellare lo schema o lo storico delle presenze. Il rollback non è stato
+eseguito durante questo collaudo.
