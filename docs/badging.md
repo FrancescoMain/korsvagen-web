@@ -404,3 +404,8 @@ servizi di anteprima senza richiedere JavaScript. Il logo riutilizza un asset
 pubblico esistente; l'HTML compilato è stato verificato insieme all'immagine.
 `agent-gate full` superato (34 test server, 12 client, TypeScript, lint, build);
 build ripetuta dopo la modifica dei metadati, con soli warning preesistenti.
+
+Pubblicato il commit `e3f29e7`, frontend `dpl_G52eZRUWFz7ob4JCCqAR3a5DmT13`,
+READY su `www.korsvagen.it`. Ripetute le 44 combinazioni sul dominio pubblico;
+verificati HTML iniziale di home/login/Presenze e logo con richiesta da crawler.
+Il controllo non verifica la cache interna di WhatsApp. Backend invariato.
