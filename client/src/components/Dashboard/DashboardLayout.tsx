@@ -10,17 +10,18 @@ const LayoutContainer = styled.div<{ $sidebarCollapsed: boolean }>`
   grid-template-areas:
     "sidebar header"
     "sidebar main";
+  /* A wide header must not enlarge the content column beyond the viewport. */
   grid-template-columns: ${({ $sidebarCollapsed }) =>
-    $sidebarCollapsed ? "80px 1fr" : "250px 1fr"};
+    $sidebarCollapsed ? "80px minmax(0, 1fr)" : "250px minmax(0, 1fr)"};
   grid-template-rows: 60px 1fr;
   min-height: 100vh;
   transition: grid-template-columns 0.3s ease-in-out;
 
   @media (max-width: 768px) {
     grid-template-areas:
-      "header header"
-      "main main";
-    grid-template-columns: 1fr;
+      "header"
+      "main";
+    grid-template-columns: minmax(0, 1fr);
     grid-template-rows: 60px 1fr;
   }
 `;
@@ -36,10 +37,12 @@ const SidebarArea = styled.div`
 
 const HeaderArea = styled.div`
   grid-area: header;
+  min-width: 0;
 `;
 
 const MainArea = styled.main`
   grid-area: main;
+  min-width: 0;
   background-color: var(--bg-secondary);
   overflow-y: auto;
   padding: 1.5rem;

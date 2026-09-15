@@ -5,7 +5,6 @@ import { useAuth } from "../../hooks/useAuth";
 import {
   Home,
   FileText,
-  Image,
   Settings,
   Menu,
   X,
@@ -206,9 +205,12 @@ const NavLink = styled(Link)<{
     transform: ${({ $collapsed }) => ($collapsed ? "scale(1.05)" : "none")};
   }
 
+  svg {
+    flex-shrink: 0;
+  }
+
   span {
-    opacity: ${({ $collapsed }) => ($collapsed ? 0 : 1)};
-    transition: opacity 0.3s ease-in-out;
+    display: ${({ $collapsed }) => ($collapsed ? "none" : "inline")};
     white-space: nowrap;
   }
 `;
@@ -253,6 +255,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <NavItem key={item.title} $active={active} $collapsed={collapsed}>
               <NavLink
                 to={item.path}
+                aria-label={item.title}
+                title={collapsed ? item.title : undefined}
                 $active={active}
                 $collapsed={collapsed}
                 onClick={() => handleNavigation(item.path)}

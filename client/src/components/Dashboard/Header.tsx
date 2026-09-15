@@ -12,7 +12,6 @@ import {
 } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 import { useTheme } from "../../contexts/ThemeContext";
-import { Button } from "../ui/Button";
 
 interface HeaderProps {
   onToggleMobileSidebar: () => void;
@@ -32,6 +31,7 @@ const HeaderContainer = styled.header`
 
 const LeftSection = styled.div`
   display: flex;
+  flex-shrink: 0;
   align-items: center;
   gap: 1rem;
 `;
@@ -70,6 +70,7 @@ const BreadcrumbContainer = styled.div`
 
 const RightSection = styled.div`
   display: flex;
+  min-width: 0;
   align-items: center;
   gap: 1rem;
 `;
@@ -117,10 +118,12 @@ const ThemeToggle = styled.button`
 
 const UserMenuContainer = styled.div`
   position: relative;
+  min-width: 0;
 `;
 
 const UserMenuTrigger = styled.button`
   display: flex;
+  max-width: 100%;
   align-items: center;
   gap: 0.5rem;
   background: none;
@@ -139,6 +142,7 @@ const UserMenuTrigger = styled.button`
 
 const UserInfo = styled.div`
   display: flex;
+  min-width: 0;
   flex-direction: column;
   align-items: flex-start;
   gap: 0.125rem;
@@ -149,6 +153,10 @@ const UserInfo = styled.div`
 `;
 
 const UserName = styled.span`
+  max-width: min(20vw, 240px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   font-size: 0.875rem;
   font-weight: 500;
   color: var(--text-primary);
@@ -277,7 +285,7 @@ export const Header: React.FC<HeaderProps> = ({
           <UserMenuTrigger onClick={toggleUserMenu}>
             <User size={20} />
             <UserInfo>
-              <UserName>{user?.username}</UserName>
+              <UserName title={user?.username}>{user?.username}</UserName>
               <UserRole>{user?.role}</UserRole>
             </UserInfo>
             <ChevronDown size={16} />

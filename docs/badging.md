@@ -321,7 +321,8 @@ sincronizzare con GitHub. Non è stato eseguito un rollback.
 
 La tabella ereditava una larghezza minima di 850 px: nelle finestre strette le
 colonne a destra erano raggiungibili solo scorrendo un contenitore senza una
-barra sempre visibile. La griglia della dashboard non superava la viewport.
+barra sempre visibile. La prima verifica con intestazione breve non aveva
+evidenziato il secondo problema della griglia, descritto sotto.
 
 Con al massimo 900 px disponibili, ogni riga ora diventa una scheda con tutti
 i dati etichettati e le azioni visibili. La container query considera anche lo
@@ -356,3 +357,27 @@ Rimossa la sessione dimostrativa, verificato il redirect anonimo al login.
 Backend invariato, confermato da `/api/health/version` sul commit `c154187`.
 Per ripristinare il solo frontend, la versione precedente è
 `dpl_DUmnxChTZtasde2tU5CnpuqqW3uD`; nessun rollback eseguito.
+
+## Contenimento della dashboard — correzione del 2026-09-15
+
+Gli screenshot successivi mostravano tagli anche ai filtri e ai riepiloghi del
+report. Riprodotto uno spostamento analogo con un nome utente lungo nell'header:
+la colonna `1fr` conservava il minimo intrinseco dell'intestazione e allargava
+l'intera pagina. Con viewport di 1686 px e un nome di prova di 180 caratteri,
+il documento arrivava a 2192 px; il blocco Presenze centrato usciva a destra.
+I precedenti collaudi usavano un nome admin breve e non coprivano questo caso.
+
+La griglia comune ora usa `minmax(0, 1fr)` e `min-width: 0` per header e main;
+su mobile dichiara una sola colonna anche nelle aree. Il nome utente ha una
+larghezza limitata e i puntini di sospensione, con nome completo nel tooltip.
+La sidebar chiusa rimuove il testo dal layout: la precedente sola opacità
+lasciava le etichette nel flex e schiacciava le icone. Le icone conservano ora
+la dimensione, e i link mantengono nomi accessibili e tooltip.
+
+Verifiche locali: 44 combinazioni in Chromium e 44 in Firefox 154, da 320 a
+3440 px, Dipendenti/Report e sidebar aperta/chiusa, con nome admin lungo.
+Controllati documento, header, filtri, statistiche, azioni, icone e accesso
+all'ultima colonna del report tramite lo scorrimento della sola tabella.
+Il medesimo controllo fallisce sul deployment precedente del frontend.
+`agent-gate full` superato: 34 test server, 12 client, TypeScript, lint e build;
+verificato anche il lint dei tre componenti della dashboard modificati.
