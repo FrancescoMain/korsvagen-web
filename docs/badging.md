@@ -151,6 +151,19 @@ incompleti nella graduatoria; sorgenti ripristinati. Il mutation runner automati
 resta assente. Browser Chromium: flussi reali contro PostgreSQL locale isolato,
 22 combinazioni da 320 a 3440 px con sidebar aperta/chiusa, nessun overflow o
 errore JavaScript.
+
+Pubblicato il commit `5045373` il 2026-09-15: migrazione Supabase
+`20260915110523_badging_statistics`, backend `dpl_4ZLtqoSGRn1pJERTTQfn4KVtcBMc`
+e frontend `dpl_6VpPPxYeNrZdzaDpDSwBe43tgwPE`, entrambi READY sugli alias
+abituali. DDL provato con ROLLBACK; definizioni dei due RPC e privilegi confrontati
+dopo l'applicazione. L'ultimo gate fast include 43 test server e 17 client.
+Sul sito pubblico ripetuti i flussi contro il database reale e le 22 combinazioni
+responsive, con amministratore, due sedi e tre dipendenti temporanei; fixture,
+timbrature e audit rimossi e redirect anonimo al login verificato. Health conferma
+il commit del backend; titolo e metadati delle anteprime restano corretti.
+Ripristino del solo codice: backend precedente `dpl_4Sc9SizWFyLZXu9oZ9c4Fi2yAbZ1`,
+frontend precedente `dpl_G52eZRUWFz7ob4JCCqAR3a5DmT13`. La migrazione additiva
+può restare applicata in caso di rollback del codice, conservando le impostazioni.
 Gli ingressi aperti sono uno stato corrente, indipendente dal periodo selezionato.
 
 ## Controlli e limiti
