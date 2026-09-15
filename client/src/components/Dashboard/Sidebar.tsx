@@ -1,6 +1,7 @@
 import React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import styled from "styled-components";
+import { useAuth } from "../../hooks/useAuth";
 import {
   Home,
   FileText,
@@ -14,12 +15,14 @@ import {
   Newspaper,
   Briefcase,
   MessageCircle,
+  QrCode,
 } from "lucide-react";
 
 interface NavigationItem {
   title: string;
   icon: React.ReactNode;
   path: string;
+  adminOnly?: boolean;
 }
 
 interface SidebarProps {
@@ -29,6 +32,12 @@ interface SidebarProps {
 }
 
 const navigationItems: NavigationItem[] = [
+  {
+    title: "Presenze e QR",
+    icon: <QrCode size={20} />,
+    path: "/dashboard/badging",
+    adminOnly: true,
+  },
   {
     title: "Dashboard",
     icon: <Home size={20} />,
@@ -210,6 +219,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onToggle,
   onNavigate,
 }) => {
+  const { hasRole } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -236,7 +246,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       </SidebarHeader>
 
       <Navigation>
-        {navigationItems.map((item) => {
+        {navigationItems.filter(item => !item.adminOnly || hasRole(["admin", "super_admin"])).map((item) => {
           const active = isActive(item.path);
 
           return (

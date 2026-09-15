@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+set -euo pipefail
+cd "$(dirname "$0")"
+
+case "${1:-}" in
+  mutation)
+    echo "agent-gate: mutation runner not configured; see docs/badging.md for the manual probe and /gate-setup mutation." >&2
+    exit 2
+    ;;
+  fast|full) ;;
+  *) echo "usage: .agent-gates <fast|full|mutation>" >&2; exit 64 ;;
+esac
+
+git diff --check
+for source in server/index.js server/routes/badging.js server/badging/router.js server/badging/security.js server/badging/validation.js; do
+  node --check "$source"
+done
+npm run typecheck --prefix client
+npm run lint:badging --prefix client
+npm test --prefix server
+npm run test:ci --prefix client
+if [[ "$1" == "full" ]]; then
+  npm run build --prefix client
+fi

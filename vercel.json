@@ -16,6 +16,14 @@
       "dest": "/server/index.js"
     },
     {
+      "src": "/badge/[^/]+/?",
+      "dest": "/build/index.html"
+    },
+    {
+      "src": "/dashboard/badging/?",
+      "dest": "/build/index.html"
+    },
+    {
       "src": "/(.*)",
       "dest": "/build/$1"
     }

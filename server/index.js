@@ -56,6 +56,7 @@ import newsRoutes from "./routes/news.js";
 import jobsRoutes from "./routes/jobs-new.js";
 import messagesRoutes from "./routes/messages.js";
 import policiesRoutes from "./routes/policies.js";
+import badgingRoutes from "./routes/badging.js";
 
 // Inizializza l'app Express
 const app = express();
@@ -213,6 +214,9 @@ app.options("*", (req, res) => {
 
 // Rate Limiting: Prevenzione attacchi DDoS
 const generalLimiter = rateLimit({
+  // A shared office/cantiere IP must not exhaust the CMS limiter.
+  // Badging applies persistent, per-account/IP limits in its own router.
+  skip: (req) => req.path === "/api/badging" || req.path.startsWith("/api/badging/"),
   windowMs: (parseInt(process.env.RATE_LIMIT_WINDOW) || 15) * 60 * 1000, // 15 minuti default
   max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 100, // 100 richieste per finestra
   message: {
@@ -372,6 +376,7 @@ app.use("/api/auth", (req, res, next) => {
 
 // Autenticazione - login, logout, refresh token
 app.use("/api/auth", authRoutes);
+app.use("/api/badging", badgingRoutes);
 
 // Dashboard - statistiche, messaggi, gestione contenuti
 app.use("/api/dashboard", dashboardRoutes);

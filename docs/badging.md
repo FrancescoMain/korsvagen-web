@@ -1,0 +1,168 @@
+# Presenze tramite QR
+
+## Contratto della prima versione
+
+- Ogni sede ha un QR casuale, stampabile anche in più copie. Creazione, modifica,
+  rigenerazione e archiviazione sono riservate ad admin e super_admin. Gli editor
+  del CMS e gli account dei dipendenti non accedono ai dati delle presenze.
+- L'indirizzo pubblico è /badge/:token; la dashboard è /dashboard/badging.
+  La pagina del dipendente carica separatamente dal sito e dal CMS.
+- Registrazione con nome, cognome, data di nascita, mansione, cellulare e password.
+  Account inizialmente in attesa: il responsabile verifica la persona e lo attiva.
+  Il numero di telefono identifica l'account; non viene inviato un SMS di verifica.
+- Accesso ricordato per 30 giorni. Password temporanea generata dal responsabile
+  in caso di smarrimento, da sostituire prima di timbrare. Sospensione e reset
+  revocano le sessioni precedenti.
+- Ingresso e uscita acquisiscono posizione e precisione soltanto su pressione
+  del pulsante. Senza posizione valida non si registra una presenza. Data e ora
+  vengono dal database; l'orologio del cellulare non determina la timbratura.
+- Raggio predefinito 200 m, errore GPS massimo 100 m; entrambi configurabili.
+  Fuori zona si blocca per impostazione iniziale; ogni sede può invece accettare
+  con segnalazione. Una posizione troppo imprecisa viene sempre respinta.
+- Un solo ingresso aperto per dipendente. L'uscita può avvenire in un'altra sede,
+  con posizione valida per quella sede e anomalia esplicita. Un ingresso dimenticato
+  può essere chiuso dal responsabile con motivazione obbligatoria: rimane annotato
+  sulla riga originale e non genera un'uscita, una posizione o ore inventate.
+- Le ricevute sono append-only per il backend. I tentativi con coordinate valide
+  ma respinti restano separati dalle presenze accettate. Richieste prive di posizione
+  o autenticazione valida non diventano eventi di presenza.
+- Rigenerare il QR invalida i fogli precedenti; modificare i dati della sede mantiene
+  il collegamento. Eliminare il QR archivia la sede e conserva lo storico. Gli
+  ingressi aperti devono essere risolti prima dell'archiviazione.
+
+## Report
+
+Filtri per intervallo, sede (anche archiviata), dipendente, esito e anomalie.
+Pagine da 50 righe, riepiloghi calcolati su tutti i risultati, elenco degli ingressi
+attualmente aperti. Sono visibili dati anagrafici, mansione, sede, ingresso/uscita,
+coordinate, collegamento alla mappa, precisione, distanza, identificativo del browser,
+anomalie e motivazioni delle chiusure amministrative.
+
+Date interpretate nel fuso Europe/Rome, inclusi i cambi d'ora legale; UTC conservato
+nel database e nel CSV. Periodo massimo 93 giorni. Il CSV esporta tutti i risultati,
+fino a 20.000 righe: oltre questa soglia chiede di ridurre i filtri. Le celle vengono
+quotate e protette dall'esecuzione di formule nei fogli di calcolo.
+
+Le ore rappresentano gli intervalli chiusi da vere uscite e sono attribuite alla
+data e alla sede di uscita. Comprendono gli intervalli anomali da verificare.
+Non vengono spezzate automaticamente per giorno, né elaborate come buste paga.
+Gli ingressi aperti sono uno stato corrente, indipendente dal periodo selezionato.
+
+## Controlli e limiti
+
+| Caso | Controllo incluso | Limite / eventuale passo successivo |
+| --- | --- | --- |
+| Foto del QR usata da casa | Posizione obbligatoria, raggio verificato nel database | Il browser non può attestare che le coordinate siano autentiche; un utente esperto può simularle. |
+| Stesso browser per più persone | Identificativo casuale firmato dal server, conservato dopo il logout; associazioni e alert retroattivi per entrambi gli account | Non è IMEI né identificazione certa dell'hardware. |
+| Altro browser o dati cancellati | Segnalazione quando il browser differisce dal primo utilizzato | Prima timbratura e identità browser separate non provano chi impugna il telefono. Si può aggiungere approvazione dei nuovi browser. |
+| Doppio tocco o risposta persa | Richiesta identificata una sola volta, ricevuta recuperabile, transazione e blocco della riga dipendente | Nessuna conferma offline; occorre ritrovare connessione e posizione. |
+| Account inventato o credenziali condivise | Attivazione manuale, password con hash bcrypt, segnalazioni browser | La verifica iniziale del responsabile resta necessaria. |
+| QR vecchio o alterato | Token casuale, rigenerazione e revoca immediata | Il QR identifica una sede, non è una prova di presenza. |
+| Spostamento improbabile | Segnalazione oltre 5 km a velocità media superiore a 180 km/h | È un indizio da verificare, non una decisione disciplinare automatica. |
+| Uscita dimenticata | Ingresso aperto oltre 16 ore segnalato; chiusura motivata del responsabile | Le rettifiche degli orari lavorati richiedono un processo ulteriore. |
+
+Se i controlli risultassero insufficienti, valutare un codice giornaliero esposto
+in sede oppure un terminale gestito dal capocantiere. Un'app con verifica del
+dispositivo aumenta complessità, costi e assistenza; non serve per questa prima
+versione. Nessuno di questi strumenti elimina da solo la collaborazione tra persone.
+
+La registrazione della posizione richiede HTTPS e autorizzazione esplicita del
+browser. Viene richiesta una lettura nuova, senza posizione in cache; una richiesta
+di timbratura autorizzata dal server scade dopo due minuti.
+[API Geolocation di Mozilla](https://developer.mozilla.org/en-US/docs/Web/API/Geolocation/getCurrentPosition).
+Gli identificativi permanenti dell'hardware non fanno parte delle normali API
+web usate qui; il fingerprinting non è una prova affidabile dell'identità.
+[W3C: identificazione del browser e limiti](https://www.w3.org/TR/fingerprinting-guidance/).
+
+## Componenti e attivazione
+
+- [Schema e funzioni](../database/badging.sql): tabelle private con RLS, funzioni
+  riservate al service_role, ricevute immutabili per l'app, audit e limiti persistenti.
+- [Router API](../server/badging/router.js): autenticazione dipendenti separata dal
+  CMS, validazione, limiti per account/IP, amministrazione e report.
+- [Frontend](../client/src/features/badging): pagina mobile, sedi/stampa, dipendenti
+  e report. QR generati localmente con qrcode, senza servizi esterni.
+- [Gate](../.agent-gates): sintassi server, TypeScript, lint delle schermate nuove,
+  test API/database/client e build frontend.
+
+Per l'ambiente reale, dopo autorizzazione alla pubblicazione:
+
+1. Applicare lo schema in un progetto Supabase di preview e verificare le funzioni
+   tramite PostgREST. È richiesto PostgreSQL 15 o successivo per la vista con
+   security_invoker. La migrazione è transazionale e riapplicabile nella stessa
+   versione; non contiene dati dimostrativi.
+2. Configurare nel backend SUPABASE_SERVICE_ROLE_KEY e JWT_SECRET (oppure il
+   SUPABASE_JWT_SECRET già previsto), almeno 32 caratteri. La chiave service_role
+   non deve essere esposta al frontend. Servono anche le configurazioni Supabase
+   già usate dal server.
+3. Impostare REACT_APP_API_BASE_URL o REACT_APP_API_URL con il percorso API
+   corretto, incluso /api, soprattutto per isolare una preview dalla produzione.
+   Le nuove riscritture Vercel supportano l'apertura diretta dei QR.
+4. Configurare la prima sede sul posto e provare raggio/precisione con Android
+   e iPhone, anche all'interno. Preparare l'informativa e decidere accessi e tempi
+   di conservazione con chi gestisce i dati dei dipendenti; non è configurata una
+   cancellazione automatica dello storico.
+5. Verificare una registrazione, attivazione, ingresso, uscita, reset password,
+   browser condiviso e CSV in preview; quindi pubblicare quando autorizzato.
+
+Una rotazione del segreto JWT invalida sessioni e firme degli identificativi del
+browser: al login successivo viene richiesto un identificativo nuovo, con possibili
+segnalazioni di cambio browser. Non cambiare il segreto per la normale rotazione dei QR.
+Senza configurazione o migrazione il modulo risponde 503, senza accesso anonimo
+alle tabelle delle presenze.
+
+## Verifica locale riproducibile
+
+Installazione delle dipendenze del progetto:
+
+    npm ci --prefix client --legacy-peer-deps
+    npm install --prefix server --ignore-scripts
+
+Gate:
+
+    /home/valua/Work/bin/agent-gate fast
+    /home/valua/Work/bin/agent-gate full
+
+Anteprima scollegata dai servizi remoti, con database PostgreSQL in memoria:
+
+    REACT_APP_API_BASE_URL=/api npm run build --prefix client
+    npm run preview:badging --prefix server
+
+Il processo stampa URL e credenziali esclusivamente dimostrative; ascolta solo su
+127.0.0.1:4100. I dati scompaiono alla chiusura. La sede dimostrativa è a latitudine
+40, longitudine 14: impostare questa posizione nella simulazione del browser per
+il test positivo, poi una posizione distante per il negativo.
+
+Il banco prova usa PGlite per eseguire il vero schema PostgreSQL. Un piccolo
+adattatore riproduce le operazioni Supabase, compreso il formato array delle RPC
+che restituiscono righe. Non sostituisce la prova contro PostgREST reale:
+[formato delle risposte PostgREST](https://docs.postgrest.org/en/stable/references/api/resource_representation.html).
+PGlite ha una sola connessione; i blocchi per concorrenza devono essere confermati
+anche con più connessioni PostgreSQL nell'ambiente di preview.
+
+## Esiti al 2026-09-15
+
+Gate fast e full superati: 27 test server (API, PostgreSQL, sicurezza e validazione)
+e 7 test frontend; TypeScript e lint del modulo senza errori. Build frontend
+riuscita con warning preesistenti del sito. Prove eseguite:
+
+- Test di schema/RLS, geofence, sequenze, idempotenza, revoca QR, profili pending,
+  reset password, ruoli, report completi oltre 1.000 righe e correzioni motivate.
+- Frontend: accesso da QR, campi di registrazione, posizione negata, ricevute
+  respinte, recupero della risposta persa con lo stesso identificativo.
+- Browser Chromium a 390 px: ingresso/uscita, blocco fuori zona, registrazione,
+  attivazione e riconoscimento di due account sullo stesso browser.
+- QR decodificato con zbarimg; PDF verificato come singola pagina A4; CSV scaricato
+  dalla dashboard e verificato contro le timbrature dell'anteprima.
+
+Il runner automatico di mutation testing non è configurato: agent-gate mutation
+restituisce un gap esplicito. Due probe manuali eseguiti e rilevati dai test:
+controllo della precisione GPS rimosso e lettura dell'amministrazione consentita
+agli editor. I test database e router sono falliti per asserzione; le modifiche
+sono state ripristinate prima del gate full finale.
+Per introdurre il runner completo: /gate-setup mutation.
+
+Il lint senza warning riguarda il nuovo modulo e le route React. Il sito preesistente
+contiene warning lint e dati Browserslist da aggiornare. Nessuna migrazione remota,
+pubblicazione, verifica GPS fisica, prova iOS o test multi-connessione è implicita
+nei risultati locali.

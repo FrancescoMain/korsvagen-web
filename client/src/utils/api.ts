@@ -3,6 +3,8 @@ import axios from "axios";
 // API base URL configuration
 // TEMPORARY: Durante il debug, usiamo una configurazione più esplicita
 const getApiBaseUrl = () => {
+  const configured = process.env.REACT_APP_API_BASE_URL || process.env.REACT_APP_API_URL;
+  if (configured) return configured.replace(/\/$/, '');
   // Se siamo in development, usa il proxy locale
   if (process.env.NODE_ENV === 'development') {
     return '/api';

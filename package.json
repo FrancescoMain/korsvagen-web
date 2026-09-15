@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "vercel dev",
-    "build": "npm install --prefix client --legacy-peer-deps && npm run build --prefix client; npm run copy-build",
+    "build": "npm install --prefix client --legacy-peer-deps && npm run build --prefix client && npm run copy-build",
     "copy-build": "node -e \"require('fs').cpSync('client/build', 'build', {recursive: true})\"",
     "start": "vercel dev",
     "migrate": "node api/utils/migrations.js migrate",

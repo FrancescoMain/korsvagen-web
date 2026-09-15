@@ -21,6 +21,7 @@
     "debounce": "^2.2.0",
     "korsvagen-web-backend": "file:..",
     "lucide-react": "^0.525.0",
+    "qrcode": "^1.5.4",
     "react": "18.3.1",
     "react-color": "^2.19.3",
     "react-dom": "18.3.1",
@@ -42,6 +43,9 @@
     "build": "react-scripts build",
     "vercel-build": "react-scripts build",
     "test": "react-scripts test",
+    "test:ci": "CI=true react-scripts test --watchAll=false --runInBand --silent",
+    "typecheck": "tsc --noEmit",
+    "lint:badging": "eslint src/features/badging src/App.tsx src/SiteApp.tsx src/App.test.tsx --ext .ts,.tsx --max-warnings=0",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
@@ -74,5 +78,8 @@
       "last 1 safari version"
     ]
   },
-  "proxy": "http://localhost:3001"
+  "proxy": "http://localhost:3001",
+  "devDependencies": {
+    "@types/qrcode": "^1.5.6"
+  }
 }
