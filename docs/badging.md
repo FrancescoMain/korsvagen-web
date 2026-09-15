@@ -316,3 +316,29 @@ Per annullare il solo aggiornamento mappe, i deployment precedenti funzionanti
 sono backend `dpl_FogSUGw6JhJT3fX7z78jwsXdPjFi` e frontend
 `dpl_4aoCs5Wevr4UYcjvU8bW7QeArXQf`. I commit rimangono locali, ancora da
 sincronizzare con GitHub. Non è stato eseguito un rollback.
+
+## Vista dipendenti responsive — correzione locale del 2026-09-15
+
+La tabella ereditava una larghezza minima di 850 px: nelle finestre strette le
+colonne a destra erano raggiungibili solo scorrendo un contenitore senza una
+barra sempre visibile. La griglia della dashboard non superava la viewport.
+
+Con al massimo 900 px disponibili, ogni riga ora diventa una scheda con tutti
+i dati etichettati e le azioni visibili. La container query considera anche lo
+spazio occupato dalla sidebar. Sopra la soglia resta la tabella; i testi lunghi
+possono andare a capo. Ruoli e intestazioni della tabella restano accessibili.
+
+QA riproducibile nell'anteprima locale: aprire Presenze → Dipendenti, provare
+viewport da 320 a 1920 px con sidebar aperta e chiusa, compresa la soglia tra
+1198 e 1199 px con sidebar aperta. Verificare che celle e pulsanti restino nella
+larghezza disponibile, anche con nomi/mansioni senza spazi, browser condivisi,
+account attivi/in attesa/sospesi e ingresso aperto. Provare ricerca senza
+risultati, sospensione/attivazione e focus sui pulsanti da tastiera.
+
+Verificato in Chromium anche sulla build ottimizzata: nessun overflow in 20
+combinazioni di larghezza e sidebar con tre dipendenti fittizi. Un probe CSS
+temporaneo (`container-type: normal`) ha riprodotto il taglio a 390 px; dopo il
+ripristino tutti i campi sono tornati entro la viewport. `agent-gate full`
+superato: 34 test server, 12 client, TypeScript, lint del modulo e build
+(warning preesistenti del sito). Il mutation runner automatico resta assente.
+Correzione non ancora pubblicata; nessuna modifica al backend o al database.

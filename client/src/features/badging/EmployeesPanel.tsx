@@ -33,7 +33,7 @@ export default function EmployeesPanel({ employees, onChange }: { employees: Emp
     catch (err) { setError(messageOf(err)); }
     finally { setBusy(false); }
   }
-  return <section>
+  return <section className="badge-employees">
     <h2>Dipendenti</h2><p>Verifica nome, data di nascita e mansione prima di attivare un account.</p>
     <label className="badge-search">Cerca dipendente<input value={search} onChange={e => setSearch(e.target.value)} placeholder="Nome, cognome o cellulare" /></label>
     {error && <div role="alert" className="badge-alert error">{error}</div>}
@@ -42,14 +42,16 @@ export default function EmployeesPanel({ employees, onChange }: { employees: Emp
       <label>Password da comunicare<input readOnly value={temporary.password} onFocus={e => e.target.select()} /></label>
       <button className="badge-button" onClick={() => setTemporary(null)}>Ho comunicato la password · Chiudi</button>
     </div>}
-    <div className="badge-table-wrap"><table className="badge-table"><thead><tr><th>Dipendente</th><th>Data di nascita</th><th>Mansione</th><th>Stato</th><th>Controlli browser</th><th>Azioni</th></tr></thead><tbody>
-      {visible.map(person => <tr key={person.id}>
-        <td><strong>{person.first_name} {person.last_name}</strong><small>{person.phone}</small>{person.current_entry_at && <small>Ingresso aperto dal {dateTime(person.current_entry_at)}</small>}</td>
-        <td>{person.birth_date.split('-').reverse().join('/')}</td><td>{person.job_role}</td>
-        <td><span className={'badge-pill ' + (person.status === 'pending' ? 'warning' : person.status === 'suspended' ? 'muted' : '')}>{person.status === 'active' ? 'Attivo' : person.status === 'pending' ? 'Da attivare' : 'Sospeso'}</span></td>
-        <td>{person.device_count || 0} browser osservati{person.first_device_hash && <small>Primo: {person.first_device_hash.slice(0, 12)}</small>}
+    {/* Explicit roles preserve table semantics when CSS presents the rows as cards. */}
+    <div className="badge-table-wrap badge-employees-wrap"><table className="badge-table badge-employees-table" role="table" aria-label="Dipendenti"><thead><tr role="row"><th scope="col" role="columnheader">Dipendente</th><th scope="col" role="columnheader">Data di nascita</th><th scope="col" role="columnheader">Mansione</th><th scope="col" role="columnheader">Stato</th><th scope="col" role="columnheader">Controlli browser</th><th scope="col" role="columnheader">Azioni</th></tr></thead><tbody>
+      {visible.map(person => <tr key={person.id} role="row">
+        <td role="cell" className="badge-employee-identity"><strong>{person.first_name} {person.last_name}</strong><small>{person.phone}</small>{person.current_entry_at && <small>Ingresso aperto dal {dateTime(person.current_entry_at)}</small>}</td>
+        <td role="cell"><span className="badge-cell-label" aria-hidden="true">Data di nascita</span>{person.birth_date.split('-').reverse().join('/')}</td>
+        <td role="cell"><span className="badge-cell-label" aria-hidden="true">Mansione</span>{person.job_role}</td>
+        <td role="cell"><span className="badge-cell-label" aria-hidden="true">Stato</span><span className={'badge-pill ' + (person.status === 'pending' ? 'warning' : person.status === 'suspended' ? 'muted' : '')}>{person.status === 'active' ? 'Attivo' : person.status === 'pending' ? 'Da attivare' : 'Sospeso'}</span></td>
+        <td role="cell"><span className="badge-cell-label" aria-hidden="true">Controlli browser</span>{person.device_count || 0} browser osservati{person.first_device_hash && <small>Primo: {person.first_device_hash.slice(0, 12)}</small>}
           {!!person.shared_with?.length && <span className="badge-flag">Condiviso con: {person.shared_with.join(', ')}</span>}</td>
-        <td><div className="badge-actions">
+        <td role="cell" className="badge-employee-actions"><span className="badge-cell-label" aria-hidden="true">Azioni</span><div className="badge-actions">
           {person.status !== 'active' && <button className="badge-button primary" disabled={busy} onClick={() => status(person, 'active')}>Attiva</button>}
           {person.status === 'active' && <button className="badge-button danger" disabled={busy} onClick={() => status(person, 'suspended')}>Sospendi</button>}
           <button className="badge-button" disabled={busy} onClick={() => reset(person)}>Reimposta password</button>

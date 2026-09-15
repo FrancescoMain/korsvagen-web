@@ -77,6 +77,21 @@
 .badge-table a { color: #2e6543; text-decoration: underline; }
 .badge-table .badge-button { font-size: 12px; }
 .badge-table summary { cursor: pointer; margin-top: 8px; }
+.badge-employees { container-type: inline-size; }
+.badge-employees-table { overflow-wrap: anywhere; }
+.badge-cell-label { display: none; }
+/* Use the available content width, including the space taken by the sidebar. */
+@container (max-width: 900px) {
+  .badge-employees-wrap { overflow: visible; border: 0; background: transparent; }
+  .badge-employees-table { display: block; min-width: 0; font-size: 14px; }
+  /* Keep column headers available to assistive technology in the card layout. */
+  .badge-employees-table thead { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; }
+  .badge-employees-table tbody { display: grid; gap: 16px; }
+  .badge-employees-table tbody tr { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; border: 1px solid #d9e2db; border-radius: 12px; padding: 20px; background: white; }
+  .badge-employees-table td { display: block; min-width: 0; padding: 0; border: 0; }
+  .badge-employees-table .badge-employee-identity, .badge-employees-table .badge-employee-actions { grid-column: 1 / -1; }
+  .badge-employees-table .badge-cell-label { display: block; margin-bottom: 6px; color: #55685e; font-size: 12px; font-weight: 600; }
+}
 .badge-report-filters { display: grid; grid-template-columns: repeat(auto-fit, minmax(155px, 1fr)); gap: 14px; align-items: end; }
 .badge-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(155px, 1fr)); gap: 14px; margin: 22px 0 0; }
 .badge-stats .badge-card { padding: 18px; }
