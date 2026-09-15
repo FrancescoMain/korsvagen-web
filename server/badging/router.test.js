@@ -3,9 +3,12 @@ import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
 import express from 'express';
 import { createBadgeRouter } from './router.js';
+import { createAddressSearch } from './geocoding.js';
+import { badgeSecurity } from './security.js';
 import { fixture, TEST_SECRET, TEST_ADMIN, TEST_EDITOR, TEST_EMPLOYEE, TEST_SITE, TEST_QR, TEST_PASSWORD, verifyAdmin, adminToken } from './test-support.js';
 
 let harness, server, base, token, device, entryId;
+let geocoderCalls = 0;
 async function call(path, options = {}) {
   const response = await fetch(base + path, {
     method: options.method || (options.body ? 'POST' : 'GET'),
@@ -19,7 +22,12 @@ before(async () => {
   harness = await fixture();
   const app = express();
   app.use(express.json());
-  app.use(createBadgeRouter({ db: harness.db, secret: TEST_SECRET, verifyAdminToken: verifyAdmin }));
+  app.use(createBadgeRouter({ db: harness.db, secret: TEST_SECRET, verifyAdminToken: verifyAdmin,
+    searchAddresses: createAddressSearch({ fetchImpl: async () => {
+      geocoderCalls++;
+      return { ok: true, json: async () => ({ features: [{ geometry: { type: 'Point', coordinates: [14.5, 40.75] }, properties: { street: 'Via Roma', city: 'Castellammare di Stabia' } }] }) };
+    } }),
+  }));
   server = app.listen(0, '127.0.0.1');
   await new Promise(resolve => server.once('listening', resolve));
   base = 'http://127.0.0.1:' + server.address().port;
@@ -61,6 +69,34 @@ test('employee authentication is isolated; forged browser identifiers and admin 
   token = login.data.token;
   assert.equal((await call('/admin/employees', { token })).status, 401);
   assert.equal((await call('/me', { token })).data.employee.id, TEST_EMPLOYEE);
+});
+
+test('address lookup is admin-only, validates queries and enforces shared provider and account limits', async () => {
+  const path = '/admin/geocode?q=Via%20Roma';
+  assert.equal((await call(path)).status, 401);
+  assert.equal((await call(path, { token })).status, 401);
+  assert.equal((await call(path, { token: adminToken(TEST_EDITOR) })).status, 403);
+  for (const query of ['', 'ab', 'x'.repeat(251), 'Via%0ARoma', 'Via&q=Roma']) {
+    assert.equal((await call('/admin/geocode?q=' + query, { token: adminToken() })).status, 400);
+  }
+  assert.equal(geocoderCalls, 0);
+  const first = await call(path, { token: adminToken() });
+  assert.equal(first.status, 200);
+  assert.deepEqual(first.data.data.map(({ latitude, longitude }) => [latitude, longitude]), [[40.75, 14.5]]);
+  assert.equal(first.headers.get('cache-control'), 'no-store');
+  const providerKey = badgeSecurity(TEST_SECRET).rateKey('geocode-provider');
+  // Fix the window in the future: deterministic even on a slow test machine.
+  await harness.pg.query("UPDATE badge_rate_limits SET window_start=now()+interval '1 minute' WHERE key=$1", [providerKey]);
+  assert.equal((await call(path, { token: adminToken() })).status, 200);
+  assert.equal(geocoderCalls, 1);
+  const blocked = await call('/admin/geocode?q=Via%20Milano', { token: adminToken() });
+  assert.equal(blocked.status, 429);
+  assert.equal(blocked.data.code, 'GEOCODER_BUSY');
+  assert.equal(geocoderCalls, 1);
+  const adminKey = badgeSecurity(TEST_SECRET).rateKey('geocode-admin:' + TEST_ADMIN);
+  await harness.pg.query("UPDATE badge_rate_limits SET hits=30, window_start=now()+interval '1 minute' WHERE key=$1", [adminKey]);
+  assert.equal((await call(path, { token: adminToken() })).status, 429);
+  assert.equal(geocoderCalls, 1);
 });
 
 test('challenge binds account, action, QR and browser; GPS cannot be skipped and timestamps cannot be backdated', async () => {
@@ -169,4 +205,5 @@ test('admin revocation takes effect without waiting for the JWT to expire', asyn
   await harness.pg.query('UPDATE admin_users SET is_active=false WHERE id=$1', [TEST_ADMIN]);
   await harness.pg.exec('SET ROLE service_role');
   assert.equal((await call('/admin/reports', { token: adminToken() })).status, 403);
+  assert.equal((await call('/admin/geocode?q=Via%20Roma', { token: adminToken() })).status, 403);
 });

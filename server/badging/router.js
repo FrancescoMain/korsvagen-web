@@ -2,6 +2,7 @@ import express from 'express';
 import bcrypt from 'bcryptjs';
 import { randomBytes } from 'node:crypto';
 import { badgeSecurity } from './security.js';
+import { createAddressSearch } from './geocoding.js';
 import { BadgeError, invalid, uuid, textField, phoneNumber, passwordInput, registration, siteInput, positionInput, reportFilters, csvCell } from './validation.js';
 
 const EMPLOYEE_FIELDS = 'id,first_name,last_name,birth_date,job_role,phone,status,must_change_password,current_site_id,current_entry_at,created_at';
@@ -39,7 +40,7 @@ async function allRows(query, limit = 20000) {
   }
 }
 
-export function createBadgeRouter({ db, secret, verifyAdminToken }) {
+export function createBadgeRouter({ db, secret, verifyAdminToken, searchAddresses = createAddressSearch() }) {
   const router = express.Router();
   const security = secret && badgeSecurity(secret);
   const run = handler => (req, res, next) => Promise.resolve(handler(req, res, next)).catch(next);
@@ -188,6 +189,16 @@ export function createBadgeRouter({ db, secret, verifyAdminToken }) {
   }));
 
   router.use('/admin', requireAdmin);
+
+  router.get('/admin/geocode', run(async (req, res) => {
+    const query = textField(req.query.q, 'Indirizzo da cercare', 4, 250);
+    await throttle('geocode-admin:' + req.admin.id, 30, 60);
+    const results = await searchAddresses(query, async () => {
+      const allowed = await rpc('badge_rate_limit', { p_key: security.rateKey('geocode-provider'), p_limit: 1, p_seconds: 1 });
+      if (!allowed) throw new BadgeError(429, 'GEOCODER_BUSY', 'Attendi un secondo e riprova la ricerca.');
+    });
+    res.json({ data: results });
+  }));
 
   router.get('/admin/sites', run(async (req, res) => {
     res.json({ data: await allRows(() => db.from('badge_sites').select('*').order('created_at').order('id')) });

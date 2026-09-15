@@ -25,7 +25,7 @@ const server = app.listen(port, '127.0.0.1', () => {
   console.log('Anteprima locale: http://127.0.0.1:' + port + '/badge/' + TEST_QR);
   console.log('Dipendente: +393331234567 | Password di prova: ' + TEST_PASSWORD);
   console.log('Dashboard: /login | Utente: preview | Stessa password di prova.');
-  console.log('Posizione della sede di prova: latitudine 40, longitudine 14. Nessun servizio remoto connesso.');
+  console.log('Sede di prova: latitudine 40, longitudine 14. Database isolato; mappe e ricerca indirizzi usano servizi pubblici.');
 });
 async function close() {
   await new Promise(resolve => server.close(resolve));

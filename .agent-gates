@@ -12,7 +12,7 @@ case "${1:-}" in
 esac
 
 git diff --check
-for source in server/index.js server/routes/badging.js server/badging/router.js server/badging/security.js server/badging/validation.js; do
+for source in server/index.js server/routes/badging.js server/badging/router.js server/badging/security.js server/badging/validation.js server/badging/geocoding.js; do
   node --check "$source"
 done
 npm run typecheck --prefix client

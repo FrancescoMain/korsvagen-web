@@ -30,6 +30,43 @@
   il collegamento. Eliminare il QR archivia la sede e conserva lo storico. Gli
   ingressi aperti devono essere risolti prima dell'archiviazione.
 
+## Ricerca indirizzi e mappa delle sedi
+
+In **Presenze → Sedi e QR → Nuova sede / Modifica**, inserire via, civico e
+comune, premere **Cerca indirizzo** e scegliere il risultato corretto.
+Indirizzo, latitudine e longitudine vengono compilati insieme. Toccare la mappa
+o trascinare il segnaposto permette di indicare l'ingresso effettivo; il cerchio
+mostra il raggio consentito. Restano disponibili **Usa la mia posizione** e le
+coordinate manuali. Modificare il testo dell'indirizzo cancella le vecchie
+coordinate: serve confermare un nuovo punto prima del salvataggio.
+
+La mappa usa Leaflet 1.9.4 e tile OpenStreetMap; la ricerca usa Photon, senza
+chiavi Google. La ricerca parte solo su comando, con massimo cinque risultati:
+non sceglie automaticamente il primo. Le risposte di ricerche precedenti o
+di moduli chiusi vengono ignorate. La timbratura del dipendente continua a
+richiedere il GPS: la mappa serve alla configurazione amministrativa della sede.
+
+- `GET /api/badging/admin/geocode?q=...`: riservato ad amministratori attivi,
+  query di 4–250 caratteri, timeout del provider 8 secondi, errori recuperabili.
+- Limiti persistenti nel database: 30 richieste/minuto per amministratore e una
+  richiesta/secondo al provider per applicazione, anche su più istanze Vercel.
+- Cache per istanza calda, massimo 100 indirizzi: 24 ore per risultati trovati,
+  10 minuti per risultati vuoti; ricerche identiche simultanee condividono la
+  richiesta. La cache non è condivisa né durevole. Errori e timeout non sono
+  memorizzati. Le risposte API al browser hanno `Cache-Control: no-store`.
+- Provider sostituibile tramite `BADGING_GEOCODER_URL` nel backend, un endpoint
+  HTTPS compatibile con Photon. Non servono nuove tabelle o migrazioni.
+- Tile richiesti direttamente dal browser, attribuzione sempre visibile,
+  cache HTTP ordinaria e referrer limitato all'origine. Nessun download offline
+  o precaricamento massivo. Nei test automatici le tile sono sostituite da fixture.
+
+Photon e le tile pubbliche sono servizi senza disponibilità garantita: se la
+ricerca è indisponibile, usare mappa/GPS/coordinate; se mancano le tile, restano
+ricerca/GPS/coordinate. Per volumi elevati occorre un provider dedicato.
+[Condizioni Photon](https://github.com/komoot/photon#demo-server),
+[policy tile OpenStreetMap](https://operations.osmfoundation.org/policies/tiles/),
+[documentazione Leaflet](https://leafletjs.com/reference.html).
+
 ## Report
 
 Filtri per intervallo, sede (anche archiviata), dipendente, esito e anomalie.
@@ -123,7 +160,7 @@ Gate:
     /home/valua/Work/bin/agent-gate fast
     /home/valua/Work/bin/agent-gate full
 
-Anteprima scollegata dai servizi remoti, con database PostgreSQL in memoria:
+Anteprima con database PostgreSQL isolato in memoria:
 
     REACT_APP_API_BASE_URL=/api npm run build --prefix client
     npm run preview:badging --prefix server
@@ -132,6 +169,8 @@ Il processo stampa URL e credenziali esclusivamente dimostrative; ascolta solo s
 127.0.0.1:4100. I dati scompaiono alla chiusura. La sede dimostrativa è a latitudine
 40, longitudine 14: impostare questa posizione nella simulazione del browser per
 il test positivo, poi una posizione distante per il negativo.
+Mappe e ricerca indirizzi usano i servizi pubblici anche nell'anteprima;
+intercettare le tile nei test automatici, senza generare traffico di scansione.
 
 Il banco prova usa PGlite per eseguire il vero schema PostgreSQL. Un piccolo
 adattatore riproduce le operazioni Supabase, compreso il formato array delle RPC
@@ -167,7 +206,27 @@ contiene warning lint e dati Browserslist da aggiornare. Nessuna migrazione remo
 pubblicazione, verifica GPS fisica, prova iOS o test multi-connessione è implicita
 nei risultati locali.
 
-## Produzione — 2026-09-15
+### Verifica della ricerca su mappa — 2026-09-15
+
+Gate fast e full superati; il totale è ora 34 test server e 12 frontend.
+TypeScript, lint del modulo e build superati, con i warning preesistenti del sito.
+Coperti ordine latitudine/longitudine, risposte malformate, cache/scadenza,
+ricerche simultanee, timeout, autenticazione admin e limiti persistenti.
+Nel frontend: ricerca esplicita/Enter, scelta risultato, risposte obsolete,
+nuovo modulo durante una ricerca, errori, coordinate zero, GPS e modifica sede.
+
+Due ulteriori mutation probe manuali rilevati dai test: inversione delle
+coordinate GeoJSON e accettazione di una risposta di ricerca obsoleta. Codice
+ripristinato e test mirati nuovamente superati. Runner automatico ancora assente.
+
+Browser Chromium: ricerca Photon reale via API locale, selezione, trascinamento
+segnaposto, persistenza del punto e del raggio, riapertura della sede, tocco sulla
+mappa a 390 px senza overflow. Simulati errore del provider e tile indisponibili:
+il GPS rimane utilizzabile. Coordinate ai limiti e 0,0 non bloccano la mappa.
+Nessun errore JavaScript. Le tile erano fixture locali per evitare traffico
+automatico sul servizio pubblico; il GPS era simulato, non un collaudo sul posto.
+
+## Produzione — prima versione del 2026-09-15
 
 Pubblicazione completata su richiesta dell'utente. La gestione è disponibile su
 [www.korsvagen.it/dashboard/badging](https://www.korsvagen.it/dashboard/badging),

@@ -54,6 +54,17 @@
 .badge-flag { display: block; padding: 5px 8px; margin: 6px 0; border-radius: 6px; background: #fff4d8; color: #795711; font-size: 12px; }
 .badge-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
 .badge-site-form { max-width: 800px; margin-top: 20px; }
+.badge-location-picker { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.badge-address-search { display: flex; align-items: end; gap: 12px; flex-wrap: wrap; }
+.badge-address-search label { flex: 1 1 250px; }
+.badge-address-search > button { min-height: 48px; }
+.badge-address-results { list-style: none; padding: 0; margin: 0; border: 1px solid #bacbbe; border-radius: 10px; overflow: hidden; }
+.badge-address-results .badge-button { width: 100%; text-align: left; justify-content: flex-start; border: 0; border-radius: 0; overflow-wrap: anywhere; }
+.badge-address-results li + li { border-top: 1px solid #dce4dd; }
+.badge-site-map { height: 330px; width: 100%; border: 1px solid #bacbbe; border-radius: 12px; z-index: 0; background: #e5ebe3; }
+.badge-map-pin span { display: block; width: 28px; height: 28px; background: #23553d; border: 3px solid white; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); box-shadow: 0 2px 5px #0006; }
+.badge-location-picker a { color: #2e6543; }
+.badge-location-picker p { margin: 0; }
 .badge-empty { padding: 36px 24px; border: 1px dashed #aabfad; border-radius: 12px; text-align: center; margin: 22px 0; }
 .badge-search { max-width: 450px; margin-bottom: 22px; }
 .badge-table-wrap { width: 100%; overflow-x: auto; background: white; border: 1px solid #d9e2db; border-radius: 12px; margin: 20px 0; }

@@ -1,8 +1,9 @@
 import React, { FormEvent, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import QRCode from 'qrcode';
-import { adminBadge, locate, messageOf } from './api';
+import { adminBadge, messageOf } from './api';
 import { BadgeSite } from './types';
+import SiteLocationPicker from './SiteLocationPicker';
 
 export function badgeLink(token: string) {
   return window.location.origin + '/badge/' + token;
@@ -50,18 +51,23 @@ export default function SitesPanel({ sites, onChange }: { sites: BadgeSite[]; on
   const [showForm, setShowForm] = useState(false);
   const [printing, setPrinting] = useState<BadgeSite | null>(null);
   const [busy, setBusy] = useState(false);
+  const [locationBusy, setLocationBusy] = useState(false);
+  const [formRevision, setFormRevision] = useState(0);
   const [error, setError] = useState('');
   const active = sites.filter(site => !site.archived_at);
   const update = (key: keyof typeof blank, value: string) => setForm(prev => ({ ...prev, [key]: value }));
 
   function edit(site?: BadgeSite) {
+    setFormRevision(revision => revision + 1);
     setEditing(site?.id || null); setError('');
     setForm(site ? { name: site.name, address: site.address, latitude: String(site.latitude), longitude: String(site.longitude),
       radius_m: String(site.radius_m), max_accuracy_m: String(site.max_accuracy_m), outside_policy: site.outside_policy } : blank);
     setShowForm(true);
   }
   async function save(event: FormEvent) {
-    event.preventDefault(); setBusy(true); setError('');
+    event.preventDefault();
+    if (busy || locationBusy) return;
+    setBusy(true); setError('');
     try {
       const payload = { ...form, latitude: Number(form.latitude), longitude: Number(form.longitude), radius_m: Number(form.radius_m), max_accuracy_m: Number(form.max_accuracy_m) };
       if (editing) await adminBadge.put('/sites/' + editing, payload);
@@ -83,31 +89,21 @@ export default function SitesPanel({ sites, onChange }: { sites: BadgeSite[]; on
     } catch (err) { setError(messageOf(err)); }
     finally { setBusy(false); }
   }
-  async function currentPosition() {
-    setBusy(true); setError('');
-    try {
-      const position = await locate();
-      setForm(prev => ({ ...prev, latitude: position.coords.latitude.toFixed(6), longitude: position.coords.longitude.toFixed(6) }));
-    } catch (err) { setError(messageOf(err)); }
-    finally { setBusy(false); }
-  }
   return <section>
     <div className="badge-row"><div><h2>Sedi e QR</h2><p>Un QR per ogni ufficio o cantiere. Puoi stamparne più copie.</p></div><button className="badge-button primary" onClick={() => edit()} disabled={busy}>+ Nuova sede</button></div>
     {error && <div role="alert" className="badge-alert error">{error}</div>}
     {showForm && <form className="badge-card badge-form badge-site-form" onSubmit={save}>
       <h3>{editing ? 'Modifica sede' : 'Nuova sede'}</h3>
       <label>Nome ufficio o cantiere<input value={form.name} onChange={e => update('name', e.target.value)} required maxLength={100} /></label>
-      <label>Indirizzo<input value={form.address} onChange={e => update('address', e.target.value)} required maxLength={250} /></label>
-      <div className="badge-row"><p>Indica il punto in cui si deve timbrare.</p><button type="button" className="badge-button" onClick={currentPosition} disabled={busy}>Usa la mia posizione</button></div>
+      <SiteLocationPicker key={formRevision} value={form} radius={Number(form.radius_m)} disabled={busy}
+        onChange={location => setForm(prev => ({ ...prev, ...location }))} onBusyChange={setLocationBusy} />
       <div className="badge-form-grid">
-        <label>Latitudine<input type="number" step="any" min={-90} max={90} value={form.latitude} onChange={e => update('latitude', e.target.value)} required /></label>
-        <label>Longitudine<input type="number" step="any" min={-180} max={180} value={form.longitude} onChange={e => update('longitude', e.target.value)} required /></label>
         <label>Raggio consentito (metri)<input type="number" min={20} max={5000} value={form.radius_m} onChange={e => update('radius_m', e.target.value)} required /></label>
         <label>Errore GPS massimo (metri)<input type="number" min={5} max={1000} value={form.max_accuracy_m} onChange={e => update('max_accuracy_m', e.target.value)} required /></label>
       </div>
       <label>Timbratura fuori zona<select value={form.outside_policy} onChange={e => update('outside_policy', e.target.value)}><option value="block">Blocca e registra il tentativo respinto</option><option value="flag">Accetta e segnala un’anomalia</option></select></label>
       <p className="badge-help">Una posizione troppo imprecisa viene sempre respinta. Verifica il raggio sul posto prima di distribuire i QR.</p>
-      <div className="badge-row"><button className="badge-button primary" disabled={busy}>{busy ? 'Salvataggio…' : 'Salva sede'}</button><button className="badge-button" type="button" disabled={busy} onClick={() => setShowForm(false)}>Annulla</button></div>
+      <div className="badge-row"><button className="badge-button primary" disabled={busy || locationBusy}>{busy ? 'Salvataggio…' : 'Salva sede'}</button><button className="badge-button" type="button" disabled={busy} onClick={() => setShowForm(false)}>Annulla</button></div>
     </form>}
     {!active.length && <div className="badge-empty"><h3>Crea il primo QR</h3><p>Aggiungi un ufficio o un cantiere e imposta la zona in cui timbrare.</p></div>}
     <div className="badge-sites-grid">{active.map(site => <article className="badge-card" key={site.id}>
