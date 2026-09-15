@@ -181,8 +181,7 @@ personali persistenti, ore nette, isolamento dei colleghi, modifica/eliminazione
 e ricalcolo; 22 combinazioni da 320 a 3440 px senza overflow o errori JavaScript.
 Runner mutation automatico assente; warning di build preesistenti fuori dal modulo.
 
-Verifiche della precedente versione del 2026-09-15:
- nove test API/DB delle statistiche, inclusi 1202 eventi,
+Verifiche della precedente versione del 2026-09-15: nove test API/DB delle statistiche, inclusi 1202 eventi,
 QR separati/archiviati, più intervalli al giorno, orari opzionali e audit,
 ingressi incompleti, notte, confini dei trimestri e cambi d'ora di marzo/ottobre.
 Cinque test UI coprono confronti, salvataggio/rimozione, storico, errori e risposte
@@ -206,6 +205,24 @@ Ripristino del solo codice: backend precedente `dpl_4Sc9SizWFyLZXu9oZ9c4Fi2yAbZ1
 frontend precedente `dpl_G52eZRUWFz7ob4JCCqAR3a5DmT13`. La migrazione additiva
 può restare applicata in caso di rollback del codice, conservando le impostazioni.
 Gli ingressi aperti sono uno stato corrente, indipendente dal periodo selezionato.
+
+Estensione personale pubblicata il 2026-09-15: migrazione
+`20260915114800_badging_personal_schedules`, backend `dpl_75Yi4aPM54RA1mwBdFkVmYvVYEW6`
+(commit `a61e6d6`), frontend `dpl_Fn3r1ReQFLB6WP8KnAyYZnAzWxHo` (commit `7fa670b`).
+Alias e versioni confermati; sei definizioni RPC e privilegi confrontati con
+la prova transazionale terminata con ROLLBACK. Nessun turno operativo preimpostato.
+Sul sito verificati giorni/pausa personali persistenti, colleghi invariati, QR
+separati, storico tra trimestri, rettifiche, eliminazione della coppia e ore
+ricalcolate; fixture e audit rimossi, accesso anonimo rediretto al login.
+22 combinazioni Chromium da 320 a 3440 px con sidebar aperta/chiusa sul sito;
+sette larghezze aggiuntive con nomi molto lunghi in locale. Le intestazioni
+nascoste delle schede sono ancorate alla tabella e non ampliano il contenitore.
+Gate full: 49 test server, 21 client, lint, TypeScript e build; warning legacy.
+Tre mutation probe manuali rilevati e ripristinati; runner automatico assente.
+Per rollback conservare le nuove tabelle e viste: ricevute originali immutabili,
+rettifiche separate e RPC legacy inoltrato al nuovo calcolo. Riferimenti prima
+dell'estensione: frontend `dpl_6VpPPxYeNrZdzaDpDSwBe43tgwPE`, backend
+`dpl_4ZLtqoSGRn1pJERTTQfn4KVtcBMc`. Nessun push GitHub eseguito.
 
 ## Controlli e limiti
 
