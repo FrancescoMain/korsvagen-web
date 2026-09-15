@@ -83,6 +83,74 @@ quotate e protette dall'esecuzione di formule nei fogli di calcolo.
 Le ore rappresentano gli intervalli chiusi da vere uscite e sono attribuite alla
 data e alla sede di uscita. Comprendono gli intervalli anomali da verificare.
 Non vengono spezzate automaticamente per giorno, né elaborate come buste paga.
+
+## Statistiche per sede e trimestre
+
+In **Presenze → Statistiche**, selezionare una sede/QR, anno e trimestre.
+Il riepilogo mostra ore registrate, giornate di presenza, dipendenti con ingressi
+e intervalli incompleti. Seguono totali mensili, confronti dei giorni/ore più
+bassi e medie per dipendente. **Apri storico** mostra le giornate del trimestre
+e le singole timbrature; cambiando trimestre conserva il dipendente scelto.
+Le sedi archiviate restano consultabili. Le tabelle diventano schede negli
+spazi stretti, conservando etichette e comandi accessibili.
+
+**Orari previsti della sede** è una configurazione facoltativa: abilitare il
+confronto, compilare ingresso/uscita e salvare. Disabilitare e salvare rimuove
+le soglie senza cancellare eventi. Sono uguali per chi timbra quel QR; ufficio
+e cantiere hanno impostazioni indipendenti. La configurazione attuale è un
+riferimento applicato anche allo storico, come indicato nel modulo: non è uno
+storico contrattuale dei turni. Le modifiche sono registrate nell'audit admin.
+
+Regole di calcolo:
+
+- Il trimestre è solare e usa Europe/Rome. Ogni ingresso accettato è collegato
+  al successivo evento accettato dello stesso dipendente. Se è un nuovo
+  ingresso, quello precedente non assorbe l'uscita del nuovo intervallo.
+- Ore e giornate sono attribuite alla sede e al giorno dell'ingresso, anche
+  quando l'uscita è nel trimestre successivo. Un orario notturno configurato
+  attribuisce gli ingressi dopo mezzanotte e prima dell'uscita prevista alla
+  sera precedente. Le durate sono secondi reali, inclusi i cambi d'ora.
+- Il totale delle statistiche include solo intervalli chiusi nello stesso QR,
+  fino a 16 ore. Uscite su altro QR e durate superiori sono separate nelle ore
+  da verificare. Ingressi aperti, uscite mancanti e chiusure amministrative
+  non generano ore stimate. Il report eventi conserva il suo totale grezzo
+  attribuito alla sede/data di uscita, quindi può differire da queste statistiche.
+- Una presenza è un giorno con almeno un ingresso. Le medie circolari degli
+  orari usano il primo ingresso e l'ultima uscita giornalieri: i passaggi
+  multipli non pesano più volte; le uscite medie richiedono giornate complete.
+  Orari opposti senza media significativa restituiscono un valore assente.
+- Se configurato, il primo ingresso è confrontato con l'ingresso previsto al
+  minuto. L'ultima uscita è valutata solo a orario previsto terminato e giornata
+  completa, evitando di segnalare la pausa pranzo come uscita anticipata.
+- I confronti riguardano chi ha un ingresso nella sede nel trimestre; non
+  deducono assenze senza assegnazioni e turni. I totali incompleti sono esclusi
+  dalla graduatoria delle ore; i valori minimi uguali restano segnalati insieme.
+
+API riservate ad amministratori attivi, con risposte no-store:
+
+- GET /api/badging/admin/statistics?site=<uuid>&year=2026&quarter=1
+  restituisce aggregati dell'intero trimestre, dipendenti e tre mesi;
+  employee=<uuid> aggiunge lo storico giornaliero del dipendente.
+- PATCH /api/badging/admin/sites/:id/schedule accetta expected_start e
+  expected_end in HH:mm, entrambi validi e diversi oppure entrambi null.
+
+Applicare **database/badging-statistics.sql dopo database/badging.sql** e
+prima del nuovo backend. La migrazione aggiunge due colonne nullable alle sedi,
+il salvataggio atomico/audit e una funzione di aggregazione; non modifica gli
+eventi esistenti. I nuovi RPC non sono eseguibili da anon/authenticated.
+L'aggregazione JSON avviene nel database e non dipende dal limite PostgREST
+di 1000 righe né dalla paginazione del report.
+
+Verifiche del 2026-09-15: nove test API/DB delle statistiche, inclusi 1202 eventi,
+QR separati/archiviati, più intervalli al giorno, orari opzionali e audit,
+ingressi incompleti, notte, confini dei trimestri e cambi d'ora di marzo/ottobre.
+Cinque test UI coprono confronti, salvataggio/rimozione, storico, errori e risposte
+obsolete. Gate full superato (TypeScript, lint, test e build con warning legacy).
+Probe manuali rilevano la rimozione del filtro QR e l'inclusione dei totali
+incompleti nella graduatoria; sorgenti ripristinati. Il mutation runner automatico
+resta assente. Browser Chromium: flussi reali contro PostgreSQL locale isolato,
+22 combinazioni da 320 a 3440 px con sidebar aperta/chiusa, nessun overflow o
+errore JavaScript.
 Gli ingressi aperti sono uno stato corrente, indipendente dal periodo selezionato.
 
 ## Controlli e limiti

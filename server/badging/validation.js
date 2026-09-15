@@ -120,3 +120,26 @@ export function csvCell(value) {
   if (/^[\s]*[=+\-@]/.test(text) || /^[\t\r\n]/.test(text)) text = "'" + text;
   return '"' + text.replace(/"/g, '""') + '"';
 }
+
+export function statisticsFilters(query) {
+  const today = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Rome' }).format(new Date());
+  const year = query.year ?? today.slice(0, 4);
+  const quarter = query.quarter ?? String(Math.ceil(Number(today.slice(5, 7)) / 3));
+  if (typeof year !== 'string' || !/^\d{4}$/.test(year) || Number(year) < 2000 || Number(year) > 2100) invalid('Anno non valido.');
+  if (typeof quarter !== 'string' || !/^[1-4]$/.test(quarter)) invalid('Trimestre non valido.');
+  const month = (Number(quarter) - 1) * 3;
+  return {
+    year: Number(year), quarter: Number(quarter), site: uuid(query.site),
+    employee: query.employee === undefined ? null : uuid(query.employee),
+    from: new Date(Date.UTC(Number(year), month, 1)).toISOString().slice(0, 10),
+    to: new Date(Date.UTC(Number(year), month + 3, 1)).toISOString().slice(0, 10),
+  };
+}
+
+export function scheduleInput(body) {
+  const { expected_start: start, expected_end: end } = body;
+  if (start === null && end === null) return { start, end };
+  const valid = value => typeof value === 'string' && /^([01]\d|2[0-3]):[0-5]\d$/.test(value);
+  if (!valid(start) || !valid(end) || start === end) invalid('Inserisci entrambi gli orari, diversi tra loro, oppure disattiva l’orario previsto.');
+  return { start, end };
+}

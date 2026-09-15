@@ -98,6 +98,38 @@
 .badge-stats span { display: block; color: #536557; font-size: 12px; }
 .badge-stats strong { display: block; font-size: 30px; font-weight: 650; margin-top: 8px; }
 .badge-pagination { margin-bottom: 24px; font-size: 13px; }
+.badge-statistics { container-type: inline-size; }
+.badge-statistics .badge-stats strong { font-size: clamp(22px, 2.5vw, 30px); overflow-wrap: anywhere; }
+.badge-schedule summary { cursor: pointer; }
+.badge-admin .badge-schedule-toggle { flex-direction: row; align-items: center; margin: 18px 0; }
+.badge-admin .badge-schedule-toggle input { width: 20px; min-height: 20px; height: 20px; flex-shrink: 0; }
+.badge-months, .badge-rankings { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr)); gap: 16px; }
+.badge-months strong, .badge-months small { display: block; margin-top: 8px; }
+.badge-months strong { font-size: 22px; }
+.badge-month-track { height: 8px; background: #e6eee7; border-radius: 8px; margin: 14px 0; overflow: hidden; }
+.badge-month-track span { display: block; height: 100%; background: #35664b; border-radius: inherit; }
+.badge-rankings h3 { font-size: 17px; margin: 0 0 12px; }
+.badge-ranking { list-style-position: inside; margin: 0; padding: 0; }
+.badge-ranking li { border-top: 1px solid #e4ebe4; padding: 8px 0; overflow-wrap: anywhere; }
+.badge-ranking .badge-link { text-align: left; }
+.badge-ranking strong { display: block; font-size: 13px; }
+.badge-history { margin-top: 24px; }
+.badge-statistics-table { overflow-wrap: anywhere; }
+.badge-statistics-table td small { max-width: none; }
+.badge-intervals { list-style: none; margin: 8px 0 0; padding: 0; }
+.badge-intervals li { border-top: 1px solid #e4ebe4; margin-top: 10px; padding-top: 10px; }
+.badge-intervals span { display: block; }
+.badge-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; }
+@container (max-width: 1000px) {
+  .badge-statistics-wrap { overflow: visible; border: 0; background: transparent; }
+  .badge-statistics-table { display: block; min-width: 0; }
+  .badge-statistics-table thead { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; }
+  .badge-statistics-table tbody { display: grid; gap: 16px; }
+  .badge-statistics-table tbody tr { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; border: 1px solid #d9e2db; border-radius: 12px; padding: 20px; background: white; }
+  .badge-statistics-table td { display: block; min-width: 0; padding: 0; border: 0; }
+  .badge-statistics-identity, .badge-statistics-details { grid-column: 1 / -1; }
+  .badge-statistics-table .badge-cell-label { display: block; margin-bottom: 6px; color: #55685e; font-size: 12px; font-weight: 600; }
+}
 .badge-print-layer { position: fixed; z-index: 9999; inset: 0; overflow-y: auto; background: #e8ece7; padding: 24px; color: #17291e; }
 .badge-print-controls { max-width: 780px; margin: 0 auto 18px; }
 .badge-sheet { width: min(780px, 100%); margin: 0 auto; background: white; padding: 48px; text-align: center; }

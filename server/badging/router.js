@@ -3,7 +3,7 @@ import bcrypt from 'bcryptjs';
 import { randomBytes } from 'node:crypto';
 import { badgeSecurity } from './security.js';
 import { createAddressSearch } from './geocoding.js';
-import { BadgeError, invalid, uuid, textField, phoneNumber, passwordInput, registration, siteInput, positionInput, reportFilters, csvCell } from './validation.js';
+import { BadgeError, invalid, uuid, textField, phoneNumber, passwordInput, registration, siteInput, positionInput, reportFilters, statisticsFilters, scheduleInput, csvCell } from './validation.js';
 
 const EMPLOYEE_FIELDS = 'id,first_name,last_name,birth_date,job_role,phone,status,must_change_password,current_site_id,current_entry_at,created_at';
 const SESSION_AUDIENCE = 'korsvagen-badging';
@@ -11,6 +11,7 @@ const CHALLENGE_AUDIENCE = 'korsvagen-badge-punch';
 const DATABASE_ERRORS = {
   EMPLOYEE_NOT_ACTIVE: [403, 'Account non attivo o sessione terminata. Accedi nuovamente.'],
   EMPLOYEE_NOT_FOUND: [404, 'Dipendente non trovato.'],
+  SITE_NOT_FOUND: [404, 'Sede non trovata.'],
   QR_INACTIVE: [404, 'QR non valido o disattivato. Chiedi il nuovo QR al responsabile.'],
   ADMIN_REQUIRED: [403, 'Operazione riservata agli amministratori.'],
   SITE_OCCUPIED: [409, 'Ci sono ingressi ancora aperti in questa sede. Registrare prima le uscite.'],
@@ -202,6 +203,20 @@ export function createBadgeRouter({ db, secret, verifyAdminToken, searchAddresse
 
   router.get('/admin/sites', run(async (req, res) => {
     res.json({ data: await allRows(() => db.from('badge_sites').select('*').order('created_at').order('id')) });
+  }));
+  router.patch('/admin/sites/:id/schedule', run(async (req, res) => {
+    const schedule = scheduleInput(req.body);
+    const data = await rpcRecord('badge_set_site_schedule', {
+      p_admin: req.admin.id, p_site: uuid(req.params.id), p_start: schedule.start, p_end: schedule.end,
+    });
+    res.json({ data });
+  }));
+  router.get('/admin/statistics', run(async (req, res) => {
+    const filters = statisticsFilters(req.query);
+    const data = await rpc('badge_statistics', {
+      p_from: filters.from, p_to: filters.to, p_site: filters.site, p_employee: filters.employee,
+    });
+    res.json({ ...data, period: { year: filters.year, quarter: filters.quarter, from: filters.from, to: filters.to } });
   }));
   for (const [method, path, action] of [
     ['post', '/admin/sites', 'create'], ['put', '/admin/sites/:id', 'update'],

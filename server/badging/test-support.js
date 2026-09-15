@@ -73,6 +73,7 @@ export async function fixture() {
   const pg = new PGlite();
   await pg.exec('CREATE ROLE anon; CREATE ROLE authenticated; CREATE ROLE service_role BYPASSRLS; CREATE TABLE admin_users (id uuid PRIMARY KEY, role text, is_active boolean); GRANT SELECT ON admin_users TO service_role;');
   await pg.exec(await readFile(new URL('../../database/badging.sql', import.meta.url), 'utf8'));
+  await pg.exec(await readFile(new URL('../../database/badging-statistics.sql', import.meta.url), 'utf8'));
   await pg.query("INSERT INTO admin_users VALUES ($1,'admin',true)", [TEST_ADMIN]);
   await pg.query("INSERT INTO admin_users VALUES ($1,'editor',true)", [TEST_EDITOR]);
   await pg.query("INSERT INTO badge_sites (id,name,address,latitude,longitude,qr_token) VALUES ($1,'Cantiere dimostrativo','Dati di prova locali',40,14,$2)", [TEST_SITE, TEST_QR]);
@@ -88,7 +89,7 @@ export async function fixture() {
           const result = await pg.query('SELECT to_jsonb(' + identifier(name) + '(' + args + ')) AS value', Object.values(params));
           // PostgREST returns row-valued RPCs as arrays, even for one row.
           const value = result.rows[0].value;
-          return { data: ['badge_punch', 'badge_manage_site'].includes(name) ? [value] : value, error: null };
+          return { data: ['badge_punch', 'badge_manage_site', 'badge_set_site_schedule'].includes(name) ? [value] : value, error: null };
         } catch (error) { return { data: null, error: { code: error.code, message: error.message } }; }
       },
     },

@@ -5,6 +5,7 @@ import { BadgeSite, Employee } from './types';
 import SitesPanel from './SitesPanel';
 import EmployeesPanel from './EmployeesPanel';
 import ReportsPanel from './ReportsPanel';
+import StatisticsPanel from './StatisticsPanel';
 import './badging.css';
 
 export default function BadgingManagement() {
@@ -34,7 +35,7 @@ export default function BadgingManagement() {
       <button className="badge-button" disabled={loading} onClick={load}>Aggiorna dati</button>
     </header>
     <nav className="badge-tabs" aria-label="Gestione presenze">
-      {[['sites', 'Sedi e QR'], ['employees', 'Dipendenti'], ['reports', 'Report presenze']].map(([id, title]) =>
+      {[['sites', 'Sedi e QR'], ['employees', 'Dipendenti'], ['reports', 'Report presenze'], ['statistics', 'Statistiche']].map(([id, title]) =>
         <button key={id} aria-current={tab === id ? 'page' : undefined} onClick={() => setTab(id)}>{title}{id === 'employees' && employees.some(e => e.status === 'pending') ? ' · ' + employees.filter(e => e.status === 'pending').length + ' da attivare' : ''}</button>)}
     </nav>
     {error && <div className="badge-alert error" role="alert">{error}</div>}
@@ -42,6 +43,7 @@ export default function BadgingManagement() {
       {tab === 'sites' && <SitesPanel sites={sites} onChange={load} />}
       {tab === 'employees' && <EmployeesPanel employees={employees} onChange={load} />}
       {tab === 'reports' && <ReportsPanel sites={sites} employees={employees} />}
+      {tab === 'statistics' && <StatisticsPanel sites={sites} employees={employees} />}
     </>}
   </div>;
 }
