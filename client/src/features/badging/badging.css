@@ -78,14 +78,14 @@
 .badge-table .badge-button { font-size: 12px; }
 .badge-table summary { cursor: pointer; margin-top: 8px; }
 .badge-employees { container-type: inline-size; }
-.badge-employees-table { overflow-wrap: anywhere; }
+.badge-employees-table { position: relative; overflow-wrap: anywhere; }
 .badge-cell-label { display: none; }
 /* Use the available content width, including the space taken by the sidebar. */
 @container (max-width: 900px) {
   .badge-employees-wrap { overflow: visible; border: 0; background: transparent; }
   .badge-employees-table { display: block; min-width: 0; font-size: 14px; }
   /* Keep column headers available to assistive technology in the card layout. */
-  .badge-employees-table thead { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; }
+  .badge-employees-table thead { display: block; position: absolute; top: 0; left: 0; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; }
   .badge-employees-table tbody { display: grid; gap: 16px; }
   .badge-employees-table tbody tr { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; border: 1px solid #d9e2db; border-radius: 12px; padding: 20px; background: white; }
   .badge-employees-table td { display: block; min-width: 0; padding: 0; border: 0; }
@@ -114,7 +114,7 @@
 .badge-ranking .badge-link { text-align: left; }
 .badge-ranking strong { display: block; font-size: 13px; }
 .badge-history { margin-top: 24px; }
-.badge-statistics-table { overflow-wrap: anywhere; }
+.badge-statistics-table { position: relative; overflow-wrap: anywhere; }
 .badge-statistics-table td small { max-width: none; }
 .badge-intervals { list-style: none; margin: 8px 0 0; padding: 0; }
 .badge-intervals li { border-top: 1px solid #e4ebe4; margin-top: 10px; padding-top: 10px; }
@@ -123,7 +123,7 @@
 @container (max-width: 1000px) {
   .badge-statistics-wrap { overflow: visible; border: 0; background: transparent; }
   .badge-statistics-table { display: block; min-width: 0; }
-  .badge-statistics-table thead { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; }
+  .badge-statistics-table thead { display: block; position: absolute; top: 0; left: 0; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; }
   .badge-statistics-table tbody { display: grid; gap: 16px; }
   .badge-statistics-table tbody tr { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; border: 1px solid #d9e2db; border-radius: 12px; padding: 20px; background: white; }
   .badge-statistics-table td { display: block; min-width: 0; padding: 0; border: 0; }
