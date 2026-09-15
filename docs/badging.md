@@ -317,7 +317,7 @@ sono backend `dpl_FogSUGw6JhJT3fX7z78jwsXdPjFi` e frontend
 `dpl_4aoCs5Wevr4UYcjvU8bW7QeArXQf`. I commit rimangono locali, ancora da
 sincronizzare con GitHub. Non è stato eseguito un rollback.
 
-## Vista dipendenti responsive — correzione locale del 2026-09-15
+## Vista dipendenti responsive — aggiornamento del 2026-09-15
 
 La tabella ereditava una larghezza minima di 850 px: nelle finestre strette le
 colonne a destra erano raggiungibili solo scorrendo un contenitore senza una
@@ -341,4 +341,18 @@ temporaneo (`container-type: normal`) ha riprodotto il taglio a 390 px; dopo il
 ripristino tutti i campi sono tornati entro la viewport. `agent-gate full`
 superato: 34 test server, 12 client, TypeScript, lint del modulo e build
 (warning preesistenti del sito). Il mutation runner automatico resta assente.
-Correzione non ancora pubblicata; nessuna modifica al backend o al database.
+
+Pubblicata su richiesta dell'utente il 2026-09-15: frontend
+`dpl_Cnu5KP2mFQZ1fjF8uyM9F51yJm1Y`, stato `READY`, sorgenti `29a7500`,
+alias assegnati `www.korsvagen.it` e `korsvagen.it`. CSS responsive presente
+negli asset pubblici; il dominio apice redirige a `www`.
+
+Sul dominio pubblico ripetute 20 combinazioni Chromium da 320 a 1920 px,
+con sidebar aperta/chiusa, ricerca senza risultati e focus sui pulsanti.
+Il collaudo del layout usa risposte API fittizie intercettate nel browser,
+senza scritture al database reale: nessun overflow o errore JavaScript.
+Rimossa la sessione dimostrativa, verificato il redirect anonimo al login.
+
+Backend invariato, confermato da `/api/health/version` sul commit `c154187`.
+Per ripristinare il solo frontend, la versione precedente è
+`dpl_DUmnxChTZtasde2tU5CnpuqqW3uD`; nessun rollback eseguito.
