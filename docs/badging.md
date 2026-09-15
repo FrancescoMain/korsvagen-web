@@ -381,3 +381,10 @@ all'ultima colonna del report tramite lo scorrimento della sola tabella.
 Il medesimo controllo fallisce sul deployment precedente del frontend.
 `agent-gate full` superato: 34 test server, 12 client, TypeScript, lint e build;
 verificato anche il lint dei tre componenti della dashboard modificati.
+
+Pubblicato nello stesso giorno il commit `61ff228` sul frontend
+`dpl_EgTsUketazoaizdD3YH11RG9gdDv`, `READY`, alias `www.korsvagen.it` e
+`korsvagen.it`. Le stesse 44 combinazioni Chromium sono ora superate sul dominio
+pubblico, usando risposte API dimostrative nel browser senza scrivere dati reali.
+Nessun errore JavaScript; ripristinata la sessione anonima e verificato il login.
+Versione frontend precedente: `dpl_Cnu5KP2mFQZ1fjF8uyM9F51yJm1Y`.
