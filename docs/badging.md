@@ -294,3 +294,25 @@ Riferimenti per un eventuale ripristino applicativo: frontend precedente
 `dpl_9KuApcvWVuiij25wJ6GFkiMwe8M6`. Il ripristino dei deployment non richiede
 di cancellare lo schema o lo storico delle presenze. Il rollback non è stato
 eseguito durante questo collaudo.
+
+## Produzione — aggiornamento mappe del 2026-09-15
+
+Aggiornamento pubblicato e verificato sul dominio pubblico, con sorgenti locali
+`c154187`. Nessuna migrazione o variazione dei segreti è stata necessaria.
+
+| Componente | Deployment |
+| --- | --- |
+| Backend | `dpl_4Sc9SizWFyLZXu9oZ9c4Fi2yAbZ1`, READY su `korsvagen-web-be.vercel.app` |
+| Frontend | `dpl_DUmnxChTZtasde2tU5CnpuqqW3uD`, READY su `www.korsvagen.it` |
+
+Verificati dal browser pubblicato: accesso admin e rifiuto di query non valide,
+ricerca Photon reale, selezione con coordinate automatiche, trascinamento del
+segnaposto, creazione della sede e del raggio nel database reale, ricaricamento,
+modifica con tocco sulla mappa a 390 px e persistenza delle nuove coordinate.
+Nessun errore JavaScript o overflow orizzontale. Tile sostituite da fixture nei
+test automatici. Amministratore, sede e audit temporanei rimossi con filtri univoci.
+
+Per annullare il solo aggiornamento mappe, i deployment precedenti funzionanti
+sono backend `dpl_FogSUGw6JhJT3fX7z78jwsXdPjFi` e frontend
+`dpl_4aoCs5Wevr4UYcjvU8bW7QeArXQf`. I commit rimangono locali, ancora da
+sincronizzare con GitHub. Non è stato eseguito un rollback.
