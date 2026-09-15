@@ -639,6 +639,53 @@ router.get("/applications", requireAuth, async (req, res) => {
 });
 
 /**
+ * PUT /api/jobs/applications/:id/status
+ * Aggiorna lo stato di una candidatura (admin only)
+ */
+router.put("/applications/:id/status", requireAuth, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+    const validStatuses = ['new', 'reviewed', 'contacted', 'interview', 'hired', 'rejected'];
+
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({
+        error: `Invalid status. Must be one of: ${validStatuses.join(', ')}`
+      });
+    }
+
+    logger.info(`🔒 Admin updating application status ID: ${id} to: ${status}`);
+
+    const { data: updatedApplication, error } = await supabaseAdmin
+      .from("job_applications")
+      .update({ status })
+      .eq("id", id)
+      .select()
+      .maybeSingle();
+
+    if (error) {
+      logger.error("❌ Admin error updating application status:", error);
+      return res.status(500).json({
+        error: "Failed to update application status",
+        details: error.message
+      });
+    }
+
+    if (!updatedApplication) {
+      return res.status(404).json({ error: "Application not found" });
+    }
+
+    res.json({ success: true, data: updatedApplication });
+  } catch (error) {
+    logger.error("❌ Error in PUT /api/jobs/applications/:id/status:", error);
+    res.status(500).json({
+      error: "Internal server error",
+      details: error.message
+    });
+  }
+});
+
+/**
  * GET /api/jobs/applications/:id/cv
  * Download CV candidato (admin only)
  */
